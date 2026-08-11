@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
       return apiError("Position is already closed", 400);
     }
 
-    const currentPrice = Number(position.asset.lastPrice) || Number(position.currentPrice);
+    const currentPrice =
+      Number(position.asset.lastPrice) || Number(position.currentPrice);
     const pnl = calculateUnrealizedPnl(
       position.side,
       Number(position.amount),
@@ -35,8 +36,13 @@ export async function POST(req: NextRequest) {
     );
 
     const result = await prisma.$transaction(async (tx) => {
-      const closed = await tx.position.update({
-        where: { id: position.id },
+      // Atomically claim the position: this UPDATE only affects a row if
+      // it is still OPEN. That makes the claim and the status change a
+      // single indivisible operation, so a manual close (this route) and
+      // an auto-close (TP/SL/liquidation in server/ws) racing on the same
+      // position can never both succeed and both credit the wallet.
+      const claimed = await tx.position.updateMany({
+        where: { id: position.id, status: "OPEN" },
         data: {
           status: "CLOSED",
           currentPrice,
@@ -44,6 +50,13 @@ export async function POST(req: NextRequest) {
           closedAt: new Date(),
         },
       });
+
+      if (claimed.count === 0) {
+        // Lost the race — another request already closed this position.
+        return null;
+      }
+
+      const closed = await tx.position.findUniqueOrThrow({ where: { id: position.id } });
 
       await tx.trade.create({
         data: {
@@ -66,6 +79,10 @@ export async function POST(req: NextRequest) {
 
       return closed;
     });
+
+    if (!result) {
+      return apiError("Position is already closed", 400);
+    }
 
     return apiSuccess({ position: result, pnl });
   } catch (error) {

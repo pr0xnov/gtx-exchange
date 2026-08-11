@@ -17,16 +17,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const input = withdrawSchema.parse(body);
 
-    const wallet = user.wallet;
-    if (!wallet || Number(wallet.balance) < input.amount) {
-      return apiError("Insufficient balance for this withdrawal", 400);
-    }
-
     const result = await prisma.$transaction(async (tx) => {
-      await tx.wallet.update({
-        where: { userId: user.id },
+      // Atomically check-and-debit: the balance check and the decrement
+      // are the same conditional UPDATE, not a stale pre-transaction
+      // read followed by a separate write. Two concurrent withdrawals can
+      // therefore never both pass the check against the same balance and
+      // drive it negative — the second one simply matches zero rows here.
+      const debited = await tx.wallet.updateMany({
+        where: { userId: user.id, balance: { gte: input.amount } },
         data: { balance: { decrement: input.amount } },
       });
+
+      if (debited.count === 0) {
+        return null;
+      }
 
       const transaction = await tx.transaction.create({
         data: {
@@ -48,6 +52,10 @@ export async function POST(req: NextRequest) {
 
       return transaction;
     });
+
+    if (!result) {
+      return apiError("Insufficient balance for this withdrawal", 400);
+    }
 
     return apiSuccess(result, 201);
   } catch (error) {

@@ -66,15 +66,26 @@ export async function POST(req: NextRequest) {
     const executionPrice = marketPrice;
     const side = input.side === "BUY" ? "LONG" : "SHORT";
     const margin = calculateMargin(input.amount, executionPrice, input.leverage);
-    const wallet = user.wallet;
-
-    if (!wallet || Number(wallet.balance) < margin) {
-      return apiError("Insufficient balance to open this position", 400);
-    }
-
-    const liquidationPrice = calculateLiquidationPrice(side, executionPrice, input.leverage);
+    const liquidationPrice = calculateLiquidationPrice(
+      side,
+      executionPrice,
+      input.leverage
+    );
 
     const result = await prisma.$transaction(async (tx) => {
+      // Atomically check-and-reserve the margin before creating anything.
+      // The check and the debit are a single conditional UPDATE, so this
+      // can never overdraw the wallet under concurrent order/withdrawal
+      // requests — and if it fails, no order/position rows are created.
+      const debited = await tx.wallet.updateMany({
+        where: { userId: user.id, balance: { gte: margin } },
+        data: { balance: { decrement: margin } },
+      });
+
+      if (debited.count === 0) {
+        return null;
+      }
+
       const order = await tx.order.create({
         data: {
           userId: user.id,
@@ -108,13 +119,12 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      await tx.wallet.update({
-        where: { userId: user.id },
-        data: { balance: { decrement: margin } },
-      });
-
       return position;
     });
+
+    if (!result) {
+      return apiError("Insufficient balance to open this position", 400);
+    }
 
     return apiSuccess(result, 201);
   } catch (error) {

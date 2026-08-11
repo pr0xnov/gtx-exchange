@@ -13,18 +13,10 @@
  */
 import { WebSocket, WebSocketServer } from "ws";
 import { PrismaClient } from "@prisma/client";
-import {
-  buildCombinedStreamUrl,
-  BinanceTickerEvent,
-  TrackedSymbol,
-} from "../../lib/binance/client";
+import { buildCombinedStreamUrl, BinanceTickerEvent } from "../../lib/binance/client";
 import { priceStore } from "../../lib/binance/price-store";
-import {
-  calculateUnrealizedPnl,
-  checkTpSlLiquidation,
-  calculateMargin,
-  calculateLiquidationPrice,
-} from "../../lib/trading/engine";
+import { calculateUnrealizedPnl, checkTpSlLiquidation } from "../../lib/trading/engine";
+import { fillLimitOrder } from "./fill-limit-order";
 
 const prisma = new PrismaClient();
 const PORT = Number(process.env.WS_PORT ?? 8080);
@@ -93,7 +85,9 @@ function connectToBinance() {
   });
 
   upstream.on("close", () => {
-    console.warn(`[ws] Binance stream closed, reconnecting in ${BINANCE_RECONNECT_DELAY_MS}ms`);
+    console.warn(
+      `[ws] Binance stream closed, reconnecting in ${BINANCE_RECONNECT_DELAY_MS}ms`
+    );
     setTimeout(connectToBinance, BINANCE_RECONNECT_DELAY_MS);
   });
 
@@ -144,7 +138,9 @@ setInterval(async () => {
       currentPrice,
       takeProfit: position.takeProfit ? Number(position.takeProfit) : null,
       stopLoss: position.stopLoss ? Number(position.stopLoss) : null,
-      liquidationPrice: position.liquidationPrice ? Number(position.liquidationPrice) : null,
+      liquidationPrice: position.liquidationPrice
+        ? Number(position.liquidationPrice)
+        : null,
     });
 
     if (!check.shouldClose) continue;
@@ -156,9 +152,15 @@ setInterval(async () => {
       currentPrice
     );
 
-    await prisma.$transaction(async (tx) => {
-      await tx.position.update({
-        where: { id: position.id },
+    const claimed = await prisma.$transaction(async (tx) => {
+      // Atomically claim the position: this UPDATE only affects a row if
+      // it is still OPEN. That makes the claim and the status change a
+      // single indivisible operation, so this auto-close loop can never
+      // race with a manual close (app/api/orders/close) — or with its own
+      // next tick, if a previous run is still in flight — and end up
+      // crediting the wallet twice for the same position.
+      const claim = await tx.position.updateMany({
+        where: { id: position.id, status: "OPEN" },
         data: {
           status: "CLOSED",
           currentPrice,
@@ -166,6 +168,8 @@ setInterval(async () => {
           closedAt: new Date(),
         },
       });
+
+      if (claim.count === 0) return false;
 
       await tx.trade.create({
         data: {
@@ -195,7 +199,11 @@ setInterval(async () => {
           }${pnl.toFixed(2)} USDT)`,
         },
       });
+
+      return true;
     });
+
+    if (!claimed) continue;
 
     console.log(
       `[ws] auto-closed position ${position.id} (${check.reason}) pnl=${pnl.toFixed(2)}`
@@ -224,57 +232,14 @@ setInterval(async () => {
       order.side === "BUY" ? currentPrice <= limitPrice : currentPrice >= limitPrice;
     if (!shouldFill) continue;
 
-    const side = order.side === "BUY" ? "LONG" : "SHORT";
-    const executionPrice = limitPrice;
-    const margin = calculateMargin(Number(order.amount), executionPrice, order.leverage);
-    const liquidationPrice = calculateLiquidationPrice(side, executionPrice, order.leverage);
-
-    const wallet = await prisma.wallet.findUnique({ where: { userId: order.userId } });
-    if (!wallet || Number(wallet.balance) < margin) {
-      // Not enough margin anymore — cancel instead of filling.
-      await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
-      continue;
-    }
-
-    await prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: order.id },
-        data: { status: "FILLED", filledAt: new Date() },
-      });
-
-      await tx.position.create({
-        data: {
-          userId: order.userId,
-          assetId: order.assetId,
-          orderId: order.id,
-          side,
-          amount: order.amount,
-          leverage: order.leverage,
-          entryPrice: executionPrice,
-          currentPrice: executionPrice,
-          takeProfit: order.takeProfit,
-          stopLoss: order.stopLoss,
-          margin,
-          liquidationPrice,
-          status: "OPEN",
-        },
-      });
-
-      await tx.wallet.update({
-        where: { userId: order.userId },
-        data: { balance: { decrement: margin } },
-      });
-
-      await tx.notification.create({
-        data: {
-          userId: order.userId,
-          title: "Limit order filled",
-          message: `${order.asset.symbol} ${order.side} limit order filled at ${executionPrice}`,
-        },
-      });
+    const outcome = await fillLimitOrder(prisma, order, {
+      executionPrice: limitPrice,
+      symbol: order.asset.symbol,
     });
 
-    console.log(`[ws] filled limit order ${order.id} at ${executionPrice}`);
+    if (outcome === "filled") {
+      console.log(`[ws] filled limit order ${order.id} at ${limitPrice}`);
+    }
   }
 }, POSITION_CHECK_INTERVAL_MS);
 

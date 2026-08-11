@@ -1,0 +1,25 @@
+# Disposable Postgres instance for the integration/race-condition test
+# suite (tests/). Isolated from the dev stack in docker-compose.yml: own
+# port, own DB name, tmpfs data dir (nothing persists between runs).
+#
+# Usage:
+#   docker compose -f docker-compose.test.yml up -d
+#   npm test
+#   docker compose -f docker-compose.test.yml down
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      POSTGRES_USER: gtx
+      POSTGRES_PASSWORD: gtx_password
+      POSTGRES_DB: gtx_exchange_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gtx -d gtx_exchange_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30

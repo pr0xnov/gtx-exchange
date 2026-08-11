@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.env
+.env.local
+*.log
+npm-debug.log*
+.DS_Store
+README.md
+.husky
+.vscode
+coverage
+prisma/dev.db

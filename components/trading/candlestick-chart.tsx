@@ -105,6 +105,20 @@ export function CandlestickChart({
   const symbolRef = useRef(symbol);
   const timeframeRef = useRef(timeframe);
 
+  // Bumped every time symbol/timeframe changes (and once more on unmount —
+  // see the chart-setup effect's cleanup below); loadOlderPage captures it
+  // before its async fetch and checks it again after, so a stale response
+  // (user switched pairs/timeframe, or navigated away, while an older-page
+  // request was still in flight) is discarded instead of being spliced
+  // onto the new symbol's data or touching refs after unmount.
+  // readyGenerationRef records which generation's initial load has
+  // actually landed, so the live-tick effect can tell it's not safe to
+  // touch candlesRef/series yet during that same async gap. Both are plain
+  // numbers on a ref, not subscriptions or timers, so there's nothing to
+  // explicitly tear down for them beyond the generation bump above.
+  const generationRef = useRef(0);
+  const readyGenerationRef = useRef(-1);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -113,6 +127,19 @@ export function CandlestickChart({
   }, [symbol, timeframe]);
 
   const applyData = useCallback((candles: Candle[]) => {
+    // Defense in depth: lightweight-charts throws a hard internal assertion
+    // if handed a non-ascending or duplicate-timestamp series. Verify here,
+    // at the single choke point every candle array passes through, and
+    // silently drop the batch rather than ever calling setData with it.
+    for (let i = 1; i < candles.length; i++) {
+      if (candles[i]!.time <= candles[i - 1]!.time) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[chart] dropped out-of-order candle batch");
+        }
+        return;
+      }
+    }
+
     seriesRef.current?.setData(
       candles.map((c) => ({
         time: c.time as never,
@@ -136,16 +163,26 @@ export function CandlestickChart({
   // the user keep scrolling back — including well past a year — for any
   // timeframe, instead of only ever seeing the most recent bars.
   const loadOlderPage = useCallback(async () => {
+    const requestGeneration = generationRef.current;
+    const requestSymbol = symbolRef.current;
+    const requestTimeframe = timeframeRef.current;
     const earliest = candlesRef.current[0];
     if (!earliest || loadingMoreRef.current || exhaustedRef.current) return;
 
     loadingMoreRef.current = true;
     try {
       const older = await fetchCandlePage(
-        symbolRef.current,
-        timeframeRef.current,
+        requestSymbol,
+        requestTimeframe,
         earliest.time * 1000 - 1
       );
+
+      // The user switched symbol/timeframe (or unmounted the chart) while
+      // this request was in flight — it no longer corresponds to what's on
+      // screen. Discard it rather than splicing stale data onto the new
+      // symbol's dataset.
+      if (requestGeneration !== generationRef.current) return;
+
       const fresh = older.filter((c) => c.time < earliest.time);
       if (fresh.length === 0) {
         exhaustedRef.current = true;
@@ -231,11 +268,16 @@ export function CandlestickChart({
       chartRef.current = null;
       seriesRef.current = null;
       volumeSeriesRef.current = null;
+      // Invalidate any in-flight loadOlderPage/initial-load request so its
+      // continuation sees a generation mismatch and bails out instead of
+      // touching candlesRef/series after this component is gone.
+      generationRef.current += 1;
     };
   }, [loadOlderPage]);
 
   // Load the most recent page whenever symbol/timeframe changes.
   useEffect(() => {
+    const generation = ++generationRef.current;
     let cancelled = false;
     setLoading(true);
     exhaustedRef.current = false;
@@ -247,10 +289,13 @@ export function CandlestickChart({
         candlesRef.current = candles;
         applyData(candles);
         chartRef.current?.timeScale().fitContent();
+        readyGenerationRef.current = generation;
       })
       .catch(() => {
         // Leave the chart empty; the effect reruns on the next
-        // symbol/timeframe change.
+        // symbol/timeframe change. Still mark this generation "ready" so
+        // live ticks (which don't need history) aren't blocked forever.
+        if (!cancelled) readyGenerationRef.current = generation;
       })
       .finally(() => !cancelled && setLoading(false));
 
@@ -264,6 +309,11 @@ export function CandlestickChart({
   // timeframe's bucket boundary, instead of extending one bar forever.
   useEffect(() => {
     if (livePrice == null || !seriesRef.current) return;
+    // Symbol/timeframe just changed and the new history hasn't landed yet
+    // (candlesRef.current is either stale or empty) — applying a live
+    // tick right now would either update the wrong series' last bar or
+    // desync candlesRef.current from what's actually on screen.
+    if (readyGenerationRef.current !== generationRef.current) return;
 
     const bucketSeconds = TIMEFRAME_SECONDS[timeframe];
     const bucketTime = Math.floor(Date.now() / 1000 / bucketSeconds) * bucketSeconds;

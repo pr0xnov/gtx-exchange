@@ -13,6 +13,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "."),
     },
   },
+  // tsconfig.json sets jsx:"preserve" for Next's own SWC pipeline; Vite's
+  // esbuild transform (which vitest uses) needs its own JSX config, or
+  // .tsx files under test fail with "React is not defined".
+  esbuild: {
+    jsx: "automatic",
+  },
   test: {
     include: ["tests/**/*.test.ts"],
     environment: "node",

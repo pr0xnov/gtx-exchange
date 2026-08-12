@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getOptionalUser } from "@/lib/auth/session";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { PhoneMockup } from "@/components/marketing/phone-mockup";
@@ -34,10 +35,14 @@ const FEATURES = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const user = await getOptionalUser();
+
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar
+        user={user ? { firstName: user.firstName, lastName: user.lastName } : null}
+      />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-green-glow">
@@ -52,8 +57,7 @@ export default function HomePage() {
             </h1>
             <p className="mt-6 max-w-md text-base leading-relaxed text-muted">
               Reliable, simple, innovative. Trade the most popular assets in Europe:
-              S&amp;P/ASX 200, Bitcoin, EUR/USD, with our CFD-style paper trading
-              service.
+              S&amp;P/ASX 200, Bitcoin, EUR/USD, with our CFD-style paper trading service.
             </p>
             <div className="mt-8 flex items-center gap-4">
               <Button size="lg" asChild>
@@ -110,8 +114,8 @@ export default function HomePage() {
             Ready to start trading?
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-muted">
-            Create a free account and get $10,000 in virtual funds instantly. No
-            card, no risk.
+            Create a free account and get $10,000 in virtual funds instantly. No card, no
+            risk.
           </p>
           <Button size="lg" className="mt-8" asChild>
             <Link href="/register">Create free account</Link>

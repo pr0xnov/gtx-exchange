@@ -26,7 +26,11 @@ export function TradingTerminal() {
   const displayName = DISPLAY_NAMES[symbol] ?? symbol;
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    // Nested under the shared Navbar (h-16) via the (dashboard) layout, so
+    // it fills the remaining viewport height instead of the full screen.
+    // The chart's own container resizes via lightweight-charts' autoSize
+    // ResizeObserver — nothing here needs to touch the chart directly.
+    <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
       <TerminalTopbar />
       <div className="flex flex-1 overflow-hidden">
         <AssetWatchlist prices={prices} selected={symbol} onSelect={setSymbol} />

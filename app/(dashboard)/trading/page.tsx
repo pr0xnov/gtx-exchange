@@ -3,7 +3,7 @@ import { TradingTerminal } from "@/components/trading/trading-terminal";
 
 function TerminalFallback() {
   return (
-    <div className="flex h-screen items-center justify-center bg-background text-sm text-muted">
+    <div className="flex h-[calc(100vh-4rem)] items-center justify-center bg-background text-sm text-muted">
       Loading trading terminal…
     </div>
   );

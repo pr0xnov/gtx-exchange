@@ -4,17 +4,18 @@ import Link from "next/link";
 import { usePortfolio } from "@/hooks/use-api";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/shared/logo";
 
+/**
+ * Trading-specific stats strip (balance/credit/equity/profit). Global
+ * navigation (logo, section links, account) lives in the shared Navbar
+ * from the surrounding (dashboard) layout — this no longer duplicates it.
+ */
 export function TerminalTopbar() {
   const { data } = usePortfolio();
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border px-4">
+    <header className="flex h-14 items-center justify-between border-b border-border px-4">
       <div className="flex items-center gap-8">
-        <Link href="/">
-          <Logo />
-        </Link>
         <div className="hidden items-center gap-6 text-xs sm:flex">
           <div>
             <div className="text-muted">Balance</div>

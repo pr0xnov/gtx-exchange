@@ -1,12 +1,17 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
-import { signAccessToken, signRefreshToken, refreshTokenExpiryDate } from "@/lib/auth/jwt";
+import {
+  signAccessToken,
+  signRefreshToken,
+  refreshTokenExpiryDate,
+} from "@/lib/auth/jwt";
 import { setAuthCookies } from "@/lib/auth/cookies";
 import { registerSchema } from "@/lib/validation/auth";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { generateLoginId } from "@/lib/utils";
+import { SPOT_CURRENCIES } from "@/lib/spot/currencies";
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,6 +40,15 @@ export async function POST(req: NextRequest) {
         login: generateLoginId(),
         wallet: { create: { balance: 10_000, credit: 0, currency: "USDT" } },
         settings: { create: {} },
+        // Spot wallet is a separate ledger from the futures margin wallet
+        // above — same $10,000 virtual USDT starting bonus, but it can
+        // never be spent or margined by futures trades and vice versa.
+        spotWallets: {
+          create: SPOT_CURRENCIES.map((currency) => ({
+            currency,
+            balance: currency === "USDT" ? 10_000 : 0,
+          })),
+        },
       },
       include: { wallet: true },
     });

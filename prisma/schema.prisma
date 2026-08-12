@@ -33,7 +33,7 @@ model User {
   settings      UserSettings?
   sessions      Session[]
   refreshTokens RefreshToken[]
-  spotHoldings  SpotHolding[]
+  spotWallets   SpotWallet[]
   spotOrders    SpotOrder[]
 
   @@index([email])
@@ -133,11 +133,9 @@ model Asset {
   change24h   Decimal  @default(0) @db.Decimal(10, 4)
   updatedAt   DateTime @updatedAt
 
-  orders       Order[]
-  positions    Position[]
-  trades       Trade[]
-  spotHoldings SpotHolding[]
-  spotOrders   SpotOrder[]
+  orders    Order[]
+  positions Position[]
+  trades    Trade[]
 
   @@index([category])
 }
@@ -244,36 +242,48 @@ model Trade {
 // SPOT TRADING
 //
 // Deliberately separate from Order/Position/Trade above: spot ownership is
-// just "how many units of an asset does this user hold", with no leverage,
-// margin, or liquidation concept, so it doesn't fit those leveraged-trading
-// models. Spot orders execute at market immediately (no PENDING/LIMIT spot
-// orders yet).
+// just "how many units of a currency does this user hold", with no
+// leverage, margin, or liquidation concept, so it doesn't fit those
+// leveraged-trading models. SpotWallet is a per-user, per-currency ledger
+// (USDT, BTC, ETH, ...) — entirely separate from the `Wallet` model, which
+// is the futures-margin USDT balance. SpotOrder.symbol is a plain string
+// (not a relation to Asset) per spec — order rows are a standalone,
+// self-contained record of what was requested/filled.
 // ---------------------------------------------------------------------------
 
-model SpotHolding {
+enum SpotOrderStatus {
+  OPEN
+  FILLED
+  CANCELLED
+}
+
+model SpotWallet {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assetId   String
-  asset     Asset    @relation(fields: [assetId], references: [id])
-  quantity  Decimal  @default(0) @db.Decimal(20, 8)
+  currency  String // "USDT", "BTC", "ETH", "BNB", "SOL", "XRP", "ADA", "DOGE", "LTC"
+  balance   Decimal  @default(0) @db.Decimal(20, 8) // available
+  locked    Decimal  @default(0) @db.Decimal(20, 8) // reserved by this user's own OPEN limit orders
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, assetId])
+  @@unique([userId, currency])
 }
 
 model SpotOrder {
-  id        String    @id @default(cuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assetId   String
-  asset     Asset     @relation(fields: [assetId], references: [id])
-  side      OrderSide
-  quantity  Decimal   @db.Decimal(20, 8)
-  price     Decimal   @db.Decimal(20, 8)
-  total     Decimal   @db.Decimal(20, 8)
-  createdAt DateTime  @default(now())
+  id             String          @id @default(cuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol         String // e.g. "BTCUSDT"
+  side           OrderSide
+  type           OrderType
+  price          Decimal         @db.Decimal(20, 8) // limit price, or execution price for MARKET
+  quantity       Decimal         @db.Decimal(20, 8)
+  filledQuantity Decimal         @default(0) @db.Decimal(20, 8)
+  status         SpotOrderStatus @default(OPEN)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
+  @@index([userId, status])
   @@index([userId, createdAt])
 }
 

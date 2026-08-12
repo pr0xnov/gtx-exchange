@@ -9,7 +9,7 @@ import { CandlestickChart, Timeframe } from "@/components/trading/candlestick-ch
 import { OrderPanel } from "@/components/trading/order-panel";
 import { SpotOrderPanel } from "@/components/trading/spot-order-panel";
 import { OpenPositionsPanel } from "@/components/trading/open-positions-panel";
-import { SpotHoldingsPanel } from "@/components/trading/spot-holdings-panel";
+import { SpotOrdersPanel } from "@/components/trading/spot-orders-panel";
 import { TradeModeToggle, TradeMode } from "@/components/trading/trade-mode-toggle";
 import { useLivePrices } from "@/hooks/use-live-prices";
 
@@ -46,7 +46,7 @@ export function TradingTerminal() {
               livePrice={ticker?.price}
             />
           </div>
-          {mode === "FUTURES" ? <OpenPositionsPanel /> : <SpotHoldingsPanel />}
+          {mode === "FUTURES" ? <OpenPositionsPanel /> : <SpotOrdersPanel />}
         </div>
 
         <div className="flex h-full w-80 shrink-0 flex-col border-l border-border">

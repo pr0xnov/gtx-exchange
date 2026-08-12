@@ -4,23 +4,23 @@ import { requireUser } from "@/lib/auth/session";
 import { createSpotOrderSchema } from "@/lib/validation/trading";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit } from "@/lib/rate-limit";
+import { ensureSpotWallet } from "@/lib/spot/wallet";
 
-// Spot trading is unleveraged: BUY spends USDT to acquire units of the
-// asset, SELL converts units of the asset back into USDT. There is no
-// margin, no position, no liquidation — just a wallet balance and a
-// SpotHolding quantity. Prices come from `Asset.lastPrice`, same as the
-// futures order routes — see the note in app/api/portfolio/route.ts on
-// why the web container reads prices from the DB rather than the ws
-// container's in-memory store.
+// Spot trading is unleveraged and settles against a dedicated per-currency
+// SpotWallet ledger (USDT, BTC, ETH, ...) — entirely separate from the
+// futures-margin `Wallet`. MARKET orders execute immediately at
+// `Asset.lastPrice` (same price source of truth as the futures routes —
+// see the note in app/api/portfolio/route.ts). LIMIT orders reserve funds
+// into `SpotWallet.locked` and stay OPEN until the ws engine fills them
+// (server/ws) or the user cancels them (POST .../[id]/cancel).
 
 export async function GET() {
   try {
     const user = await requireUser();
     const orders = await prisma.spotOrder.findMany({
       where: { userId: user.id },
-      include: { asset: true },
       orderBy: { createdAt: "desc" },
-      take: 50,
+      take: 100,
     });
     return apiSuccess(orders);
   } catch (error) {
@@ -41,78 +41,111 @@ export async function POST(req: NextRequest) {
     const asset = await prisma.asset.findUnique({ where: { symbol: input.symbol } });
     if (!asset) return apiError("Unknown trading asset", 404);
 
-    const price = Number(asset.lastPrice);
-    if (!price || price <= 0) {
-      return apiError("Live price unavailable for this asset. Try again shortly.", 503);
+    const baseCurrency = asset.baseAsset;
+    const quoteCurrency = asset.quoteAsset;
+
+    let executionPrice: number;
+    if (input.type === "MARKET") {
+      executionPrice = Number(asset.lastPrice);
+      if (!executionPrice || executionPrice <= 0) {
+        return apiError("Live price unavailable for this asset. Try again shortly.", 503);
+      }
+    } else {
+      // Guaranteed present by createSpotOrderSchema's refine for LIMIT.
+      executionPrice = input.price as number;
     }
 
-    const total = input.quantity * price;
+    const notional = input.quantity * executionPrice;
+    const isMarket = input.type === "MARKET";
 
     if (input.side === "BUY") {
       const result = await prisma.$transaction(async (tx) => {
-        // Atomically check-and-debit: same conditional UPDATE pattern used
-        // by the leveraged order routes, so concurrent buys can never
-        // overdraw the wallet.
-        const debited = await tx.wallet.updateMany({
-          where: { userId: user.id, balance: { gte: total } },
-          data: { balance: { decrement: total } },
+        await ensureSpotWallet(tx, user.id, quoteCurrency);
+
+        // Atomically check-and-debit the quote currency in one conditional
+        // UPDATE — a MARKET buy spends it outright; a LIMIT buy moves it
+        // into `locked` as a reservation instead, released or consumed
+        // when the order later fills or is cancelled. Concurrent orders
+        // can therefore never overdraw the wallet.
+        const debited = await tx.spotWallet.updateMany({
+          where: { userId: user.id, currency: quoteCurrency, balance: { gte: notional } },
+          data: isMarket
+            ? { balance: { decrement: notional } }
+            : { balance: { decrement: notional }, locked: { increment: notional } },
         });
         if (debited.count === 0) return null;
 
-        await tx.spotHolding.upsert({
-          where: { userId_assetId: { userId: user.id, assetId: asset.id } },
-          update: { quantity: { increment: input.quantity } },
-          create: { userId: user.id, assetId: asset.id, quantity: input.quantity },
-        });
+        if (isMarket) {
+          await ensureSpotWallet(tx, user.id, baseCurrency);
+          await tx.spotWallet.update({
+            where: { userId_currency: { userId: user.id, currency: baseCurrency } },
+            data: { balance: { increment: input.quantity } },
+          });
+        }
 
         return tx.spotOrder.create({
           data: {
             userId: user.id,
-            assetId: asset.id,
+            symbol: input.symbol,
             side: "BUY",
+            type: input.type,
+            price: executionPrice,
             quantity: input.quantity,
-            price,
-            total,
+            filledQuantity: isMarket ? input.quantity : 0,
+            status: isMarket ? "FILLED" : "OPEN",
           },
         });
       });
 
-      if (!result) {
-        return apiError("Insufficient balance for this purchase", 400);
-      }
+      if (!result) return apiError("Insufficient balance for this order", 400);
       return apiSuccess(result, 201);
     }
 
     // SELL
     const result = await prisma.$transaction(async (tx) => {
-      // Atomically check-and-debit the holding: can never sell more than
-      // is actually owned, even under concurrent sell requests.
-      const debited = await tx.spotHolding.updateMany({
-        where: { userId: user.id, assetId: asset.id, quantity: { gte: input.quantity } },
-        data: { quantity: { decrement: input.quantity } },
+      await ensureSpotWallet(tx, user.id, baseCurrency);
+
+      // Same atomic check-and-debit pattern, on the base currency: a
+      // MARKET sell spends it outright, a LIMIT sell reserves it into
+      // `locked` — never lets a concurrent sell oversell the holding.
+      const debited = await tx.spotWallet.updateMany({
+        where: {
+          userId: user.id,
+          currency: baseCurrency,
+          balance: { gte: input.quantity },
+        },
+        data: isMarket
+          ? { balance: { decrement: input.quantity } }
+          : {
+              balance: { decrement: input.quantity },
+              locked: { increment: input.quantity },
+            },
       });
       if (debited.count === 0) return null;
 
-      await tx.wallet.update({
-        where: { userId: user.id },
-        data: { balance: { increment: total } },
-      });
+      if (isMarket) {
+        await ensureSpotWallet(tx, user.id, quoteCurrency);
+        await tx.spotWallet.update({
+          where: { userId_currency: { userId: user.id, currency: quoteCurrency } },
+          data: { balance: { increment: notional } },
+        });
+      }
 
       return tx.spotOrder.create({
         data: {
           userId: user.id,
-          assetId: asset.id,
+          symbol: input.symbol,
           side: "SELL",
+          type: input.type,
+          price: executionPrice,
           quantity: input.quantity,
-          price,
-          total,
+          filledQuantity: isMarket ? input.quantity : 0,
+          status: isMarket ? "FILLED" : "OPEN",
         },
       });
     });
 
-    if (!result) {
-      return apiError("Insufficient balance for this sale", 400);
-    }
+    if (!result) return apiError("Insufficient balance for this order", 400);
     return apiSuccess(result, 201);
   } catch (error) {
     return handleApiError(error);

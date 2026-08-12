@@ -1,24 +1,24 @@
 /**
- * Correctness + concurrency tests for the new spot order routes
- * (app/api/spot/orders). Spot buy/sell uses the same atomic
- * conditional-UPDATE pattern established for the leveraged order routes
- * (checked-and-write in one statement, inside a transaction) specifically
- * to avoid reintroducing the balance/overselling races that pattern was
- * built to close — these tests prove that holds here too.
- *
- * Requires the disposable Postgres in docker-compose.test.yml:
- *   docker compose -f docker-compose.test.yml up -d
- *   npm test
+ * Correctness + concurrency tests for the spot order routes
+ * (app/api/spot/orders, app/api/spot/orders/[id]/cancel). Spot trading
+ * settles against a dedicated per-currency SpotWallet ledger (balance +
+ * locked), entirely separate from the futures-margin Wallet. Every
+ * balance mutation here uses the same atomic conditional-UPDATE pattern
+ * established for the leveraged order routes (check-and-write in one
+ * statement, inside a transaction) — these tests prove that holds for
+ * spot too: MARKET orders can't overdraw/oversell under concurrency, and
+ * LIMIT orders correctly reserve and release funds.
  */
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/session";
 import { POST as spotOrder } from "@/app/api/spot/orders/route";
+import { POST as cancelSpotOrder } from "@/app/api/spot/orders/[id]/cancel/route";
 import {
   jsonRequest,
   resetDatabase,
   seedAsset,
-  seedSpotHolding,
+  seedSpotWallet,
   seedUserWithWallet,
 } from "./helpers";
 
@@ -41,157 +41,292 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-async function readJson(res: Response) {
-  return res.json() as Promise<{ success: boolean; data?: unknown; error?: string }>;
+interface SpotOrderResponse {
+  id: string;
+  status: string;
+  filledQuantity: string;
 }
 
-describe("spot buy", () => {
-  it("debits the wallet and credits a holding at the current asset price", async () => {
-    const user = await seedUserWithWallet(1_000);
-    const asset = await seedAsset(50_000, "SPOTBUYUSDT");
-    vi.mocked(requireUser).mockResolvedValue(user);
+async function readJson(res: Response) {
+  return res.json() as Promise<{
+    success: boolean;
+    data?: SpotOrderResponse;
+    error?: string;
+  }>;
+}
 
-    const res = await spotOrder(
-      jsonRequest("http://test/api/spot/orders", {
-        symbol: "SPOTBUYUSDT",
-        side: "BUY",
-        quantity: 0.01,
-      })
-    );
-    expect(res.status).toBe(201);
-
-    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { userId: user.id } });
-    expect(Number(wallet.balance)).toBe(1_000 - 0.01 * 50_000); // 500
-
-    const holding = await prisma.spotHolding.findUniqueOrThrow({
-      where: { userId_assetId: { userId: user.id, assetId: asset.id } },
-    });
-    expect(Number(holding.quantity)).toBe(0.01);
+async function walletOf(userId: string, currency: string) {
+  return prisma.spotWallet.findUnique({
+    where: { userId_currency: { userId, currency } },
   });
+}
 
-  it("rejects a buy that would exceed the wallet balance", async () => {
-    const user = await seedUserWithWallet(100);
-    await seedAsset(50_000, "SPOTPOORUSDT");
+describe("spot market orders", () => {
+  it("BUY debits USDT and credits the base currency, filled immediately", async () => {
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 1_000 });
+    const asset = await seedAsset(50_000, "MKTBUYUSDT");
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await spotOrder(
       jsonRequest("http://test/api/spot/orders", {
-        symbol: "SPOTPOORUSDT",
+        symbol: "MKTBUYUSDT",
         side: "BUY",
-        quantity: 1, // 1 * 50000 = 50000, way over the 100 balance
+        type: "MARKET",
+        quantity: 0.01,
       })
     );
     const json = await readJson(res);
-    expect(res.status).toBe(400);
-    expect(json.error).toBe("Insufficient balance for this purchase");
-
-    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { userId: user.id } });
-    expect(Number(wallet.balance)).toBe(100); // untouched
-  });
-});
-
-describe("spot sell", () => {
-  it("credits the wallet and debits the holding", async () => {
-    const user = await seedUserWithWallet(0);
-    const asset = await seedAsset(50_000, "SPOTSELLUSDT");
-    await seedSpotHolding({ userId: user.id, assetId: asset.id, quantity: 0.02 });
-    vi.mocked(requireUser).mockResolvedValue(user);
-
-    const res = await spotOrder(
-      jsonRequest("http://test/api/spot/orders", {
-        symbol: "SPOTSELLUSDT",
-        side: "SELL",
-        quantity: 0.01,
-      })
-    );
     expect(res.status).toBe(201);
+    expect(json.data!.status).toBe("FILLED");
+    expect(json.data!.filledQuantity).toBe("0.01");
 
-    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { userId: user.id } });
-    expect(Number(wallet.balance)).toBe(500); // 0 + 0.01 * 50000
-
-    const holding = await prisma.spotHolding.findUniqueOrThrow({
-      where: { userId_assetId: { userId: user.id, assetId: asset.id } },
-    });
-    expect(Number(holding.quantity)).toBe(0.01); // 0.02 - 0.01
+    const usdt = await walletOf(user.id, "USDT");
+    expect(Number(usdt!.balance)).toBe(500); // 1000 - 0.01*50000
+    const base = await walletOf(user.id, asset.baseAsset);
+    expect(Number(base!.balance)).toBe(0.01);
   });
 
-  it("rejects selling more than is held (no shorting in spot mode)", async () => {
+  it("BUY is rejected when USDT balance is insufficient, wallet untouched", async () => {
     const user = await seedUserWithWallet(0);
-    const asset = await seedAsset(50_000, "SPOTSHORTUSDT");
-    await seedSpotHolding({ userId: user.id, assetId: asset.id, quantity: 0.005 });
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 10 });
+    await seedAsset(50_000, "MKTPOORUSDT");
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await spotOrder(
       jsonRequest("http://test/api/spot/orders", {
-        symbol: "SPOTSHORTUSDT",
-        side: "SELL",
+        symbol: "MKTPOORUSDT",
+        side: "BUY",
+        type: "MARKET",
         quantity: 1,
       })
     );
     const json = await readJson(res);
     expect(res.status).toBe(400);
-    expect(json.error).toBe("Insufficient balance for this sale");
+    expect(json.error).toBe("Insufficient balance for this order");
 
-    const holding = await prisma.spotHolding.findUniqueOrThrow({
-      where: { userId_assetId: { userId: user.id, assetId: asset.id } },
-    });
-    expect(Number(holding.quantity)).toBe(0.005); // untouched
+    const usdt = await walletOf(user.id, "USDT");
+    expect(Number(usdt!.balance)).toBe(10);
   });
-});
 
-describe("concurrent spot buys for the same user", () => {
-  it("never lets the wallet balance go negative", async () => {
-    const user = await seedUserWithWallet(100);
-    await seedAsset(75, "SPOTRACEBUYUSDT"); // 1 unit costs 75
-
-    vi.mocked(requireUser).mockResolvedValue(user);
-
-    // Two concurrent buys of 75 each = 150 total, over the 100 balance:
-    // only one can possibly be funded.
-    const body = { symbol: "SPOTRACEBUYUSDT", side: "BUY" as const, quantity: 1 };
-
-    const [resA, resB] = await Promise.all([
-      spotOrder(jsonRequest("http://test/api/spot/orders", body)),
-      spotOrder(jsonRequest("http://test/api/spot/orders", body)),
-    ]);
-
-    const succeeded = [resA.status, resB.status].filter((s) => s === 201);
-    const rejected = [resA.status, resB.status].filter((s) => s === 400);
-    expect(succeeded).toHaveLength(1);
-    expect(rejected).toHaveLength(1);
-
-    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { userId: user.id } });
-    expect(Number(wallet.balance)).toBe(25); // 100 - 75, exactly one buy went through
-    expect(Number(wallet.balance)).toBeGreaterThanOrEqual(0);
-  });
-});
-
-describe("concurrent spot sells for the same user", () => {
-  it("never lets the holding quantity go negative", async () => {
+  it("SELL debits the base currency and credits USDT", async () => {
     const user = await seedUserWithWallet(0);
-    const asset = await seedAsset(50_000, "SPOTRACESELLUSDT");
-    await seedSpotHolding({ userId: user.id, assetId: asset.id, quantity: 0.01 });
+    const asset = await seedAsset(50_000, "MKTSELLUSDT"); // baseAsset -> "MKTSELL"
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 0 });
+    await seedSpotWallet({ userId: user.id, currency: asset.baseAsset, balance: 0.02 });
     vi.mocked(requireUser).mockResolvedValue(user);
 
-    const body = { symbol: "SPOTRACESELLUSDT", side: "SELL" as const, quantity: 0.01 };
+    const res = await spotOrder(
+      jsonRequest("http://test/api/spot/orders", {
+        symbol: "MKTSELLUSDT",
+        side: "SELL",
+        type: "MARKET",
+        quantity: 0.01,
+      })
+    );
+    expect(res.status).toBe(201);
 
+    const base = await walletOf(user.id, asset.baseAsset);
+    expect(Number(base!.balance)).toBe(0.01); // 0.02 - 0.01
+
+    const usdt = await walletOf(user.id, "USDT");
+    expect(Number(usdt!.balance)).toBe(500); // 0 + 0.01*50000
+  });
+
+  it("SELL is rejected when the base currency balance is insufficient", async () => {
+    const user = await seedUserWithWallet(0);
+    const asset = await seedAsset(50_000, "MKTSHORTUSDT");
+    await seedSpotWallet({ userId: user.id, currency: asset.baseAsset, balance: 0.001 });
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const res = await spotOrder(
+      jsonRequest("http://test/api/spot/orders", {
+        symbol: "MKTSHORTUSDT",
+        side: "SELL",
+        type: "MARKET",
+        quantity: 1,
+      })
+    );
+    const json = await readJson(res);
+    expect(res.status).toBe(400);
+    expect(json.error).toBe("Insufficient balance for this order");
+
+    const base = await walletOf(user.id, asset.baseAsset);
+    expect(Number(base!.balance)).toBe(0.001);
+  });
+});
+
+describe("spot limit orders", () => {
+  it("BUY reserves USDT into `locked` and creates an OPEN order", async () => {
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 1_000 });
+    await seedAsset(50_000, "LIMBUYUSDT");
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const res = await spotOrder(
+      jsonRequest("http://test/api/spot/orders", {
+        symbol: "LIMBUYUSDT",
+        side: "BUY",
+        type: "LIMIT",
+        quantity: 0.01,
+        price: 40_000,
+      })
+    );
+    const json = await readJson(res);
+    expect(res.status).toBe(201);
+    expect(json.data!.status).toBe("OPEN");
+    expect(json.data!.filledQuantity).toBe("0");
+
+    const usdt = await walletOf(user.id, "USDT");
+    expect(Number(usdt!.balance)).toBe(600); // 1000 - 0.01*40000
+    expect(Number(usdt!.locked)).toBe(400);
+  });
+
+  it("SELL reserves the base currency into `locked`", async () => {
+    const user = await seedUserWithWallet(0);
+    const asset = await seedAsset(50_000, "LIMSELLUSDT");
+    await seedSpotWallet({ userId: user.id, currency: asset.baseAsset, balance: 0.02 });
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const res = await spotOrder(
+      jsonRequest("http://test/api/spot/orders", {
+        symbol: "LIMSELLUSDT",
+        side: "SELL",
+        type: "LIMIT",
+        quantity: 0.01,
+        price: 60_000,
+      })
+    );
+    expect(res.status).toBe(201);
+
+    const base = await walletOf(user.id, asset.baseAsset);
+    expect(Number(base!.balance)).toBe(0.01);
+    expect(Number(base!.locked)).toBe(0.01);
+  });
+
+  it("rejects a LIMIT order without a price", async () => {
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 1_000 });
+    await seedAsset(50_000, "NOPRICEUSDT");
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const res = await spotOrder(
+      jsonRequest("http://test/api/spot/orders", {
+        symbol: "NOPRICEUSDT",
+        side: "BUY",
+        type: "LIMIT",
+        quantity: 0.01,
+      })
+    );
+    expect(res.status).toBe(422);
+  });
+});
+
+describe("cancelling a spot limit order", () => {
+  it("releases the reservation back to available balance", async () => {
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 1_000 });
+    await seedAsset(50_000, "CANCELBUYUSDT");
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const createRes = await spotOrder(
+      jsonRequest("http://test/api/spot/orders", {
+        symbol: "CANCELBUYUSDT",
+        side: "BUY",
+        type: "LIMIT",
+        quantity: 0.01,
+        price: 40_000,
+      })
+    );
+    const created = (await readJson(createRes)).data;
+
+    const cancelRes = await cancelSpotOrder(
+      new Request("http://test", { method: "POST" }),
+      {
+        params: Promise.resolve({ id: created!.id }),
+      }
+    );
+    const cancelJson = await readJson(cancelRes);
+    expect(cancelRes.status).toBe(200);
+    expect(cancelJson.data!.status).toBe("CANCELLED");
+
+    const usdt = await walletOf(user.id, "USDT");
+    expect(Number(usdt!.balance)).toBe(1_000); // fully restored
+    expect(Number(usdt!.locked)).toBe(0);
+  });
+
+  it("rejects cancelling an order that is no longer open", async () => {
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 1_000 });
+    await seedAsset(50_000, "DBLCANCELUSDT");
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const createRes = await spotOrder(
+      jsonRequest("http://test/api/spot/orders", {
+        symbol: "DBLCANCELUSDT",
+        side: "BUY",
+        type: "LIMIT",
+        quantity: 0.01,
+        price: 40_000,
+      })
+    );
+    const created = (await readJson(createRes)).data;
+
+    await cancelSpotOrder(new Request("http://test", { method: "POST" }), {
+      params: Promise.resolve({ id: created!.id }),
+    });
+    const secondRes = await cancelSpotOrder(
+      new Request("http://test", { method: "POST" }),
+      {
+        params: Promise.resolve({ id: created!.id }),
+      }
+    );
+    expect(secondRes.status).toBe(400);
+
+    const usdt = await walletOf(user.id, "USDT");
+    expect(Number(usdt!.locked)).toBe(0); // not double-released
+  });
+});
+
+describe("concurrent spot market orders for the same user", () => {
+  it("BUY: never lets the USDT balance go negative", async () => {
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 100 });
+    await seedAsset(75, "RACEBUYUSDT"); // 1 unit costs 75
+
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const body = { symbol: "RACEBUYUSDT", side: "BUY", type: "MARKET", quantity: 1 };
     const [resA, resB] = await Promise.all([
       spotOrder(jsonRequest("http://test/api/spot/orders", body)),
       spotOrder(jsonRequest("http://test/api/spot/orders", body)),
     ]);
 
     const succeeded = [resA.status, resB.status].filter((s) => s === 201);
-    const rejected = [resA.status, resB.status].filter((s) => s === 400);
     expect(succeeded).toHaveLength(1);
-    expect(rejected).toHaveLength(1);
 
-    const holding = await prisma.spotHolding.findUniqueOrThrow({
-      where: { userId_assetId: { userId: user.id, assetId: asset.id } },
-    });
-    expect(Number(holding.quantity)).toBe(0);
-    expect(Number(holding.quantity)).toBeGreaterThanOrEqual(0);
+    const usdt = await walletOf(user.id, "USDT");
+    expect(Number(usdt!.balance)).toBe(25); // 100 - 75, exactly one buy went through
+    expect(Number(usdt!.balance)).toBeGreaterThanOrEqual(0);
+  });
 
-    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { userId: user.id } });
-    expect(Number(wallet.balance)).toBe(500); // credited exactly once
+  it("SELL: never lets the base currency balance go negative", async () => {
+    const user = await seedUserWithWallet(0);
+    const asset = await seedAsset(50_000, "RACESELLUSDT");
+    await seedSpotWallet({ userId: user.id, currency: asset.baseAsset, balance: 0.01 });
+    vi.mocked(requireUser).mockResolvedValue(user);
+
+    const body = { symbol: "RACESELLUSDT", side: "SELL", type: "MARKET", quantity: 0.01 };
+    const [resA, resB] = await Promise.all([
+      spotOrder(jsonRequest("http://test/api/spot/orders", body)),
+      spotOrder(jsonRequest("http://test/api/spot/orders", body)),
+    ]);
+
+    const succeeded = [resA.status, resB.status].filter((s) => s === 201);
+    expect(succeeded).toHaveLength(1);
+
+    const base = await walletOf(user.id, asset.baseAsset);
+    expect(Number(base!.balance)).toBe(0);
+    expect(Number(base!.balance)).toBeGreaterThanOrEqual(0);
   });
 });

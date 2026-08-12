@@ -13,11 +13,7 @@
  */
 import { WebSocket, WebSocketServer } from "ws";
 import { PrismaClient } from "@prisma/client";
-import {
-  buildCombinedStreamUrl,
-  BinanceTickerEvent,
-  TrackedSymbol,
-} from "../../lib/binance/client";
+import { buildCombinedStreamUrl, BinanceTickerEvent } from "../../lib/binance/client";
 import { priceStore } from "../../lib/binance/price-store";
 import {
   calculateUnrealizedPnl,
@@ -25,6 +21,7 @@ import {
   calculateMargin,
   calculateLiquidationPrice,
 } from "../../lib/trading/engine";
+import { fillSpotLimitOrder } from "./fill-spot-order";
 
 const prisma = new PrismaClient();
 const PORT = Number(process.env.WS_PORT ?? 8080);
@@ -93,7 +90,9 @@ function connectToBinance() {
   });
 
   upstream.on("close", () => {
-    console.warn(`[ws] Binance stream closed, reconnecting in ${BINANCE_RECONNECT_DELAY_MS}ms`);
+    console.warn(
+      `[ws] Binance stream closed, reconnecting in ${BINANCE_RECONNECT_DELAY_MS}ms`
+    );
     setTimeout(connectToBinance, BINANCE_RECONNECT_DELAY_MS);
   });
 
@@ -144,7 +143,9 @@ setInterval(async () => {
       currentPrice,
       takeProfit: position.takeProfit ? Number(position.takeProfit) : null,
       stopLoss: position.stopLoss ? Number(position.stopLoss) : null,
-      liquidationPrice: position.liquidationPrice ? Number(position.liquidationPrice) : null,
+      liquidationPrice: position.liquidationPrice
+        ? Number(position.liquidationPrice)
+        : null,
     });
 
     if (!check.shouldClose) continue;
@@ -227,12 +228,19 @@ setInterval(async () => {
     const side = order.side === "BUY" ? "LONG" : "SHORT";
     const executionPrice = limitPrice;
     const margin = calculateMargin(Number(order.amount), executionPrice, order.leverage);
-    const liquidationPrice = calculateLiquidationPrice(side, executionPrice, order.leverage);
+    const liquidationPrice = calculateLiquidationPrice(
+      side,
+      executionPrice,
+      order.leverage
+    );
 
     const wallet = await prisma.wallet.findUnique({ where: { userId: order.userId } });
     if (!wallet || Number(wallet.balance) < margin) {
       // Not enough margin anymore — cancel instead of filling.
-      await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { status: "CANCELLED" },
+      });
       continue;
     }
 
@@ -275,6 +283,50 @@ setInterval(async () => {
     });
 
     console.log(`[ws] filled limit order ${order.id} at ${executionPrice}`);
+  }
+}, POSITION_CHECK_INTERVAL_MS);
+
+// ---------------------------------------------------------------------------
+// Periodic: spot OPEN limit order fill engine
+//
+// Entirely separate from the futures pending-LIMIT-order loop above: spot
+// orders settle against SpotWallet (per-currency balance/locked), not the
+// futures margin Wallet, and have no leverage/position to open.
+// ---------------------------------------------------------------------------
+
+setInterval(async () => {
+  try {
+    const openOrders = await prisma.spotOrder.findMany({
+      where: { status: "OPEN", type: "LIMIT" },
+    });
+    if (openOrders.length === 0) return;
+
+    const symbols = [...new Set(openOrders.map((o) => o.symbol))];
+    const assets = await prisma.asset.findMany({ where: { symbol: { in: symbols } } });
+    const assetBySymbol = new Map(assets.map((a) => [a.symbol, a]));
+
+    for (const order of openOrders) {
+      const asset = assetBySymbol.get(order.symbol);
+      const currentPrice = priceStore.getPrice(order.symbol);
+      if (!asset || !currentPrice) continue;
+
+      const outcome = await fillSpotLimitOrder(prisma, order, {
+        currentPrice,
+        baseCurrency: asset.baseAsset,
+        quoteCurrency: asset.quoteAsset,
+      });
+
+      if (outcome === "filled") {
+        console.log(
+          `[ws] filled spot limit order ${order.id} (${order.symbol} ${order.side}) at ${order.price}`
+        );
+      }
+    }
+  } catch (err) {
+    // A transient DB hiccup here must not crash the whole process — the
+    // other loops (TP/SL, futures limit fills, price sync) share this
+    // same event loop and would go down with it. Log and retry next tick.
+    console.error("[ws] spot limit order fill tick failed", err);
   }
 }, POSITION_CHECK_INTERVAL_MS);
 

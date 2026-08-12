@@ -11,7 +11,7 @@ export async function resetDatabase() {
     prisma.position.deleteMany(),
     prisma.order.deleteMany(),
     prisma.spotOrder.deleteMany(),
-    prisma.spotHolding.deleteMany(),
+    prisma.spotWallet.deleteMany(),
     prisma.verificationDocument.deleteMany(),
     prisma.refreshToken.deleteMany(),
     prisma.session.deleteMany(),
@@ -60,13 +60,19 @@ export async function seedAsset(
   });
 }
 
-export async function seedSpotHolding(params: {
+export async function seedSpotWallet(params: {
   userId: string;
-  assetId: string;
-  quantity: number;
+  currency: string;
+  balance?: number;
+  locked?: number;
 }) {
-  return prisma.spotHolding.create({
-    data: { userId: params.userId, assetId: params.assetId, quantity: params.quantity },
+  return prisma.spotWallet.create({
+    data: {
+      userId: params.userId,
+      currency: params.currency,
+      balance: params.balance ?? 0,
+      locked: params.locked ?? 0,
+    },
   });
 }
 

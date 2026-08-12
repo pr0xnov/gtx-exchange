@@ -20,11 +20,18 @@ export const closePositionSchema = z.object({
   positionId: z.string().min(1),
 });
 
-export const createSpotOrderSchema = z.object({
-  symbol: z.string().min(1),
-  side: z.enum(["BUY", "SELL"]),
-  quantity: z.number().positive("Quantity must be greater than 0"),
-});
+export const createSpotOrderSchema = z
+  .object({
+    symbol: z.string().min(1),
+    side: z.enum(["BUY", "SELL"]),
+    type: z.enum(["MARKET", "LIMIT"]),
+    quantity: z.number().positive("Quantity must be greater than 0"),
+    price: z.number().positive().optional(),
+  })
+  .refine((data) => data.type !== "LIMIT" || data.price !== undefined, {
+    message: "Price is required for limit orders",
+    path: ["price"],
+  });
 
 export const depositSchema = z.object({
   amount: z.number().positive("Amount must be greater than 0").max(10_000_000),

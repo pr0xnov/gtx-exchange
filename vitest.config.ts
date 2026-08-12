@@ -25,6 +25,12 @@ export default defineConfig({
     globalSetup: ["tests/global-setup.ts"],
     testTimeout: 20_000,
     hookTimeout: 30_000,
+    // All test files share one real Postgres instance and each file's
+    // beforeEach does a full-table resetDatabase() — running files in
+    // parallel workers (Vitest's default) lets one file's reset wipe
+    // rows out from under another file's in-flight test. Force files to
+    // run one at a time; tests within a file are already sequential.
+    fileParallelism: false,
     env: {
       DATABASE_URL: TEST_DATABASE_URL,
       NODE_ENV: "test",

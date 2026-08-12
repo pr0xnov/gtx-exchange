@@ -67,7 +67,7 @@ export function OrderPanel({
   }
 
   return (
-    <div className="flex h-full w-80 shrink-0 flex-col border-l border-border p-4">
+    <div className="flex flex-1 flex-col overflow-y-auto p-4">
       <h3 className="mb-4 text-sm font-semibold text-foreground">Open a trade</h3>
 
       <div className="mb-4 flex rounded-xl bg-surface p-1">

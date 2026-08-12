@@ -42,13 +42,13 @@ export function ChartHeader({
           </span>
         )}
       </div>
-      <div className="flex items-center gap-1 rounded-lg bg-surface p-1">
+      <div className="flex items-center gap-1 overflow-x-auto rounded-lg bg-surface p-1">
         {TIMEFRAMES.map((tf) => (
           <button
             key={tf.value}
             onClick={() => onTimeframeChange(tf.value)}
             className={cn(
-              "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              "shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               timeframe === tf.value
                 ? "bg-primary/15 text-primary"
                 : "text-muted hover:text-foreground"

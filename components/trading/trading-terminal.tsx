@@ -7,7 +7,10 @@ import { AssetWatchlist, DISPLAY_NAMES } from "@/components/trading/asset-watchl
 import { ChartHeader } from "@/components/trading/chart-header";
 import { CandlestickChart, Timeframe } from "@/components/trading/candlestick-chart";
 import { OrderPanel } from "@/components/trading/order-panel";
+import { SpotOrderPanel } from "@/components/trading/spot-order-panel";
 import { OpenPositionsPanel } from "@/components/trading/open-positions-panel";
+import { SpotHoldingsPanel } from "@/components/trading/spot-holdings-panel";
+import { TradeModeToggle, TradeMode } from "@/components/trading/trade-mode-toggle";
 import { useLivePrices } from "@/hooks/use-live-prices";
 
 export function TradingTerminal() {
@@ -16,6 +19,7 @@ export function TradingTerminal() {
 
   const [symbol, setSymbol] = useState(initialSymbol);
   const [timeframe, setTimeframe] = useState<Timeframe>("1h");
+  const [mode, setMode] = useState<TradeMode>("FUTURES");
   const { prices } = useLivePrices();
 
   const ticker = prices[symbol];
@@ -36,12 +40,31 @@ export function TradingTerminal() {
             onTimeframeChange={setTimeframe}
           />
           <div className="min-h-0 flex-1">
-            <CandlestickChart symbol={symbol} timeframe={timeframe} livePrice={ticker?.price} />
+            <CandlestickChart
+              symbol={symbol}
+              timeframe={timeframe}
+              livePrice={ticker?.price}
+            />
           </div>
-          <OpenPositionsPanel />
+          {mode === "FUTURES" ? <OpenPositionsPanel /> : <SpotHoldingsPanel />}
         </div>
 
-        <OrderPanel symbol={symbol} displayName={displayName} livePrice={ticker?.price} />
+        <div className="flex h-full w-80 shrink-0 flex-col border-l border-border">
+          <TradeModeToggle mode={mode} onChange={setMode} />
+          {mode === "FUTURES" ? (
+            <OrderPanel
+              symbol={symbol}
+              displayName={displayName}
+              livePrice={ticker?.price}
+            />
+          ) : (
+            <SpotOrderPanel
+              symbol={symbol}
+              displayName={displayName}
+              livePrice={ticker?.price}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

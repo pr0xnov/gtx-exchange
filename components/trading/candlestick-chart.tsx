@@ -1,18 +1,59 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createChart, ColorType, IChartApi, ISeriesApi } from "lightweight-charts";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createChart,
+  ColorType,
+  IChartApi,
+  ISeriesApi,
+  LogicalRange,
+} from "lightweight-charts";
 
-export type Timeframe = "1m" | "5m" | "15m" | "1h" | "4h" | "1d";
+export type Timeframe =
+  | "30s"
+  | "1m"
+  | "3m"
+  | "5m"
+  | "15m"
+  | "30m"
+  | "1h"
+  | "4h"
+  | "1d"
+  | "1w";
 
 export const TIMEFRAMES: { label: string; value: Timeframe }[] = [
+  { label: "30s", value: "30s" },
   { label: "1m", value: "1m" },
+  { label: "3m", value: "3m" },
   { label: "5m", value: "5m" },
   { label: "15m", value: "15m" },
+  { label: "30m", value: "30m" },
   { label: "1h", value: "1h" },
   { label: "4h", value: "4h" },
   { label: "1D", value: "1d" },
+  { label: "1W", value: "1w" },
 ];
+
+const TIMEFRAME_SECONDS: Record<Timeframe, number> = {
+  "30s": 30,
+  "1m": 60,
+  "3m": 180,
+  "5m": 300,
+  "15m": 900,
+  "30m": 1800,
+  "1h": 3600,
+  "4h": 14400,
+  "1d": 86400,
+  "1w": 604800,
+};
+
+// One request page. At 500 bars this already covers well over a year for
+// 1d/1w, and for finer timeframes the chart pages further back on demand
+// as the user scrolls — see loadOlderPage below.
+const PAGE_SIZE = 500;
+// Start fetching the next page once the visible range gets this close to
+// the oldest loaded bar (index 0).
+const PREFETCH_THRESHOLD_BARS = 10;
 
 interface Candle {
   time: number;
@@ -21,6 +62,24 @@ interface Candle {
   low: number;
   close: number;
   volume: number;
+}
+
+async function fetchCandlePage(
+  symbol: string,
+  timeframe: Timeframe,
+  endTimeMs?: number
+): Promise<Candle[]> {
+  const params = new URLSearchParams({
+    symbol,
+    interval: timeframe,
+    limit: String(PAGE_SIZE),
+  });
+  if (endTimeMs) params.set("endTime", String(endTimeMs));
+
+  const res = await fetch(`/api/markets/klines?${params.toString()}`);
+  const json = await res.json();
+  if (!res.ok || !json.success) throw new Error(json.error ?? "Failed to load candles");
+  return json.data as Candle[];
 }
 
 export function CandlestickChart({
@@ -36,10 +95,121 @@ export function CandlestickChart({
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
-  const lastCandleRef = useRef<Candle | null>(null);
+
+  // Full accumulated dataset for the current symbol/timeframe, ascending
+  // by time. A ref, not state — updated imperatively so ticks/pagination
+  // never trigger a React re-render of this component.
+  const candlesRef = useRef<Candle[]>([]);
+  const loadingMoreRef = useRef(false);
+  const exhaustedRef = useRef(false); // true once Binance has no older data left
+  const symbolRef = useRef(symbol);
+  const timeframeRef = useRef(timeframe);
+
+  // Bumped every time symbol/timeframe changes (and once more on unmount —
+  // see the chart-setup effect's cleanup below); loadOlderPage captures it
+  // before its async fetch and checks it again after, so a stale response
+  // (user switched pairs/timeframe, or navigated away, while an older-page
+  // request was still in flight) is discarded instead of being spliced
+  // onto the new symbol's data or touching refs after unmount.
+  // readyGenerationRef records which generation's initial load has
+  // actually landed, so the live-tick effect can tell it's not safe to
+  // touch candlesRef/series yet during that same async gap. Both are plain
+  // numbers on a ref, not subscriptions or timers, so there's nothing to
+  // explicitly tear down for them beyond the generation bump above.
+  const generationRef = useRef(0);
+  const readyGenerationRef = useRef(-1);
+
   const [loading, setLoading] = useState(true);
 
-  // Set up chart instance once.
+  useEffect(() => {
+    symbolRef.current = symbol;
+    timeframeRef.current = timeframe;
+  }, [symbol, timeframe]);
+
+  const applyData = useCallback((candles: Candle[]) => {
+    // Defense in depth: lightweight-charts throws a hard internal assertion
+    // if handed a non-ascending or duplicate-timestamp series. Verify here,
+    // at the single choke point every candle array passes through, and
+    // silently drop the batch rather than ever calling setData with it.
+    for (let i = 1; i < candles.length; i++) {
+      if (candles[i]!.time <= candles[i - 1]!.time) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[chart] dropped out-of-order candle batch");
+        }
+        return;
+      }
+    }
+
+    seriesRef.current?.setData(
+      candles.map((c) => ({
+        time: c.time as never,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+      }))
+    );
+    volumeSeriesRef.current?.setData(
+      candles.map((c) => ({
+        time: c.time as never,
+        value: c.volume,
+        color: c.close >= c.open ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)",
+      }))
+    );
+  }, []);
+
+  // Fetches the next older page and prepends it, preserving the user's
+  // current scroll position so the view doesn't jump. This is what lets
+  // the user keep scrolling back — including well past a year — for any
+  // timeframe, instead of only ever seeing the most recent bars.
+  const loadOlderPage = useCallback(async () => {
+    const requestGeneration = generationRef.current;
+    const requestSymbol = symbolRef.current;
+    const requestTimeframe = timeframeRef.current;
+    const earliest = candlesRef.current[0];
+    if (!earliest || loadingMoreRef.current || exhaustedRef.current) return;
+
+    loadingMoreRef.current = true;
+    try {
+      const older = await fetchCandlePage(
+        requestSymbol,
+        requestTimeframe,
+        earliest.time * 1000 - 1
+      );
+
+      // The user switched symbol/timeframe (or unmounted the chart) while
+      // this request was in flight — it no longer corresponds to what's on
+      // screen. Discard it rather than splicing stale data onto the new
+      // symbol's dataset.
+      if (requestGeneration !== generationRef.current) return;
+
+      const fresh = older.filter((c) => c.time < earliest.time);
+      if (fresh.length === 0) {
+        exhaustedRef.current = true;
+        return;
+      }
+
+      const combined = [...fresh, ...candlesRef.current];
+      candlesRef.current = combined;
+
+      const chart = chartRef.current;
+      const range = chart?.timeScale().getVisibleLogicalRange();
+      applyData(combined);
+      if (chart && range) {
+        chart.timeScale().setVisibleLogicalRange({
+          from: range.from + fresh.length,
+          to: range.to + fresh.length,
+        });
+      }
+    } catch {
+      // Transient network/API hiccup — the next scroll-to-edge event
+      // will simply retry.
+    } finally {
+      loadingMoreRef.current = false;
+    }
+  }, [applyData]);
+
+  // Set up the chart instance once.
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -57,6 +227,10 @@ export function CandlestickChart({
       rightPriceScale: { borderColor: "#1F2937" },
       crosshair: { mode: 0 },
       autoSize: true,
+      // Explicit for clarity — these are the defaults, but Task 3 requires
+      // wheel-zoom and drag-pan to keep working as pagination is added.
+      handleScroll: true,
+      handleScale: true,
     });
 
     const candleSeries = chart.addCandlestickSeries({
@@ -80,67 +254,112 @@ export function CandlestickChart({
     seriesRef.current = candleSeries;
     volumeSeriesRef.current = volumeSeries;
 
+    const handleRangeChange = (range: LogicalRange | null) => {
+      if (!range) return;
+      if (range.from < PREFETCH_THRESHOLD_BARS) {
+        void loadOlderPage();
+      }
+    };
+    chart.timeScale().subscribeVisibleLogicalRangeChange(handleRangeChange);
+
     return () => {
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(handleRangeChange);
       chart.remove();
       chartRef.current = null;
+      seriesRef.current = null;
+      volumeSeriesRef.current = null;
+      // Invalidate any in-flight loadOlderPage/initial-load request so its
+      // continuation sees a generation mismatch and bails out instead of
+      // touching candlesRef/series after this component is gone.
+      generationRef.current += 1;
     };
-  }, []);
+  }, [loadOlderPage]);
 
-  // Load historical candles whenever symbol/timeframe changes.
+  // Load the most recent page whenever symbol/timeframe changes.
   useEffect(() => {
+    const generation = ++generationRef.current;
     let cancelled = false;
     setLoading(true);
+    exhaustedRef.current = false;
+    candlesRef.current = [];
 
-    fetch(`/api/markets/klines?symbol=${symbol}&interval=${timeframe}`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (cancelled || !json.success) return;
-        const candles: Candle[] = json.data;
-        seriesRef.current?.setData(
-          candles.map((c) => ({
-            time: c.time as never,
-            open: c.open,
-            high: c.high,
-            low: c.low,
-            close: c.close,
-          }))
-        );
-        volumeSeriesRef.current?.setData(
-          candles.map((c) => ({
-            time: c.time as never,
-            value: c.volume,
-            color: c.close >= c.open ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)",
-          }))
-        );
-        lastCandleRef.current = candles[candles.length - 1] ?? null;
+    fetchCandlePage(symbol, timeframe)
+      .then((candles) => {
+        if (cancelled) return;
+        candlesRef.current = candles;
+        applyData(candles);
         chartRef.current?.timeScale().fitContent();
+        readyGenerationRef.current = generation;
+      })
+      .catch(() => {
+        // Leave the chart empty; the effect reruns on the next
+        // symbol/timeframe change. Still mark this generation "ready" so
+        // live ticks (which don't need history) aren't blocked forever.
+        if (!cancelled) readyGenerationRef.current = generation;
       })
       .finally(() => !cancelled && setLoading(false));
 
     return () => {
       cancelled = true;
     };
-  }, [symbol, timeframe]);
+  }, [symbol, timeframe, applyData]);
 
-  // Live-update the last candle's close price as new ticks arrive.
+  // Live-update from the WebSocket ticker (see hooks/use-live-prices.ts).
+  // Rolls over to a brand new bar once real time crosses the current
+  // timeframe's bucket boundary, instead of extending one bar forever.
   useEffect(() => {
-    if (!livePrice || !lastCandleRef.current || !seriesRef.current) return;
-    const last = lastCandleRef.current;
-    const updated: Candle = {
-      ...last,
-      close: livePrice,
-      high: Math.max(last.high, livePrice),
-      low: Math.min(last.low, livePrice),
-    };
-    lastCandleRef.current = updated;
-    seriesRef.current.update({
-      time: updated.time as never,
-      open: updated.open,
-      high: updated.high,
-      low: updated.low,
-      close: updated.close,
-    });
-  }, [livePrice]);
+    if (livePrice == null || !seriesRef.current) return;
+    // Symbol/timeframe just changed and the new history hasn't landed yet
+    // (candlesRef.current is either stale or empty) — applying a live
+    // tick right now would either update the wrong series' last bar or
+    // desync candlesRef.current from what's actually on screen.
+    if (readyGenerationRef.current !== generationRef.current) return;
+
+    const bucketSeconds = TIMEFRAME_SECONDS[timeframe];
+    const bucketTime = Math.floor(Date.now() / 1000 / bucketSeconds) * bucketSeconds;
+    const candles = candlesRef.current;
+    const last = candles[candles.length - 1];
+
+    if (last && bucketTime === last.time) {
+      const updated: Candle = {
+        ...last,
+        close: livePrice,
+        high: Math.max(last.high, livePrice),
+        low: Math.min(last.low, livePrice),
+      };
+      candles[candles.length - 1] = updated;
+      seriesRef.current.update({
+        time: updated.time as never,
+        open: updated.open,
+        high: updated.high,
+        low: updated.low,
+        close: updated.close,
+      });
+    } else if (!last || bucketTime > last.time) {
+      const fresh: Candle = {
+        time: bucketTime,
+        open: livePrice,
+        high: livePrice,
+        low: livePrice,
+        close: livePrice,
+        volume: 0,
+      };
+      candlesRef.current = [...candles, fresh];
+      seriesRef.current.update({
+        time: fresh.time as never,
+        open: fresh.open,
+        high: fresh.high,
+        low: fresh.low,
+        close: fresh.close,
+      });
+      volumeSeriesRef.current?.update({
+        time: fresh.time as never,
+        value: 0,
+        color: "rgba(34,197,94,0.4)",
+      });
+    }
+    // else: a stale tick from just before a timeframe switch — ignore.
+  }, [livePrice, timeframe]);
 
   return (
     <div className="relative h-full w-full">

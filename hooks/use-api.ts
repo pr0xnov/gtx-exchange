@@ -187,6 +187,54 @@ export function useClosePosition() {
   });
 }
 
+export interface SpotHoldingDto {
+  symbol: string;
+  displaySymbol: string;
+  quantity: number;
+  price: number;
+  value: number;
+}
+
+export function useSpotHoldings() {
+  return useQuery({
+    queryKey: ["spot-holdings"],
+    queryFn: () => fetchJson<SpotHoldingDto[]>("/api/spot/holdings"),
+    refetchInterval: 5000,
+  });
+}
+
+export interface SpotOrderDto {
+  id: string;
+  side: "BUY" | "SELL";
+  quantity: string;
+  price: string;
+  total: string;
+  createdAt: string;
+  asset: { symbol: string; displaySymbol: string };
+}
+
+export function useSpotOrders() {
+  return useQuery({
+    queryKey: ["spot-orders"],
+    queryFn: () => fetchJson<SpotOrderDto[]>("/api/spot/orders"),
+    refetchInterval: 5000,
+  });
+}
+
+export function useCreateSpotOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { symbol: string; side: "BUY" | "SELL"; quantity: number }) =>
+      fetchJson("/api/spot/orders", { method: "POST", body: JSON.stringify(payload) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spot-holdings"] });
+      queryClient.invalidateQueries({ queryKey: ["spot-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
+}
+
 export function useDeposit() {
   const queryClient = useQueryClient();
   return useMutation({

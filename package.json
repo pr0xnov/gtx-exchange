@@ -9,6 +9,8 @@
     "start": "next start -p 3000",
     "lint": "next lint",
     "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
@@ -67,9 +69,11 @@
     "postcss": "8.5.1",
     "prettier": "3.4.2",
     "prettier-plugin-tailwindcss": "0.6.11",
+    "jsdom": "26.0.0",
     "tailwindcss": "3.4.17",
     "tailwindcss-animate": "1.0.7",
-    "tsx": "4.19.2"
+    "tsx": "4.19.2",
+    "vitest": "3.0.5"
   },
   "engines": {
     "node": ">=20.0.0"

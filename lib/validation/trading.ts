@@ -20,6 +20,12 @@ export const closePositionSchema = z.object({
   positionId: z.string().min(1),
 });
 
+export const createSpotOrderSchema = z.object({
+  symbol: z.string().min(1),
+  side: z.enum(["BUY", "SELL"]),
+  quantity: z.number().positive("Quantity must be greater than 0"),
+});
+
 export const depositSchema = z.object({
   amount: z.number().positive("Amount must be greater than 0").max(10_000_000),
   method: z.enum(["VISA_MASTERCARD", "BANK_TRANSFER", "BITCOIN", "TETHER_USDT"]),
@@ -38,3 +44,4 @@ export const verificationSchema = z.object({
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type DepositInput = z.infer<typeof depositSchema>;
 export type WithdrawInput = z.infer<typeof withdrawSchema>;
+export type CreateSpotOrderInput = z.infer<typeof createSpotOrderSchema>;

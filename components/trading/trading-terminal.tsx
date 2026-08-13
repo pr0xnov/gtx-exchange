@@ -31,11 +31,11 @@ export function TradingTerminal() {
     // The chart's own container resizes via lightweight-charts' autoSize
     // ResizeObserver — nothing here needs to touch the chart directly.
     <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
-      <TerminalTopbar />
       <div className="flex flex-1 overflow-hidden">
         <AssetWatchlist prices={prices} selected={symbol} onSelect={setSymbol} />
 
         <div className="flex flex-1 flex-col overflow-hidden">
+          <TerminalTopbar />
           <ChartHeader
             displayName={displayName}
             price={ticker?.price}

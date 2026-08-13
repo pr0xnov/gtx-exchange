@@ -1,5 +1,7 @@
 "use client";
 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { TIMEFRAMES, Timeframe } from "@/components/trading/candlestick-chart";
 
@@ -17,6 +19,7 @@ export function ChartHeader({
   onTimeframeChange: (tf: Timeframe) => void;
 }) {
   const up = (changePercent ?? 0) >= 0;
+  const activeLabel = TIMEFRAMES.find((tf) => tf.value === timeframe)?.label ?? timeframe;
 
   return (
     <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -42,22 +45,36 @@ export function ChartHeader({
           </span>
         )}
       </div>
-      <div className="flex items-center gap-1 overflow-x-auto rounded-lg bg-surface p-1">
-        {TIMEFRAMES.map((tf) => (
-          <button
-            key={tf.value}
-            onClick={() => onTimeframeChange(tf.value)}
-            className={cn(
-              "shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-              timeframe === tf.value
-                ? "bg-primary/15 text-primary"
-                : "text-muted hover:text-foreground"
-            )}
-          >
-            {tf.label}
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button className="flex items-center gap-1 rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground outline-none data-[state=open]:text-primary">
+            {activeLabel}
+            <ChevronDown className="h-3.5 w-3.5 text-muted" />
           </button>
-        ))}
-      </div>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="end"
+            sideOffset={6}
+            className="z-50 w-28 rounded-lg border border-border bg-card p-1 shadow-card"
+          >
+            {TIMEFRAMES.map((tf) => (
+              <DropdownMenu.Item
+                key={tf.value}
+                onSelect={() => onTimeframeChange(tf.value)}
+                className={cn(
+                  "cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-medium outline-none transition-colors",
+                  timeframe === tf.value
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted hover:bg-white/5 hover:text-foreground data-[highlighted]:bg-white/5 data-[highlighted]:text-foreground"
+                )}
+              >
+                {tf.label}
+              </DropdownMenu.Item>
+            ))}
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
     </div>
   );
 }

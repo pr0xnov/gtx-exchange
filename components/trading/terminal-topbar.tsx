@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePortfolio } from "@/hooks/use-api";
 import { formatCurrency } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 /**
  * Trading-specific stats strip (balance/credit/equity/profit). Global
@@ -47,9 +45,6 @@ export function TerminalTopbar() {
           </div>
         </div>
       </div>
-      <Button size="sm" asChild>
-        <Link href="/deposit">Deposit</Link>
-      </Button>
     </header>
   );
 }

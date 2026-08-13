@@ -36,7 +36,11 @@ export default async function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar
-        user={user ? { firstName: user.firstName, lastName: user.lastName } : null}
+        user={
+          user
+            ? { firstName: user.firstName, lastName: user.lastName, email: user.email }
+            : null
+        }
       />
 
       <section className="relative overflow-hidden bg-green-glow">

@@ -218,6 +218,10 @@ export function CandlestickChart({
         background: { type: ColorType.Solid, color: "transparent" },
         textColor: "#9CA3AF",
         fontSize: 11,
+        // Attribution moved to the site Footer (see components/marketing/footer.tsx)
+        // per the library's licence terms — disabling here doesn't remove the
+        // requirement, just relocates where it's satisfied.
+        attributionLogo: false,
       },
       grid: {
         vertLines: { color: "#1F2937" },

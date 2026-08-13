@@ -34,8 +34,8 @@ export function Footer() {
         <div>
           <Logo />
           <p className="mt-4 max-w-xs text-sm text-muted">
-            GTX is a paper-trading education platform. All balances are virtual and
-            all trades are simulated — no real funds are ever at risk.
+            GTX is a paper-trading education platform. All balances are virtual and all
+            trades are simulated — no real funds are ever at risk.
           </p>
         </div>
         {COLUMNS.map((col) => (
@@ -57,8 +57,21 @@ export function Footer() {
         ))}
       </div>
       <div className="border-t border-border py-6 text-center text-xs text-muted">
-        © {new Date().getFullYear()} GTX. Virtual trading simulator for educational
-        purposes only.
+        <p>
+          © {new Date().getFullYear()} GTX. Virtual trading simulator for educational
+          purposes only.
+        </p>
+        <p className="mt-1">
+          Charts powered by{" "}
+          <a
+            href="https://www.tradingview.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground hover:underline"
+          >
+            TradingView Lightweight Charts
+          </a>
+        </p>
       </div>
     </footer>
   );

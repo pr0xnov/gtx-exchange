@@ -227,3 +227,29 @@ describe("getBiggestMovers", () => {
     ]);
   });
 });
+
+describe("scales to an expanded (~100-symbol) registry", () => {
+  const MANY_ASSETS: MarketAssetLike[] = Array.from({ length: 100 }, (_, i) => ({
+    id: String(i),
+    symbol: `SYM${i}USDT`,
+    displaySymbol: `SYM${i}/USD`,
+    price: 1 + i,
+    change24h: i % 2 === 0 ? i / 10 : -(i / 10),
+  }));
+
+  it("merges, searches, sorts and ranks correctly at 100 rows", () => {
+    const rows = mergeMarketData(MANY_ASSETS, {});
+    expect(rows).toHaveLength(100);
+
+    expect(filterBySearch(rows, "SYM42").map((r) => r.symbol)).toEqual(["SYM42USDT"]);
+
+    const sorted = sortRows(rows, "price", "desc");
+    expect(sorted[0]!.symbol).toBe("SYM99USDT");
+    expect(sorted).toHaveLength(100);
+
+    expect(getTopGainers(rows, 10)).toHaveLength(10);
+    expect(getTopLosers(rows, 10)).toHaveLength(10);
+    expect(getBiggestMovers(rows, 10)).toHaveLength(10);
+    expect(getTopVolume(rows, 10)).toHaveLength(10);
+  });
+});

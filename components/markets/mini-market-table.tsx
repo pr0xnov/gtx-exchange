@@ -78,6 +78,7 @@ export function MiniMarketTable({
   sortDirection,
   onSort,
   footer,
+  startIndex = 0,
 }: {
   title: string;
   rows: EnrichedMarket[];
@@ -91,6 +92,11 @@ export function MiniMarketTable({
   sortDirection?: SortDirection;
   onSort?: (key: SortKey) => void;
   footer?: ReactNode;
+  /** Row number to continue from, for a paginated caller (AllMarketsTable)
+   *  — e.g. 20 on page 2 with pageSize 20, so rows read 21, 22, 23…
+   *  instead of restarting at 1 every page. Every other block (no
+   *  pagination) omits this and keeps numbering from 1, unchanged. */
+  startIndex?: number;
 }) {
   const router = useRouter();
   // №, [star], coin, price, change, volume, sparkline — star column only
@@ -163,7 +169,9 @@ export function MiniMarketTable({
                     onClick={() => goToTrading(row.symbol)}
                     className="cursor-pointer border-b border-border/50 transition-colors last:border-0 hover:bg-white/[0.02]"
                   >
-                    <td className="font-tabular px-4 py-3.5 text-muted">{i + 1}</td>
+                    <td className="font-tabular px-4 py-3.5 text-muted">
+                      {startIndex + i + 1}
+                    </td>
                     {isAuthenticated && (
                       <td className="px-2 py-3.5">
                         <button

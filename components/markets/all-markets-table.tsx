@@ -77,6 +77,7 @@ export function AllMarketsTable({
       sparklines={sparklines}
       isAuthenticated={isAuthenticated}
       emptyMessage={resolvedEmptyMessage}
+      startIndex={(currentPage - 1) * PAGE_SIZE}
       sortKey={sortKey}
       sortDirection={sortDirection}
       onSort={toggleSort}

@@ -12,6 +12,8 @@
  * that reason; nothing here ever fabricates one.
  */
 
+import { MARKET_REGISTRY } from "@/lib/binance/client";
+
 export interface MarketAssetLike {
   id: string;
   symbol: string;
@@ -46,16 +48,12 @@ export interface EnrichedMarket {
   volume24h: number | null;
 }
 
-const COIN_NAMES: Record<string, string> = {
-  BTC: "Bitcoin",
-  ETH: "Ethereum",
-  BNB: "BNB",
-  SOL: "Solana",
-  XRP: "XRP",
-  ADA: "Cardano",
-  DOGE: "Dogecoin",
-  LTC: "Litecoin",
-};
+// Friendly names come from the single shared registry (lib/binance/client.ts)
+// instead of a separate local map, so every symbol added there gets a real
+// name here automatically rather than falling back to its bare ticker.
+const COIN_NAMES: Record<string, string> = Object.fromEntries(
+  MARKET_REGISTRY.map((e) => [e.baseAsset, e.name])
+);
 
 export function baseAssetOf(symbol: string): string {
   return symbol.replace(/USDT$/, "");

@@ -7,7 +7,137 @@
  * No API key is required — these are Binance's public market data endpoints.
  */
 
-export const TRACKED_SYMBOLS = [
+export interface MarketRegistryEntry {
+  /** Binance trading pair, e.g. "BTCUSDT". */
+  symbol: string;
+  /** Base asset ticker, e.g. "BTC". */
+  baseAsset: string;
+  /** Friendly display name, e.g. "Bitcoin". */
+  name: string;
+}
+
+/**
+ * The single source of truth for every USDT pair this app tracks —
+ * seeded into `Asset`, subscribed to on the combined WS ticker stream,
+ * and read by Markets. Add/remove a coin here and it's live everywhere.
+ *
+ * All 95 entries are real, currently-active Binance USDT spot pairs
+ * (verified against a live `GET /api/v3/exchangeInfo` + `GET /api/v3/
+ * ticker/24hr` pull — TRADING status, spot-tradable, non-zero 24h
+ * volume), not an arbitrary/padded list. Deliberately excludes: leveraged
+ * tokens (*UP/DOWN/BULL/BEAR*USDT), Binance's tokenized-stock "xStocks"
+ * products, and stablecoin-vs-stablecoin pairs (USDC, FDUSD, etc.) —
+ * none of those are "cryptocurrencies" in the sense this dashboard means.
+ * Ordered by real 24h quote volume at the time this list was compiled
+ * (highest first); order has no functional meaning elsewhere.
+ */
+export const MARKET_REGISTRY: readonly MarketRegistryEntry[] = [
+  { symbol: "BTCUSDT", baseAsset: "BTC", name: "Bitcoin" },
+  { symbol: "ETHUSDT", baseAsset: "ETH", name: "Ethereum" },
+  { symbol: "SOLUSDT", baseAsset: "SOL", name: "Solana" },
+  { symbol: "BNBUSDT", baseAsset: "BNB", name: "BNB" },
+  { symbol: "XRPUSDT", baseAsset: "XRP", name: "XRP" },
+  { symbol: "ZECUSDT", baseAsset: "ZEC", name: "Zcash" },
+  { symbol: "TRXUSDT", baseAsset: "TRX", name: "TRON" },
+  { symbol: "DOGEUSDT", baseAsset: "DOGE", name: "Dogecoin" },
+  { symbol: "LINKUSDT", baseAsset: "LINK", name: "Chainlink" },
+  { symbol: "WLDUSDT", baseAsset: "WLD", name: "Worldcoin" },
+  { symbol: "ADAUSDT", baseAsset: "ADA", name: "Cardano" },
+  { symbol: "NEARUSDT", baseAsset: "NEAR", name: "NEAR Protocol" },
+  { symbol: "SUIUSDT", baseAsset: "SUI", name: "Sui" },
+  { symbol: "UNIUSDT", baseAsset: "UNI", name: "Uniswap" },
+  { symbol: "AVAXUSDT", baseAsset: "AVAX", name: "Avalanche" },
+  { symbol: "ACEUSDT", baseAsset: "ACE", name: "Fusionist" },
+  { symbol: "BICOUSDT", baseAsset: "BICO", name: "Biconomy" },
+  { symbol: "PEPEUSDT", baseAsset: "PEPE", name: "Pepe" },
+  { symbol: "LTCUSDT", baseAsset: "LTC", name: "Litecoin" },
+  { symbol: "ENAUSDT", baseAsset: "ENA", name: "Ethena" },
+  { symbol: "AAVEUSDT", baseAsset: "AAVE", name: "Aave" },
+  { symbol: "XLMUSDT", baseAsset: "XLM", name: "Stellar" },
+  { symbol: "BCHUSDT", baseAsset: "BCH", name: "Bitcoin Cash" },
+  { symbol: "ONDOUSDT", baseAsset: "ONDO", name: "Ondo" },
+  { symbol: "WBTCUSDT", baseAsset: "WBTC", name: "Wrapped Bitcoin" },
+  { symbol: "ATOMUSDT", baseAsset: "ATOM", name: "Cosmos" },
+  { symbol: "DEXEUSDT", baseAsset: "DEXE", name: "DeXe" },
+  { symbol: "HBARUSDT", baseAsset: "HBAR", name: "Hedera" },
+  { symbol: "CRVUSDT", baseAsset: "CRV", name: "Curve DAO Token" },
+  { symbol: "FETUSDT", baseAsset: "FET", name: "Fetch.ai" },
+  { symbol: "SCRTUSDT", baseAsset: "SCRT", name: "Secret" },
+  { symbol: "STORJUSDT", baseAsset: "STORJ", name: "Storj" },
+  { symbol: "ARBUSDT", baseAsset: "ARB", name: "Arbitrum" },
+  { symbol: "DODOUSDT", baseAsset: "DODO", name: "DODO" },
+  { symbol: "FILUSDT", baseAsset: "FIL", name: "Filecoin" },
+  { symbol: "POLUSDT", baseAsset: "POL", name: "Polygon" },
+  { symbol: "BONKUSDT", baseAsset: "BONK", name: "Bonk" },
+  { symbol: "DOTUSDT", baseAsset: "DOT", name: "Polkadot" },
+  { symbol: "APTUSDT", baseAsset: "APT", name: "Aptos" },
+  { symbol: "NOTUSDT", baseAsset: "NOT", name: "Notcoin" },
+  { symbol: "JSTUSDT", baseAsset: "JST", name: "JUST" },
+  { symbol: "TIAUSDT", baseAsset: "TIA", name: "Celestia" },
+  { symbol: "OPUSDT", baseAsset: "OP", name: "Optimism" },
+  { symbol: "INJUSDT", baseAsset: "INJ", name: "Injective" },
+  { symbol: "ICPUSDT", baseAsset: "ICP", name: "Internet Computer" },
+  { symbol: "PNUTUSDT", baseAsset: "PNUT", name: "Peanut the Squirrel" },
+  { symbol: "ONEUSDT", baseAsset: "ONE", name: "Harmony" },
+  { symbol: "MOVRUSDT", baseAsset: "MOVR", name: "Moonriver" },
+  { symbol: "JUPUSDT", baseAsset: "JUP", name: "Jupiter" },
+  { symbol: "VANRYUSDT", baseAsset: "VANRY", name: "Vanar Chain" },
+  { symbol: "SHIBUSDT", baseAsset: "SHIB", name: "Shiba Inu" },
+  { symbol: "LDOUSDT", baseAsset: "LDO", name: "Lido DAO" },
+  { symbol: "SEIUSDT", baseAsset: "SEI", name: "Sei" },
+  { symbol: "RENDERUSDT", baseAsset: "RENDER", name: "Render" },
+  { symbol: "DASHUSDT", baseAsset: "DASH", name: "Dash" },
+  { symbol: "PYTHUSDT", baseAsset: "PYTH", name: "Pyth Network" },
+  { symbol: "ALGOUSDT", baseAsset: "ALGO", name: "Algorand" },
+  { symbol: "STRKUSDT", baseAsset: "STRK", name: "Starknet" },
+  { symbol: "ETCUSDT", baseAsset: "ETC", name: "Ethereum Classic" },
+  { symbol: "GALAUSDT", baseAsset: "GALA", name: "Gala" },
+  { symbol: "PIXELUSDT", baseAsset: "PIXEL", name: "Pixels" },
+  { symbol: "EGLDUSDT", baseAsset: "EGLD", name: "MultiversX" },
+  { symbol: "CHZUSDT", baseAsset: "CHZ", name: "Chiliz" },
+  { symbol: "PENDLEUSDT", baseAsset: "PENDLE", name: "Pendle" },
+  { symbol: "KAVAUSDT", baseAsset: "KAVA", name: "Kava" },
+  { symbol: "RUNEUSDT", baseAsset: "RUNE", name: "THORChain" },
+  { symbol: "GRTUSDT", baseAsset: "GRT", name: "The Graph" },
+  { symbol: "SUSDT", baseAsset: "S", name: "Sonic" },
+  { symbol: "VETUSDT", baseAsset: "VET", name: "VeChain" },
+  { symbol: "BATUSDT", baseAsset: "BAT", name: "Basic Attention Token" },
+  { symbol: "AXSUSDT", baseAsset: "AXS", name: "Axie Infinity" },
+  { symbol: "FLOWUSDT", baseAsset: "FLOW", name: "Flow" },
+  { symbol: "IOTAUSDT", baseAsset: "IOTA", name: "IOTA" },
+  { symbol: "ROSEUSDT", baseAsset: "ROSE", name: "Oasis Network" },
+  { symbol: "SANDUSDT", baseAsset: "SAND", name: "The Sandbox" },
+  { symbol: "THETAUSDT", baseAsset: "THETA", name: "Theta Network" },
+  { symbol: "ENJUSDT", baseAsset: "ENJ", name: "Enjin Coin" },
+  { symbol: "ALTUSDT", baseAsset: "ALT", name: "AltLayer" },
+  { symbol: "STXUSDT", baseAsset: "STX", name: "Stacks" },
+  { symbol: "MANTAUSDT", baseAsset: "MANTA", name: "Manta Network" },
+  { symbol: "NEOUSDT", baseAsset: "NEO", name: "NEO" },
+  { symbol: "QNTUSDT", baseAsset: "QNT", name: "Quant" },
+  { symbol: "SNXUSDT", baseAsset: "SNX", name: "Synthetix" },
+  { symbol: "ZILUSDT", baseAsset: "ZIL", name: "Zilliqa" },
+  { symbol: "PORTALUSDT", baseAsset: "PORTAL", name: "Portal" },
+  { symbol: "MANAUSDT", baseAsset: "MANA", name: "Decentraland" },
+  { symbol: "XTZUSDT", baseAsset: "XTZ", name: "Tezos" },
+  { symbol: "COMPUSDT", baseAsset: "COMP", name: "Compound" },
+  { symbol: "IMXUSDT", baseAsset: "IMX", name: "Immutable" },
+  { symbol: "YFIUSDT", baseAsset: "YFI", name: "yearn.finance" },
+  { symbol: "KSMUSDT", baseAsset: "KSM", name: "Kusama" },
+  { symbol: "CELOUSDT", baseAsset: "CELO", name: "Celo" },
+  { symbol: "ANKRUSDT", baseAsset: "ANKR", name: "Ankr" },
+  { symbol: "KNCUSDT", baseAsset: "KNC", name: "Kyber Network Crystal" },
+  { symbol: "ZRXUSDT", baseAsset: "ZRX", name: "0x Protocol" },
+];
+
+export const TRACKED_SYMBOLS: readonly string[] = MARKET_REGISTRY.map((e) => e.symbol);
+
+/**
+ * A small, curated shortlist of the most widely recognized majors, for
+ * the Markets "Популярные" block — deliberately NOT the same as
+ * TRACKED_SYMBOLS (which is now the full ~95-symbol registry), or that
+ * block would just duplicate "Все криптовалюты".
+ */
+export const POPULAR_SYMBOLS: readonly string[] = [
   "BTCUSDT",
   "ETHUSDT",
   "BNBUSDT",
@@ -15,10 +145,12 @@ export const TRACKED_SYMBOLS = [
   "XRPUSDT",
   "ADAUSDT",
   "DOGEUSDT",
-  "LTCUSDT",
-] as const;
+  "TRXUSDT",
+  "AVAXUSDT",
+  "LINKUSDT",
+];
 
-export type TrackedSymbol = (typeof TRACKED_SYMBOLS)[number];
+export type TrackedSymbol = string;
 
 export interface TickerSnapshot {
   symbol: string;

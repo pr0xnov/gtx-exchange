@@ -1,8 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useQueries, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { closesFromCandles } from "@/lib/markets/derive";
 import type { Candle } from "@/lib/binance/client";
+
+// Sparkline requests are one-shot (not polled) but there can now be up to
+// ~100 tracked symbols — firing that many /api/markets/klines calls at
+// once on mount would be its own mini stampede. Reveal symbols to
+// useQueries in small batches instead, so at most SPARKLINE_BATCH_SIZE
+// requests are ever in flight at a time; each batch is still cached for
+// 5 minutes, so this cost is paid once per Markets visit, not repeated.
+const SPARKLINE_BATCH_SIZE = 10;
+const SPARKLINE_BATCH_DELAY_MS = 150;
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -111,8 +121,44 @@ export function useMarkets() {
  * block on the page shares these same cached results.
  */
 export function useSparklines(symbols: readonly string[]): Record<string, number[]> {
+  const [batchSize, setBatchSize] = useState(() =>
+    Math.min(SPARKLINE_BATCH_SIZE, symbols.length)
+  );
+
+  useEffect(() => {
+    setBatchSize(Math.min(SPARKLINE_BATCH_SIZE, symbols.length));
+    if (symbols.length <= SPARKLINE_BATCH_SIZE) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    function revealNextBatch(revealed: number) {
+      if (cancelled || revealed >= symbols.length) return;
+      const next = Math.min(revealed + SPARKLINE_BATCH_SIZE, symbols.length);
+      setBatchSize(next);
+      if (next < symbols.length) {
+        timer = setTimeout(() => revealNextBatch(next), SPARKLINE_BATCH_DELAY_MS);
+      }
+    }
+    timer = setTimeout(
+      () => revealNextBatch(SPARKLINE_BATCH_SIZE),
+      SPARKLINE_BATCH_DELAY_MS
+    );
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // symbols is a module-level constant list (TRACKED_SYMBOLS) in every
+    // real caller — keying off its length is enough to restart batching
+    // if a genuinely different list is ever passed in.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbols.length]);
+
+  const activeSymbols = symbols.slice(0, batchSize);
+
   const results = useQueries({
-    queries: symbols.map((symbol) => ({
+    queries: activeSymbols.map((symbol) => ({
       queryKey: ["markets", "sparkline", symbol],
       queryFn: () =>
         fetchJson<Candle[]>(`/api/markets/klines?symbol=${symbol}&interval=1h&limit=24`),
@@ -121,7 +167,7 @@ export function useSparklines(symbols: readonly string[]): Record<string, number
   });
 
   const bySymbol: Record<string, number[]> = {};
-  symbols.forEach((symbol, i) => {
+  activeSymbols.forEach((symbol, i) => {
     const candles = results[i]?.data;
     if (candles) bySymbol[symbol] = closesFromCandles(candles);
   });

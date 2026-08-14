@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { useMarkets, useSparklines } from "@/hooks/use-api";
 import { useLivePrices } from "@/hooks/use-live-prices";
 import { useFavorites } from "@/hooks/use-favorites";
-import { TRACKED_SYMBOLS } from "@/lib/binance/client";
+import { POPULAR_SYMBOLS, TRACKED_SYMBOLS } from "@/lib/binance/client";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { AllMarketsTable } from "@/components/markets/all-markets-table";
@@ -80,7 +80,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
     [rows, favorites]
   );
 
-  const popular = useMemo(() => getPopular(rows, TRACKED_SYMBOLS), [rows]);
+  const popular = useMemo(() => getPopular(rows, POPULAR_SYMBOLS), [rows]);
   const gainers = useMemo(() => getTopGainers(rows), [rows]);
   const losers = useMemo(() => getTopLosers(rows), [rows]);
   const topVolume = useMemo(() => getTopVolume(rows), [rows]);

@@ -1,168 +1,214 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { Search, Star } from "lucide-react";
-import { useMarkets } from "@/hooks/use-api";
-import { cn, formatPrice } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { useMarkets, useSparklines } from "@/hooks/use-api";
+import { useLivePrices } from "@/hooks/use-live-prices";
+import { useFavorites } from "@/hooks/use-favorites";
+import { TRACKED_SYMBOLS } from "@/lib/binance/client";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { MiniSparkline } from "@/components/markets/mini-sparkline";
-import { Skeleton } from "@/components/shared/skeleton";
+import { AllMarketsTable } from "@/components/markets/all-markets-table";
+import { MiniMarketTable } from "@/components/markets/mini-market-table";
+import {
+  getBiggestMovers,
+  getPopular,
+  getTopGainers,
+  getTopLosers,
+  getTopVolume,
+  mergeMarketData,
+} from "@/lib/markets/derive";
 
-const CATEGORIES = [
-  "Popular",
-  "Forex",
-  "Stocks",
-  "Cryptocurrencies",
-  "Commodities",
-  "Indices",
-];
+const SEARCH_DEBOUNCE_MS = 300;
 
-export function MarketsClient() {
-  const { data, isLoading } = useMarkets();
-  const [category, setCategory] = useState("Popular");
-  const [search, setSearch] = useState("");
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+export const TABS = [
+  { id: "all", label: "Все криптовалюты" },
+  { id: "favorites", label: "Избранные" },
+  { id: "popular", label: "Популярные" },
+  { id: "gainers", label: "Показывают рост" },
+  { id: "losers", label: "Теряют в цене" },
+  { id: "volume", label: "Максимальный объём" },
+  { id: "movers", label: "Наибольшее движение" },
+] as const;
 
-  const filtered = useMemo(() => {
-    if (!data) return [];
-    return data.filter((a) => {
-      const matchesCategory =
-        category === "Popular" || category === "Cryptocurrencies"
-          ? true
-          : a.category === category;
-      const matchesSearch = a.displaySymbol
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [data, category, search]);
+type TabId = (typeof TABS)[number]["id"];
 
-  function toggleFavorite(symbol: string) {
-  setFavorites((prev) => {
-    const next = new Set(prev);
+const SEARCHABLE_TABS: TabId[] = ["all", "favorites"];
 
-    if (next.has(symbol)) {
-      next.delete(symbol);
-    } else {
-      next.add(symbol);
-    }
-
-    return next;
-  });
+/** Избранные is an authenticated-account feature — hidden from the tab
+ *  list entirely for a guest, not just inert. Exported as its own pure
+ *  function (rather than an inline expression) so this exact mechanism
+ *  is directly unit-testable without mounting the whole page. */
+export function getVisibleTabs(isAuthenticated: boolean) {
+  return isAuthenticated ? TABS : TABS.filter((t) => t.id !== "favorites");
 }
 
-  return (
-    <div className="mx-auto max-w-6xl space-y-4 p-6">
-      <h1 className="text-2xl font-bold text-foreground">Markets</h1>
+/**
+ * Single source of market data for the whole /markets page: one
+ * useMarkets() REST snapshot (already polls every 3s), one
+ * useLivePrices() WS subscription (the same hook Trading uses), and one
+ * useSparklines() batch of one-shot klines requests — merged/computed
+ * once here, then every block below just slices/sorts/filters that same
+ * data. No block fetches, polls, or renders its own table markup.
+ *
+ * Favorites are an authenticated-account feature: for a guest, the
+ * Избранные tab and every star are hidden entirely (not just inert) —
+ * see the filtered `visibleTabs` below and MiniMarketTable's
+ * isAuthenticated-gated star column — and useFavorites(isAuthenticated)
+ * never touches localStorage at all while isAuthenticated is false.
+ */
+export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const { data, isLoading } = useMarkets();
+  const { prices } = useLivePrices();
+  const sparklines = useSparklines(TRACKED_SYMBOLS);
+  const { favorites, toggleFavorite } = useFavorites(isAuthenticated);
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
+  const [activeTab, setActiveTab] = useState<TabId>("all");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchInput), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  const visibleTabs = getVisibleTabs(isAuthenticated);
+
+  const rows = useMemo(() => mergeMarketData(data ?? [], prices), [data, prices]);
+  const favoriteRows = useMemo(
+    () => rows.filter((r) => favorites.has(r.symbol)),
+    [rows, favorites]
+  );
+
+  const popular = useMemo(() => getPopular(rows, TRACKED_SYMBOLS), [rows]);
+  const gainers = useMemo(() => getTopGainers(rows), [rows]);
+  const losers = useMemo(() => getTopLosers(rows), [rows]);
+  const topVolume = useMemo(() => getTopVolume(rows), [rows]);
+  const biggestMovers = useMemo(() => getBiggestMovers(rows), [rows]);
+
+  const showSearch = SEARCHABLE_TABS.includes(activeTab);
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Markets</h1>
+
+        <nav className="mt-4 flex gap-1 overflow-x-auto border-b border-border">
+          {visibleTabs.map((tab) => (
             <button
-              key={c}
-              onClick={() => setCategory(c)}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                category === c
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted hover:bg-white/5 hover:text-foreground"
+                "shrink-0 whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-colors",
+                activeTab === tab.id
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted hover:text-foreground"
               )}
             >
-              {c}
+              {tab.label}
             </button>
           ))}
-        </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-          <Input
-            placeholder="Search assets"
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        </nav>
+
+        {showSearch && (
+          <div className="relative mt-4 max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <Input
+              placeholder="Search cryptocurrencies"
+              className="pl-9"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </div>
+        )}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-xs text-muted">
-              <th className="w-8 px-4 py-3" />
-              <th className="px-2 py-3 font-medium">Instrument</th>
-              <th className="px-2 py-3 font-medium">Price</th>
-              <th className="px-2 py-3 font-medium">Change</th>
-              <th className="hidden px-2 py-3 font-medium sm:table-cell">Chart</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <tr key={i} className="border-b border-border/50">
-                  <td colSpan={6} className="px-4 py-4">
-                    <Skeleton className="h-6 w-full" />
-                  </td>
-                </tr>
-              ))}
+      {activeTab === "all" && (
+        <AllMarketsTable
+          title="Все криптовалюты"
+          rows={rows}
+          isLoading={isLoading}
+          search={debouncedSearch}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          sparklines={sparklines}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
 
-            {!isLoading && filtered.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-muted">
-                  No assets found in this category.
-                </td>
-              </tr>
-            )}
+      {activeTab === "favorites" && (
+        <AllMarketsTable
+          title="Избранные"
+          rows={favoriteRows}
+          isLoading={isLoading}
+          search={debouncedSearch}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          sparklines={sparklines}
+          isAuthenticated={isAuthenticated}
+          emptyMessage="У вас пока нет избранных криптовалют"
+        />
+      )}
 
-            {filtered.map((asset) => {
-              const up = asset.change24h >= 0;
-              return (
-                <tr
-                  key={asset.id}
-                  className="border-b border-border/50 transition-colors last:border-0 hover:bg-white/[0.02]"
-                >
-                  <td className="px-4 py-4">
-                    <button onClick={() => toggleFavorite(asset.symbol)}>
-                      <Star
-                        className={cn(
-                          "h-4 w-4",
-                          favorites.has(asset.symbol)
-                            ? "fill-primary text-primary"
-                            : "text-muted"
-                        )}
-                      />
-                    </button>
-                  </td>
-                  <td className="px-2 py-4 font-medium text-foreground">
-                    {asset.displaySymbol}
-                  </td>
-                  <td className="px-2 py-4 font-tabular text-foreground">
-                    {formatPrice(asset.price, asset.price < 10 ? 4 : 2)}
-                  </td>
-                  <td
-                    className={cn(
-                      "px-2 py-4 font-tabular",
-                      up ? "text-primary" : "text-danger"
-                    )}
-                  >
-                    {up ? "+" : ""}
-                    {asset.change24h.toFixed(2)}%
-                  </td>
-                  <td className="hidden w-28 px-2 py-4 sm:table-cell">
-                    <MiniSparkline positive={up} />
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <Button size="sm" asChild>
-                      <Link href={`/trading?symbol=${asset.symbol}`}>Trade</Link>
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {activeTab === "popular" && (
+        <MiniMarketTable
+          title="Популярные"
+          rows={popular}
+          isLoading={isLoading}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          sparklines={sparklines}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
+
+      {activeTab === "gainers" && (
+        <MiniMarketTable
+          title="Показывают рост"
+          rows={gainers}
+          isLoading={isLoading}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          sparklines={sparklines}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
+
+      {activeTab === "losers" && (
+        <MiniMarketTable
+          title="Теряют в цене"
+          rows={losers}
+          isLoading={isLoading}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          sparklines={sparklines}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
+
+      {activeTab === "volume" && (
+        <MiniMarketTable
+          title="Максимальный объём"
+          rows={topVolume}
+          isLoading={isLoading}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          sparklines={sparklines}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
+
+      {activeTab === "movers" && (
+        <MiniMarketTable
+          title="Наибольшее движение"
+          rows={biggestMovers}
+          isLoading={isLoading}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          sparklines={sparklines}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
     </div>
   );
 }

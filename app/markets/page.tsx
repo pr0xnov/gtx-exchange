@@ -14,7 +14,7 @@ export default async function MarketsPage() {
             : null
         }
       />
-      <MarketsClient />
+      <MarketsClient isAuthenticated={Boolean(user)} />
     </div>
   );
 }

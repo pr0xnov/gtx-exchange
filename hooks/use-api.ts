@@ -1,6 +1,8 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { closesFromCandles } from "@/lib/markets/derive";
+import type { Candle } from "@/lib/binance/client";
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -98,6 +100,32 @@ export function useMarkets() {
     queryFn: () => fetchJson<MarketAsset[]>("/api/markets"),
     refetchInterval: 3000,
   });
+}
+
+/**
+ * Recent-closes series per symbol for the Markets "График" sparkline
+ * column, via the same /api/markets/klines endpoint Trading already
+ * uses for the main chart — just a small one-shot request per symbol
+ * (24 hourly candles), cached for 5 minutes, no polling. Called once at
+ * the top of MarketsClient with the full tracked-symbol list, so every
+ * block on the page shares these same cached results.
+ */
+export function useSparklines(symbols: readonly string[]): Record<string, number[]> {
+  const results = useQueries({
+    queries: symbols.map((symbol) => ({
+      queryKey: ["markets", "sparkline", symbol],
+      queryFn: () =>
+        fetchJson<Candle[]>(`/api/markets/klines?symbol=${symbol}&interval=1h&limit=24`),
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  const bySymbol: Record<string, number[]> = {};
+  symbols.forEach((symbol, i) => {
+    const candles = results[i]?.data;
+    if (candles) bySymbol[symbol] = closesFromCandles(candles);
+  });
+  return bySymbol;
 }
 
 export interface TransactionDto {

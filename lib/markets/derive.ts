@@ -34,10 +34,10 @@ export interface EnrichedMarket {
   symbol: string;
   /** Base asset ticker, e.g. "BTC". Derived from `symbol`, not fetched. */
   base: string;
-  /** Friendly display name, e.g. "Bitcoin". A static label lookup for the
-   *  known base tickers (same idea as the existing DISPLAY_NAMES map in
-   *  asset-watchlist.tsx) — not part of any market-data API, so it falls
-   *  back to the ticker itself for anything not in the map. */
+  /** Friendly display name, e.g. "Bitcoin" — sourced from MARKET_REGISTRY
+   *  (lib/binance/client.ts), the single shared coin registry Trading's
+   *  asset-watchlist.tsx also reads from. Not part of any market-data
+   *  API itself, so it falls back to the ticker for anything not in it. */
   name: string;
   /** Pair display form, e.g. "BTC/USD". */
   displaySymbol: string;

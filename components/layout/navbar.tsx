@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   Menu,
   X,
   Globe,
-  ChevronDown,
   User as UserIcon,
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -22,6 +21,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
+import { NavbarSearch } from "@/components/layout/navbar-search";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -49,25 +49,79 @@ export interface NavbarUser {
   email: string;
 }
 
+/**
+ * Compact icon-only trigger (no name/email in the bar — those still show
+ * inside the dropdown's own header) — same dropdown content/links/logout
+ * as before, just relocated to the right side after Deposit and given a
+ * smaller trigger to match Language/Search/Deposit's height.
+ *
+ * Opens on hover instead of only on click. Radix's DropdownMenu is
+ * click/keyboard-driven by design and portals Content out to
+ * document.body, so it isn't a DOM descendant of the trigger — a naive
+ * onMouseEnter/onMouseLeave on just the button would close the menu the
+ * instant the cursor left the button on its way to the content. Instead,
+ * `open` is lifted into local state and both the trigger AND the
+ * portaled Content get their own onMouseEnter (cancel any pending close)
+ * / onMouseLeave (schedule a close a little in the future) — moving the
+ * cursor from one to the other lands inside the other's onMouseEnter
+ * before the scheduled close fires, so the menu only actually closes
+ * once the cursor has left both. Click-to-open/close still works too,
+ * since Radix's own toggle logic flows through the same controlled
+ * `open`/`onOpenChange` pair.
+ *
+ * Content uses `forceMount` so it never mounts/unmounts on open/close —
+ * by default Radix only renders Content while open, so every toggle was
+ * an instant DOM insert/remove with no way to transition, which is what
+ * read as "blinking". With `forceMount` it stays in the DOM permanently
+ * (Popper still positions it correctly, just hidden) and visibility is
+ * driven purely by the `data-[state]` attribute Radix already toggles,
+ * animated with a plain CSS transition (opacity/scale/translate +
+ * pointer-events, ~150ms) instead of a mount/unmount jump.
+ */
 function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function cancelClose() {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }
+
+  function scheduleClose() {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  }
+
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
       <DropdownMenu.Trigger asChild>
-        <button className="flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none data-[state=open]:border-primary/40">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary">
-            <UserIcon className="h-4 w-4" />
-          </div>
-          <span className="hidden text-foreground sm:inline">
-            {user.firstName} {user.lastName}
-          </span>
-          <ChevronDown className="h-3.5 w-3.5 text-muted" />
+        <button
+          aria-label="Account menu"
+          onMouseEnter={() => {
+            cancelClose();
+            setOpen(true);
+          }}
+          onMouseLeave={scheduleClose}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-muted transition-colors hover:border-primary/40 hover:text-foreground data-[state=open]:border-primary/40 data-[state=open]:text-foreground"
+        >
+          <UserIcon className="h-4 w-4" />
         </button>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
+      <DropdownMenu.Portal forceMount>
         <DropdownMenu.Content
-          align="start"
+          forceMount
+          align="end"
           sideOffset={8}
-          className="z-50 w-64 rounded-xl border border-border bg-card p-1.5 shadow-card"
+          onMouseEnter={cancelClose}
+          onMouseLeave={scheduleClose}
+          className={cn(
+            "z-50 w-64 origin-top-right rounded-xl border border-border bg-card p-1.5 shadow-card",
+            "transition duration-150 ease-out",
+            "data-[state=closed]:pointer-events-none data-[state=closed]:-translate-y-1 data-[state=closed]:scale-95 data-[state=closed]:opacity-0",
+            "data-[state=open]:pointer-events-auto data-[state=open]:translate-y-0 data-[state=open]:scale-100 data-[state=open]:opacity-100"
+          )}
         >
           <div className="px-3 py-2">
             <div className="truncate text-sm font-medium text-foreground">
@@ -105,11 +159,10 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
 }
 
 /**
- * The single Navbar used on every page (marketing, markets, dashboard,
- * trading). Auth state decides two things: where the logo links (never
- * a hardcoded "/", which used to strand authenticated users on the
- * logged-out marketing page and look like a logout) and whether the
- * right side shows Login/Registration or an Account link.
+ * The single Navbar used on every page. Right side order (desktop):
+ * Language -> Search -> Deposit -> Account (icon-only) for an
+ * authenticated user; Language -> Search -> Login/Registration for a
+ * guest. Deposit and Account never show for a guest.
  */
 export function Navbar({ user }: { user: NavbarUser | null }) {
   const [open, setOpen] = useState(false);
@@ -135,11 +188,6 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           <Link href={logoHref} className="shrink-0">
             <Logo />
           </Link>
-          {user && (
-            <div className="hidden lg:flex">
-              <AccountDropdown user={user} onLogout={handleLogout} />
-            </div>
-          )}
           <nav className="hidden items-center gap-7 lg:flex">
             {NAV_LINKS.map((link) => (
               <Link
@@ -159,14 +207,18 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <button className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-muted hover:text-foreground">
+          <button className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-muted transition-colors hover:text-foreground">
             <Globe className="h-4 w-4" />
             EN
           </button>
+          <NavbarSearch />
           {user && (
-            <Button size="sm" asChild>
-              <Link href="/deposit">Deposit</Link>
-            </Button>
+            <>
+              <Button size="sm" asChild>
+                <Link href="/deposit">Deposit</Link>
+              </Button>
+              <AccountDropdown user={user} onLogout={handleLogout} />
+            </>
           )}
           {!user && (
             <>

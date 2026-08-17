@@ -340,6 +340,11 @@ describe("Navbar — guest", () => {
     expect(container.querySelector('a[href="/login"]')).not.toBeNull();
     expect(container.querySelector('a[href="/register"]')).not.toBeNull();
   });
+
+  it("does not show Wallet in the main navigation", () => {
+    renderNavbar(null);
+    expect(container.querySelector('nav a[href="/wallet"]')).toBeNull();
+  });
 });
 
 describe("Navbar — main navigation links unchanged", () => {
@@ -349,5 +354,23 @@ describe("Navbar — main navigation links unchanged", () => {
     for (const href of hrefs) {
       expect(container.querySelector(`a[href="${href}"]`)).not.toBeNull();
     }
+  });
+});
+
+describe("Navbar — Wallet link", () => {
+  it("shows Wallet immediately before Trading for an authenticated user", () => {
+    renderNavbar(USER);
+    const nav = container.querySelector("nav") as HTMLElement;
+    const html = nav.innerHTML;
+    const walletIndex = html.indexOf('href="/wallet"');
+    const tradingIndex = html.indexOf('href="/trading"');
+    expect(walletIndex).toBeGreaterThan(-1);
+    expect(walletIndex).toBeLessThan(tradingIndex);
+  });
+
+  it("does not show Wallet for a guest", () => {
+    renderNavbar(null);
+    const nav = container.querySelector("nav") as HTMLElement;
+    expect(nav.innerHTML.includes('href="/wallet"')).toBe(false);
   });
 });

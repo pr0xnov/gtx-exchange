@@ -12,6 +12,7 @@ const PROTECTED_PREFIXES = [
   "/verification",
   "/trading",
   "/downloads",
+  "/wallet",
 ];
 
 const AUTH_PAGES = ["/login", "/register"];
@@ -50,6 +51,7 @@ export const config = {
     "/verification/:path*",
     "/trading/:path*",
     "/downloads/:path*",
+    "/wallet/:path*",
     "/login",
     "/register",
   ],

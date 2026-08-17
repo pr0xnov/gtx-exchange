@@ -32,6 +32,11 @@ const NAV_LINKS = [
   { label: "Contacts", href: "/contacts" },
 ];
 
+// Shown only to an authenticated user, immediately before Trading — guests
+// never see it since /wallet has nothing to show them (middleware.ts also
+// redirects a guest who navigates there directly).
+const WALLET_LINK = { label: "Wallet", href: "/wallet" };
+
 const ACCOUNT_LINKS = [
   { label: "Account", href: "/account", icon: UserIcon },
   { label: "Deposit", href: "/deposit", icon: ArrowDownToLine },
@@ -169,6 +174,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const logoHref = user ? "/account" : "/";
+  const navLinks = user ? [WALLET_LINK, ...NAV_LINKS] : NAV_LINKS;
 
   async function handleLogout() {
     try {
@@ -189,7 +195,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
             <Logo />
           </Link>
           <nav className="hidden items-center gap-7 lg:flex">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -244,7 +250,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
       {open && (
         <div className="border-t border-border bg-background px-6 py-4 lg:hidden">
           <nav className="flex flex-col gap-4">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

@@ -359,6 +359,7 @@ export function useCancelSpotOrder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spot-wallet"] });
       queryClient.invalidateQueries({ queryKey: ["spot-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["account-summary"] });
     },
   });
 }

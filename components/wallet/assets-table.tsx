@@ -11,7 +11,8 @@ import { cn, formatCurrency, formatPrice } from "@/lib/utils";
 const NAME_BY_BASE = new Map(MARKET_REGISTRY.map((e) => [e.baseAsset, e.name]));
 
 /**
- * "My Assets" — Spot holdings only (Futures/margin positions are no
+ * The "My Assets" tab's table body (rendered inside WalletAssetsSection's
+ * tab card) — Spot holdings only (Futures/margin positions are no
  * longer part of the user-facing Trading experience, per spec). Rows
  * come straight from useAccountSummary()'s `spotAssets` — real
  * quantities from SpotWallet, real cost-basis/unrealizedPnl from
@@ -51,111 +52,106 @@ export function WalletAssetsTable({
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-border bg-card">
-      <div className="border-b border-border p-5">
-        <h2 className="text-sm font-semibold text-foreground">My Assets</h2>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-xs text-muted">
-              <th className="px-5 py-3 font-medium">Asset</th>
-              <th className="px-3 py-3 font-medium">Amount</th>
-              <th className="px-3 py-3 font-medium">Price / Cost basis</th>
-              <th className="px-3 py-3 font-medium">Chart</th>
-              <th className="px-5 py-3 text-right font-medium">Unrealized PnL</th>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border text-left text-xs text-muted">
+            <th className="px-5 py-3 font-medium">Asset</th>
+            <th className="px-3 py-3 font-medium">Amount</th>
+            <th className="px-3 py-3 font-medium">Price / Cost basis</th>
+            <th className="px-3 py-3 font-medium">Chart</th>
+            <th className="px-5 py-3 text-right font-medium">Unrealized PnL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {isLoading && (
+            <tr>
+              <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
+                Loading assets…
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
-                  Loading assets…
-                </td>
-              </tr>
-            )}
-            {!isLoading && rows.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
-                  You don&apos;t have any assets yet. Buy on Spot to get started.
-                </td>
-              </tr>
-            )}
-            {rows.map((row) => {
-              // row.currentPrice is the real market price straight from
-              // the server — never reconstructed as value/amount, which
-              // would wrongly show $0.00 once a position is fully sold
-              // (amount = 0) even though the asset's own price isn't 0.
-              const costPerUnit = row.amount > 0 ? row.costBasis / row.amount : 0;
-              const decimals = row.currentPrice > 0 && row.currentPrice < 10 ? 4 : 2;
-              const series = sparklines[row.symbol];
+          )}
+          {!isLoading && rows.length === 0 && (
+            <tr>
+              <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
+                You don&apos;t have any assets yet. Buy on Spot to get started.
+              </td>
+            </tr>
+          )}
+          {rows.map((row) => {
+            // row.currentPrice is the real market price straight from
+            // the server — never reconstructed as value/amount, which
+            // would wrongly show $0.00 once a position is fully sold
+            // (amount = 0) even though the asset's own price isn't 0.
+            const costPerUnit = row.amount > 0 ? row.costBasis / row.amount : 0;
+            const decimals = row.currentPrice > 0 && row.currentPrice < 10 ? 4 : 2;
+            const series = sparklines[row.symbol];
 
-              return (
-                <tr
-                  key={row.currency}
-                  onClick={() => goToTrading(row.symbol)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      goToTrading(row.symbol);
-                    }
-                  }}
-                  role="link"
-                  tabIndex={0}
-                  aria-label={`Open ${row.currency} on Trading`}
-                  className="cursor-pointer border-b border-border/50 outline-none transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.06] focus-visible:ring-1 focus-visible:ring-primary/50"
-                >
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <CoinIcon symbol={row.currency} />
-                      <div className="min-w-0">
-                        <div className="truncate font-medium text-foreground">
-                          {row.currency}
-                        </div>
-                        <div className="truncate text-xs text-muted">
-                          {NAME_BY_BASE.get(row.currency) ?? row.currency}
-                        </div>
+            return (
+              <tr
+                key={row.currency}
+                onClick={() => goToTrading(row.symbol)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    goToTrading(row.symbol);
+                  }
+                }}
+                role="link"
+                tabIndex={0}
+                aria-label={`Open ${row.currency} on Trading`}
+                className="cursor-pointer border-b border-border/50 outline-none transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.06] focus-visible:ring-1 focus-visible:ring-primary/50"
+              >
+                <td className="px-5 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <CoinIcon symbol={row.currency} />
+                    <div className="min-w-0">
+                      <div className="truncate font-medium text-foreground">
+                        {row.currency}
+                      </div>
+                      <div className="truncate text-xs text-muted">
+                        {NAME_BY_BASE.get(row.currency) ?? row.currency}
                       </div>
                     </div>
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="font-tabular text-foreground">{row.amount}</div>
-                    <div className="font-tabular text-xs text-muted">
-                      {formatCurrency(row.value)}
-                    </div>
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="font-tabular text-foreground">
-                      {formatPrice(row.currentPrice, decimals)}
-                    </div>
-                    <div className="font-tabular text-xs text-muted">
-                      Cost: {formatPrice(costPerUnit, decimals)}
-                    </div>
-                  </td>
-                  <td className="px-3 py-3" data-testid="chart-cell">
-                    {series && series.length >= 2 ? (
-                      <MiniSparkline prices={series} className="h-8 w-28" />
-                    ) : (
-                      <Skeleton className="h-8 w-28" />
+                  </div>
+                </td>
+                <td className="px-3 py-3">
+                  <div className="font-tabular text-foreground">{row.amount}</div>
+                  <div className="font-tabular text-xs text-muted">
+                    {formatCurrency(row.value)}
+                  </div>
+                </td>
+                <td className="px-3 py-3">
+                  <div className="font-tabular text-foreground">
+                    {formatPrice(row.currentPrice, decimals)}
+                  </div>
+                  <div className="font-tabular text-xs text-muted">
+                    Cost: {formatPrice(costPerUnit, decimals)}
+                  </div>
+                </td>
+                <td className="px-3 py-3" data-testid="chart-cell">
+                  {series && series.length >= 2 ? (
+                    <MiniSparkline prices={series} className="h-8 w-28" />
+                  ) : (
+                    <Skeleton className="h-8 w-28" />
+                  )}
+                </td>
+                <td className="px-5 py-3 text-right">
+                  <div
+                    className={cn(
+                      "font-tabular font-semibold",
+                      row.unrealizedPnl >= 0 ? "text-primary" : "text-danger"
                     )}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <div
-                      className={cn(
-                        "font-tabular font-semibold",
-                        row.unrealizedPnl >= 0 ? "text-primary" : "text-danger"
-                      )}
-                    >
-                      {row.unrealizedPnl >= 0 ? "+" : ""}
-                      {formatCurrency(row.unrealizedPnl)}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  >
+                    {row.unrealizedPnl >= 0 ? "+" : ""}
+                    {formatCurrency(row.unrealizedPnl)}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

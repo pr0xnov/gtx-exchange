@@ -3,7 +3,7 @@
 import { useAccountSummary, useSparklines } from "@/hooks/use-api";
 import { calculateUnrealizedPnlPercent } from "@/lib/account/derive";
 import { WalletSummary } from "@/components/wallet/wallet-summary";
-import { WalletAssetsTable } from "@/components/wallet/assets-table";
+import { WalletAssetsSection } from "@/components/wallet/wallet-assets-section";
 
 /**
  * Wallet reads the exact same useAccountSummary() data Account and
@@ -34,7 +34,7 @@ export function WalletOverview() {
         unrealizedPnlPercent={unrealizedPnlPercent}
         isLoading={isLoading}
       />
-      <WalletAssetsTable
+      <WalletAssetsSection
         rows={spotAssets}
         sparklines={sparklines}
         isLoading={isLoading}

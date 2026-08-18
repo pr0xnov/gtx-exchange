@@ -3,7 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 
-export function AnimatedCurrency({ value }: { value: number }) {
+export function AnimatedCurrency({
+  value,
+  showSign = false,
+}: {
+  value: number;
+  /** Prepends "+" for a positive value (e.g. a Profit figure). Negative
+   *  values already get a "-" from formatCurrency's own Intl
+   *  formatting; zero gets neither — unchanged for existing callers,
+   *  which default to false. */
+  showSign?: boolean;
+}) {
   const [display, setDisplay] = useState(value);
   const prevValue = useRef(value);
 
@@ -25,5 +35,10 @@ export function AnimatedCurrency({ value }: { value: number }) {
     return () => cancelAnimationFrame(frame);
   }, [value]);
 
-  return <span className="font-tabular">{formatCurrency(display)}</span>;
+  return (
+    <span className="font-tabular">
+      {showSign && display > 0 ? "+" : ""}
+      {formatCurrency(display)}
+    </span>
+  );
 }

@@ -1,15 +1,19 @@
 "use client";
 
-import { usePortfolio } from "@/hooks/use-api";
+import { useAccountSummary } from "@/hooks/use-api";
 import { formatCurrency } from "@/lib/utils";
 
 /**
- * Trading-specific stats strip (balance/credit/equity/profit). Global
- * navigation (logo, section links, account) lives in the shared Navbar
- * from the surrounding (dashboard) layout — this no longer duplicates it.
+ * Trading-specific stats strip — Balance/Equity/Profit, sourced from the
+ * same useAccountSummary() call Account and Wallet use (GET
+ * /api/account/summary), so this header can never show a different
+ * number than the other two pages. Credit is gone; Global navigation
+ * (logo, section links, account) lives in the shared Navbar from the
+ * surrounding (dashboard) layout — this no longer duplicates it.
  */
 export function TerminalTopbar() {
-  const { data } = usePortfolio();
+  const { data } = useAccountSummary();
+  const profitPositive = (data?.profit ?? 0) >= 0;
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-border px-4">
@@ -22,12 +26,6 @@ export function TerminalTopbar() {
             </div>
           </div>
           <div>
-            <div className="text-muted">Credit</div>
-            <div className="font-tabular font-semibold text-foreground">
-              {formatCurrency(data?.credit ?? 0)}
-            </div>
-          </div>
-          <div>
             <div className="text-muted">Equity</div>
             <div className="font-tabular font-semibold text-foreground">
               {formatCurrency(data?.equity ?? 0)}
@@ -37,10 +35,11 @@ export function TerminalTopbar() {
             <div className="text-muted">Profit</div>
             <div
               className={`font-tabular font-semibold ${
-                (data?.unrealizedPnl ?? 0) >= 0 ? "text-primary" : "text-danger"
+                profitPositive ? "text-primary" : "text-danger"
               }`}
             >
-              {formatCurrency(data?.unrealizedPnl ?? 0)}
+              {profitPositive ? "+" : ""}
+              {formatCurrency(data?.profit ?? 0)}
             </div>
           </div>
         </div>

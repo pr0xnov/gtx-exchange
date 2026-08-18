@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/session";
 import { withdrawSchema } from "@/lib/validation/trading";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
+import { isUserVerified } from "@/lib/verification/status";
 
 const METHOD_LABELS: Record<string, string> = {
   VISA_MASTERCARD: "Visa / Mastercard",
@@ -14,6 +15,11 @@ const METHOD_LABELS: Record<string, string> = {
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser();
+
+    if (!(await isUserVerified(user.id))) {
+      return apiError("Please complete verification before withdrawing funds", 403);
+    }
+
     const body = await req.json();
     const input = withdrawSchema.parse(body);
 

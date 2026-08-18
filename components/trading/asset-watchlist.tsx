@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Star } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { CoinIcon } from "@/components/markets/coin-icon";
+import { useFavorites } from "@/hooks/use-favorites";
 import { MARKET_REGISTRY, TRACKED_SYMBOLS } from "@/lib/binance/client";
 import { LiveTicker } from "@/hooks/use-live-prices";
 
@@ -37,6 +38,13 @@ export function AssetWatchlist({
   onSelect: (symbol: string) => void;
 }) {
   const [search, setSearch] = useState("");
+  // Trading is already an authenticated-only route (middleware.ts), so
+  // there's no guest case to gate on here — reuses the exact same
+  // localStorage-backed favorites Markets already has (lib/markets/
+  // favorites.ts via hooks/use-favorites.ts), rather than a second,
+  // parallel favorites mechanism. Favoriting a pair here shows it
+  // favorited on /markets too, and vice versa — one shared list.
+  const { favorites, toggleFavorite } = useFavorites(true);
 
   const symbols = useMemo(() => {
     const q = search.toLowerCase();
@@ -53,7 +61,7 @@ export function AssetWatchlist({
 
   return (
     <div className="flex h-full w-64 shrink-0 flex-col border-r border-border">
-      <div className="border-b border-border p-3">
+      <div className="shrink-0 border-b border-border p-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           <Input
@@ -64,22 +72,52 @@ export function AssetWatchlist({
           />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      {/* min-h-0 is required here: a flex child's default min-height is
+          "auto" (its content's natural height), which lets this list grow
+          to fit every row instead of being capped at the space actually
+          available — overflow-y-auto never gets a chance to kick in, and
+          rows past the bottom edge become unreachable, clipped by an
+          ancestor's own overflow-hidden instead of scrolling. */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {symbols.map((symbol) => {
           const ticker = prices[symbol];
           const up = (ticker?.changePercent24h ?? 0) >= 0;
           const active = selected === symbol;
           const entry = REGISTRY_BY_SYMBOL.get(symbol);
+          const isFavorite = favorites.has(symbol);
           return (
-            <button
+            <div
               key={symbol}
+              role="button"
+              tabIndex={0}
               onClick={() => onSelect(symbol)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(symbol);
+                }
+              }}
               className={cn(
-                "flex w-full items-center justify-between gap-2 border-b border-border/50 px-4 py-3 text-left transition-colors",
+                "flex w-full cursor-pointer items-center justify-between gap-2 border-b border-border/50 px-3 py-3 text-left outline-none transition-colors",
                 active ? "bg-primary/10" : "hover:bg-white/[0.02]"
               )}
             >
               <div className="flex min-w-0 items-center gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(symbol);
+                  }}
+                  className="flex shrink-0 items-center justify-center rounded-lg p-1 text-muted hover:text-foreground"
+                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Star
+                    className={cn(
+                      "h-3.5 w-3.5",
+                      isFavorite && "fill-primary text-primary"
+                    )}
+                  />
+                </button>
                 <CoinIcon symbol={entry?.baseAsset ?? symbol} />
                 <div className="min-w-0">
                   <div
@@ -108,7 +146,7 @@ export function AssetWatchlist({
                   {ticker ? `${up ? "+" : ""}${ticker.changePercent24h.toFixed(2)}%` : ""}
                 </div>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

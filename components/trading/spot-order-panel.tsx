@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,10 +13,24 @@ import { useCreateSpotOrder, useSpotWallet } from "@/hooks/use-api";
 // TRACKED_SYMBOLS and lib/spot/currencies.ts's SPOT_CURRENCIES.
 const QUOTE_CURRENCY = "USDT";
 
+/** Truncates toward zero at `decimals` places — used for the slider-derived
+ *  quantity so it never rounds *up* past the real available balance. */
+function floorTo(value: number, decimals: number): number {
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  const factor = 10 ** decimals;
+  return Math.floor(value * factor) / factor;
+}
+
 // Spot trading: no leverage, no TP/SL — "how much of the base currency to
 // buy or sell, at what price". MARKET fills immediately at the live
 // price; LIMIT reserves funds and stays open until the ws engine fills it
 // (server/ws) or it's cancelled from the open-orders table below.
+//
+// Available balance and the max a BUY/SELL can ever reach both come from
+// the real SpotWallet (useSpotWallet()) — never a guessed or hardcoded
+// figure. The UI clamps Quantity/the slider to that max as a convenience;
+// app/api/spot/orders/route.ts's own atomic balance check is what
+// actually protects against an over-large order (untouched by this file).
 export function SpotOrderPanel({
   symbol,
   displayName,
@@ -26,9 +40,10 @@ export function SpotOrderPanel({
   displayName: string;
   livePrice?: number;
 }) {
-  const [orderType, setOrderType] = useState<"LIMIT" | "MARKET">("LIMIT");
+  const [orderType, setOrderType] = useState<"LIMIT" | "MARKET">("MARKET");
+  const [side, setSide] = useState<"BUY" | "SELL">("BUY");
   const [limitPrice, setLimitPrice] = useState("");
-  const [quantity, setQuantity] = useState("0.01");
+  const [quantity, setQuantity] = useState("0");
 
   const createOrder = useCreateSpotOrder();
   const { data: wallets } = useSpotWallet();
@@ -44,9 +59,63 @@ export function SpotOrderPanel({
     wallets?.find((w) => w.currency === QUOTE_CURRENCY)?.balance ?? 0;
   const baseAvailable = wallets?.find((w) => w.currency === baseCurrency)?.balance ?? 0;
 
-  async function submit(side: "BUY" | "SELL") {
+  // BUY's ceiling is "how much of this coin the available USDT can buy";
+  // SELL's is simply the coin balance itself — never the other way
+  // around (spec section 12).
+  const maxQuantity =
+    side === "BUY"
+      ? effectivePrice > 0
+        ? floorTo(quoteAvailable / effectivePrice, 8)
+        : 0
+      : floorTo(baseAvailable, 8);
+
+  const sliderPercent =
+    maxQuantity > 0
+      ? Math.min(100, Math.max(0, (numericQuantity / maxQuantity) * 100))
+      : 0;
+
+  // Re-clamp whenever the ceiling itself changes — switching side,
+  // switching Market/Limit, or editing the Limit price all change
+  // maxQuantity, and a quantity that was valid a moment ago may no
+  // longer fit.
+  useEffect(() => {
+    setQuantity((prev) => {
+      const num = parseFloat(prev) || 0;
+      if (num > maxQuantity) return maxQuantity > 0 ? String(maxQuantity) : "0";
+      return prev;
+    });
+    // Only maxQuantity's own inputs should re-trigger this — not `quantity`
+    // itself, or a user's own edit would immediately overwrite itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [side, maxQuantity]);
+
+  function handleQuantityChange(raw: string) {
+    if (raw === "") {
+      setQuantity("");
+      return;
+    }
+    const num = parseFloat(raw);
+    if (!Number.isFinite(num)) return;
+    setQuantity(String(Math.min(Math.max(num, 0), maxQuantity)));
+  }
+
+  function handleSliderChange(percent: number) {
+    setQuantity(
+      maxQuantity > 0 ? String(floorTo((percent / 100) * maxQuantity, 8)) : "0"
+    );
+  }
+
+  async function submit() {
     if (!numericQuantity || numericQuantity <= 0) {
       toast.error("Enter a valid amount");
+      return;
+    }
+    if (numericQuantity > maxQuantity) {
+      toast.error(
+        side === "BUY"
+          ? "Amount exceeds available USDT"
+          : `Amount exceeds available ${baseCurrency}`
+      );
       return;
     }
     const numericLimitPrice = parseFloat(limitPrice);
@@ -81,8 +150,27 @@ export function SpotOrderPanel({
     <div className="flex flex-1 flex-col overflow-y-auto p-4">
       <h3 className="mb-4 text-sm font-semibold text-foreground">Spot trade</h3>
 
+      <div className="mb-3 grid grid-cols-2 gap-2">
+        {(["BUY", "SELL"] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setSide(s)}
+            className={cn(
+              "rounded-xl py-2 text-sm font-semibold transition-colors",
+              side === s
+                ? s === "BUY"
+                  ? "bg-primary/15 text-primary"
+                  : "bg-danger/15 text-danger"
+                : "bg-surface text-muted hover:text-foreground"
+            )}
+          >
+            {s === "BUY" ? "Buy" : "Sell"}
+          </button>
+        ))}
+      </div>
+
       <div className="mb-4 flex rounded-xl bg-surface p-1">
-        {(["LIMIT", "MARKET"] as const).map((t) => (
+        {(["MARKET", "LIMIT"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setOrderType(t)}
@@ -116,16 +204,46 @@ export function SpotOrderPanel({
           <div className="mb-1.5 flex items-center justify-between">
             <Label>Quantity ({baseCurrency})</Label>
             <span className="text-xs text-muted">
-              Avbl: {formatCurrency(quoteAvailable)} · {baseAvailable} {baseCurrency}
+              Available:{" "}
+              <span className="font-tabular text-foreground">
+                {side === "BUY"
+                  ? `${formatCurrency(quoteAvailable)} ${QUOTE_CURRENCY}`
+                  : `${baseAvailable} ${baseCurrency}`}
+              </span>
             </span>
           </div>
           <Input
             type="number"
             step="0.0001"
             min="0"
+            max={maxQuantity || undefined}
             value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
+            onChange={(e) => handleQuantityChange(e.target.value)}
           />
+
+          {/* A separate bordered/padded block, not just a thin control
+              stacked right under the input — otherwise it reads as part
+              of the input itself and invites dragging the wrong thing. */}
+          <div className="mt-4 rounded-xl border border-border bg-surface p-3">
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={Math.round(sliderPercent)}
+              onChange={(e) => handleSliderChange(Number(e.target.value))}
+              disabled={maxQuantity <= 0}
+              aria-label={`${side === "BUY" ? "Buy" : "Sell"} amount as a percent of available`}
+              className="h-6 w-full cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-40"
+            />
+            <div className="mt-1.5 flex justify-between text-[10px] text-muted">
+              <span>0%</span>
+              <span>25%</span>
+              <span>50%</span>
+              <span>75%</span>
+              <span>100%</span>
+            </div>
+          </div>
         </div>
 
         <div className="rounded-xl bg-surface p-3 text-xs text-muted">
@@ -138,30 +256,18 @@ export function SpotOrderPanel({
         </div>
       </div>
 
-      <div className="mt-6 space-y-2">
+      <div className="mt-6">
         <Button
+          variant={side === "BUY" ? "primary" : "danger"}
           className="w-full"
           size="lg"
-          onClick={() => submit("BUY")}
-          disabled={createOrder.isPending}
+          onClick={submit}
+          disabled={createOrder.isPending || numericQuantity <= 0}
         >
           {createOrder.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            `Buy ${baseCurrency}`
-          )}
-        </Button>
-        <Button
-          variant="danger"
-          className="w-full"
-          size="lg"
-          onClick={() => submit("SELL")}
-          disabled={createOrder.isPending}
-        >
-          {createOrder.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            `Sell ${baseCurrency}`
+            `${side === "BUY" ? "Buy" : "Sell"} ${baseCurrency}`
           )}
         </Button>
       </div>

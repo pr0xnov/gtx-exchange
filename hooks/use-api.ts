@@ -59,6 +59,10 @@ export interface PortfolioSummary {
   unrealizedPnl: number;
   usedMargin: number;
   freeMargin: number;
+  /** Sum of Trade.pnl (closed futures trades) — already folded into
+   *  `balance`; reported separately for display (e.g. Account's Profit
+   *  card), not to be added into balance/equity again. */
+  realizedPnl: number;
 }
 
 export function usePortfolio() {
@@ -310,7 +314,40 @@ export function useCreateSpotOrder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spot-wallet"] });
       queryClient.invalidateQueries({ queryKey: ["spot-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["account-summary"] });
     },
+  });
+}
+
+export interface SpotAssetSummaryDto {
+  currency: string;
+  symbol: string;
+  amount: number;
+  currentPrice: number;
+  value: number;
+  costBasis: number;
+  unrealizedPnl: number;
+  realizedPnl: number;
+}
+
+export interface AccountSummaryDto {
+  balance: number;
+  equity: number;
+  profit: number;
+  spotAssets: SpotAssetSummaryDto[];
+}
+
+/**
+ * The one shared source of Balance/Equity/Profit for Account, Wallet,
+ * and Trading's header — see app/api/account/summary/route.ts and
+ * lib/account/derive.ts. Every consumer of this hook sees the same
+ * numbers, computed the same way, from the same price snapshot.
+ */
+export function useAccountSummary() {
+  return useQuery({
+    queryKey: ["account-summary"],
+    queryFn: () => fetchJson<AccountSummaryDto>("/api/account/summary"),
+    refetchInterval: 5000,
   });
 }
 

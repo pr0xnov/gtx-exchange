@@ -1,21 +1,54 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { CoinIcon } from "@/components/markets/coin-icon";
-import { usePositions } from "@/hooks/use-api";
-import { buildWalletAssetRows } from "@/lib/wallet/derive";
+import { MiniSparkline } from "@/components/markets/mini-sparkline";
+import { Skeleton } from "@/components/shared/skeleton";
+import { MARKET_REGISTRY } from "@/lib/binance/client";
+import type { SpotAssetSummaryDto } from "@/hooks/use-api";
 import { cn, formatCurrency, formatPrice } from "@/lib/utils";
 
+const NAME_BY_BASE = new Map(MARKET_REGISTRY.map((e) => [e.baseAsset, e.name]));
+
 /**
- * "My Assets" — this app's open margin positions (/api/positions via
- * usePositions(), already polled every 2s), reshaped by
- * buildWalletAssetRows into display rows. Names/icons come from
- * MARKET_REGISTRY + CoinIcon (the same registry and icon component
- * Markets and Trading's watchlist already use) — no separate coin list,
- * no invented icons.
+ * "My Assets" — Spot holdings only (Futures/margin positions are no
+ * longer part of the user-facing Trading experience, per spec). Rows
+ * come straight from useAccountSummary()'s `spotAssets` — real
+ * quantities from SpotWallet, real cost-basis/unrealizedPnl from
+ * lib/spot/cost-basis.ts, computed server-side from actual filled
+ * SpotOrder history. Names/icons come from MARKET_REGISTRY + CoinIcon,
+ * the same registry Markets and Trading already use.
+ *
+ * Each row navigates to Trading's own existing symbol param
+ * (?symbol=BTCUSDT — TradingTerminal's initialSymbol already reads this
+ * exact format) rather than a second symbol scheme.
+ *
+ * `sparklines` is real recent-close data per symbol (WalletOverview
+ * fetches it via the existing useSparklines() hook — the same one
+ * Markets already uses for its own sparkline column, backed by
+ * /api/markets/klines). That kline fetch is one extra round trip after
+ * the assets themselves have already loaded (isLoading below is only
+ * about useAccountSummary()), so a row whose sparkline hasn't arrived
+ * yet — the normal case for roughly the first second after every fresh
+ * page load/refresh — shows a pulsing Skeleton instead of sitting
+ * empty or blank; MiniSparkline's own built-in fallback path (a fixed
+ * fake demo curve when given fewer than 2 real points) must never
+ * render here regardless.
  */
-export function WalletAssetsTable() {
-  const { data: positions, isLoading } = usePositions();
-  const rows = buildWalletAssetRows(positions ?? []);
+export function WalletAssetsTable({
+  rows,
+  sparklines,
+  isLoading,
+}: {
+  rows: SpotAssetSummaryDto[];
+  sparklines: Record<string, number[]>;
+  isLoading: boolean;
+}) {
+  const router = useRouter();
+
+  function goToTrading(symbol: string) {
+    router.push(`/trading?symbol=${symbol}`);
+  }
 
   return (
     <div className="mt-6 rounded-2xl border border-border bg-card">
@@ -29,76 +62,97 @@ export function WalletAssetsTable() {
               <th className="px-5 py-3 font-medium">Asset</th>
               <th className="px-3 py-3 font-medium">Amount</th>
               <th className="px-3 py-3 font-medium">Price / Cost basis</th>
+              <th className="px-3 py-3 font-medium">Chart</th>
               <th className="px-5 py-3 text-right font-medium">Unrealized PnL</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={4} className="px-5 py-8 text-center text-sm text-muted">
+                <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
                   Loading assets…
                 </td>
               </tr>
             )}
             {!isLoading && rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-5 py-8 text-center text-sm text-muted">
-                  You don&apos;t have any assets yet. Open a trade to get started.
+                <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
+                  You don&apos;t have any assets yet. Buy on Spot to get started.
                 </td>
               </tr>
             )}
-            {rows.map((row) => (
-              <tr
-                key={row.symbol}
-                className="border-b border-border/50 transition-colors hover:bg-white/[0.02]"
-              >
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-2.5">
-                    <CoinIcon symbol={row.baseAsset} />
-                    <div className="min-w-0">
-                      <div className="truncate font-medium text-foreground">
-                        {row.baseAsset}
+            {rows.map((row) => {
+              // row.currentPrice is the real market price straight from
+              // the server — never reconstructed as value/amount, which
+              // would wrongly show $0.00 once a position is fully sold
+              // (amount = 0) even though the asset's own price isn't 0.
+              const costPerUnit = row.amount > 0 ? row.costBasis / row.amount : 0;
+              const decimals = row.currentPrice > 0 && row.currentPrice < 10 ? 4 : 2;
+              const series = sparklines[row.symbol];
+
+              return (
+                <tr
+                  key={row.currency}
+                  onClick={() => goToTrading(row.symbol)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      goToTrading(row.symbol);
+                    }
+                  }}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Open ${row.currency} on Trading`}
+                  className="cursor-pointer border-b border-border/50 outline-none transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.06] focus-visible:ring-1 focus-visible:ring-primary/50"
+                >
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <CoinIcon symbol={row.currency} />
+                      <div className="min-w-0">
+                        <div className="truncate font-medium text-foreground">
+                          {row.currency}
+                        </div>
+                        <div className="truncate text-xs text-muted">
+                          {NAME_BY_BASE.get(row.currency) ?? row.currency}
+                        </div>
                       </div>
-                      <div className="truncate text-xs text-muted">{row.name}</div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-3 py-3">
-                  <div className="font-tabular text-foreground">{row.amount}</div>
-                  <div className="font-tabular text-xs text-muted">
-                    {formatCurrency(row.value)}
-                  </div>
-                </td>
-                <td className="px-3 py-3">
-                  <div className="font-tabular text-foreground">
-                    {formatPrice(row.currentPrice)}
-                  </div>
-                  <div className="font-tabular text-xs text-muted">
-                    {formatPrice(row.costBasis)}
-                  </div>
-                </td>
-                <td className="px-5 py-3 text-right">
-                  <div
-                    className={cn(
-                      "font-tabular font-semibold",
-                      row.pnl >= 0 ? "text-primary" : "text-danger"
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="font-tabular text-foreground">{row.amount}</div>
+                    <div className="font-tabular text-xs text-muted">
+                      {formatCurrency(row.value)}
+                    </div>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="font-tabular text-foreground">
+                      {formatPrice(row.currentPrice, decimals)}
+                    </div>
+                    <div className="font-tabular text-xs text-muted">
+                      Cost: {formatPrice(costPerUnit, decimals)}
+                    </div>
+                  </td>
+                  <td className="px-3 py-3" data-testid="chart-cell">
+                    {series && series.length >= 2 ? (
+                      <MiniSparkline prices={series} className="h-8 w-28" />
+                    ) : (
+                      <Skeleton className="h-8 w-28" />
                     )}
-                  >
-                    {row.pnl >= 0 ? "+" : ""}
-                    {formatCurrency(row.pnl)}
-                  </div>
-                  <div
-                    className={cn(
-                      "font-tabular text-xs",
-                      row.pnl >= 0 ? "text-primary" : "text-danger"
-                    )}
-                  >
-                    {row.pnl >= 0 ? "+" : ""}
-                    {row.pnlPercent.toFixed(2)}%
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    <div
+                      className={cn(
+                        "font-tabular font-semibold",
+                        row.unrealizedPnl >= 0 ? "text-primary" : "text-danger"
+                      )}
+                    >
+                      {row.unrealizedPnl >= 0 ? "+" : ""}
+                      {formatCurrency(row.unrealizedPnl)}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

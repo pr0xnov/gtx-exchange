@@ -34,7 +34,21 @@ export async function GET() {
 
     const summary = calculatePortfolioSummary(balance, credit, enriched);
 
-    return apiSuccess(summary);
+    // Additive only — every field above is untouched (Trading's margin/
+    // risk math depends on their exact current meaning). realizedPnl is
+    // the sum of Trade.pnl (written once, at close, in
+    // app/api/orders/close/route.ts) — the only real "money already
+    // earned/lost from closed futures trades" figure anywhere in this
+    // schema. It's already folded into `balance` (the close route
+    // credits margin+pnl back to Wallet.balance), so this is reported
+    // separately for display (e.g. an Account "Profit" figure) rather
+    // than added into balance/equity here, which would double-count it.
+    const realized = await prisma.trade.aggregate({
+      where: { userId: user.id },
+      _sum: { pnl: true },
+    });
+
+    return apiSuccess({ ...summary, realizedPnl: Number(realized._sum.pnl ?? 0) });
   } catch (error) {
     return handleApiError(error);
   }

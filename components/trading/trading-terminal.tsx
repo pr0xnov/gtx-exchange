@@ -38,7 +38,15 @@ export function TradingTerminal() {
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <AssetWatchlist prices={prices} selected={symbol} onSelect={setSymbol} />
 
-        <div className="flex flex-1 flex-col overflow-hidden">
+        {/* SpotOrdersPanel below has its own fixed height and internal
+            scroll (it never grows with row count), so the chart's
+            flex-1/min-h-0 always resolves to the exact same remaining
+            space regardless of tab or order count — no elastic squeeze,
+            no resize on tab switch. overflow-y-auto here is just a
+            fallback for viewports too short to fit chart + orders at
+            all, so that case degrades to a scrollbar instead of clipped,
+            unreachable content — it doesn't engage in the normal case. */}
+        <div className="flex flex-1 flex-col overflow-y-auto">
           <TerminalTopbar />
           <ChartHeader
             displayName={displayName}

@@ -149,3 +149,57 @@ describe("TradingTerminal — Spot-only", () => {
     expect(container.textContent).not.toContain("Credit");
   });
 });
+
+describe("TradingTerminal — chart height is stable regardless of Open Orders row count/tab", () => {
+  // Regression coverage: the chart wrapper must stay a plain
+  // min-h-0/flex-1 flex item (i.e. "take exactly what's left after
+  // fixed-size siblings"), never an elastic floor or anything else that
+  // would make its size depend on how many order rows are below it.
+  // Open Orders/History themselves must own a fixed height + their own
+  // scroll (asserted in tests/spot-orders-panel.test.ts) so they never
+  // compete with the chart for space in the first place.
+  // CandlestickChart's own root (`<div className="relative h-full w-full">`,
+  // see components/trading/candlestick-chart.tsx) is real, unmocked markup
+  // — its parent is trading-terminal.tsx's chart wrapper. Locating it this
+  // way (rather than by className substring) avoids false matches against
+  // AssetWatchlist's own "min-h-0 flex-1 overflow-y-auto" list container
+  // or SpotOrdersPanel's near-identical per-tab scroll boxes.
+  function chartWrapperEl(): HTMLElement {
+    const chartRoot = container.querySelector<HTMLElement>(".relative.h-full.w-full");
+    expect(
+      chartRoot,
+      "expected to find CandlestickChart's own root element"
+    ).toBeTruthy();
+    return chartRoot!.parentElement as HTMLElement;
+  }
+
+  it("the chart's wrapper is min-h-0/flex-1 with no elastic floor tied to sibling content", () => {
+    renderTerminal();
+    const chartWrapper = chartWrapperEl();
+    expect(chartWrapper.className).toContain("min-h-0");
+    expect(chartWrapper.className).toContain("flex-1");
+  });
+
+  it("the center column (chart + Open Orders) has a scroll fallback, not a hard clip", () => {
+    renderTerminal();
+    const centerColumn = chartWrapperEl().parentElement as HTMLElement;
+    expect(centerColumn.className).toContain("overflow-y-auto");
+  });
+
+  it("the row above the center column still clips (so the watchlist sidebar keeps its own fixed height/scroll)", () => {
+    renderTerminal();
+    const centerColumn = chartWrapperEl().parentElement as HTMLElement;
+    const row = centerColumn.parentElement as HTMLElement;
+    expect(row.className).toContain("overflow-hidden");
+  });
+
+  it("Open Orders carries its own fixed height, not an auto height competing with the chart", () => {
+    renderTerminal();
+    const ordersHeading = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.startsWith("Open orders")
+    )!;
+    // Panel root is the tab bar's parent.
+    const panel = ordersHeading.parentElement!.parentElement as HTMLElement;
+    expect(panel.className).toMatch(/\bh-52\b/);
+  });
+});

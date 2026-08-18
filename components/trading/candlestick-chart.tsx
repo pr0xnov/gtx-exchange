@@ -9,25 +9,13 @@ import {
   LogicalRange,
 } from "lightweight-charts";
 
-export type Timeframe =
-  | "30s"
-  | "1m"
-  | "3m"
-  | "5m"
-  | "15m"
-  | "30m"
-  | "1h"
-  | "4h"
-  | "1d"
-  | "1w";
+export type Timeframe = "5s" | "30s" | "1m" | "15m" | "1h" | "4h" | "1d" | "1w";
 
 export const TIMEFRAMES: { label: string; value: Timeframe }[] = [
+  { label: "5s", value: "5s" },
   { label: "30s", value: "30s" },
   { label: "1m", value: "1m" },
-  { label: "3m", value: "3m" },
-  { label: "5m", value: "5m" },
   { label: "15m", value: "15m" },
-  { label: "30m", value: "30m" },
   { label: "1h", value: "1h" },
   { label: "4h", value: "4h" },
   { label: "1D", value: "1d" },
@@ -35,22 +23,36 @@ export const TIMEFRAMES: { label: string; value: Timeframe }[] = [
 ];
 
 const TIMEFRAME_SECONDS: Record<Timeframe, number> = {
+  "5s": 5,
   "30s": 30,
   "1m": 60,
-  "3m": 180,
-  "5m": 300,
   "15m": 900,
-  "30m": 1800,
   "1h": 3600,
   "4h": 14400,
   "1d": 86400,
   "1w": 604800,
 };
 
-// One request page. At 500 bars this already covers well over a year for
-// 1d/1w, and for finer timeframes the chart pages further back on demand
-// as the user scrolls — see loadOlderPage below.
-const PAGE_SIZE = 500;
+// Bars to fetch per page, calibrated per timeframe so the default view
+// (fitContent() over exactly this many bars) covers a sensible real-world
+// window instead of one flat count for every interval. A flat 500, as this
+// used to be, means 500 hourly candles (~21 days) got squeezed into the
+// same on-screen width as 500 five-second candles (~42 minutes) — at that
+// zoom level lightweight-charts auto-coarsens its axis labels to
+// day-granularity ticks, so "1h" visually read as a multi-week daily
+// chart even though the underlying candles really were hourly. The chart
+// still pages further back on demand as the user scrolls — see
+// loadOlderPage below — using this same per-timeframe page size.
+const TIMEFRAME_DEFAULT_BARS: Record<Timeframe, number> = {
+  "5s": 180, // ~15 minutes
+  "30s": 100, // ~50 minutes
+  "1m": 180, // ~3 hours
+  "15m": 192, // ~2 days
+  "1h": 168, // ~7 days
+  "4h": 270, // ~45 days
+  "1d": 270, // ~9 months
+  "1w": 182, // ~3.5 years
+};
 // Start fetching the next page once the visible range gets this close to
 // the oldest loaded bar (index 0).
 const PREFETCH_THRESHOLD_BARS = 10;
@@ -72,7 +74,7 @@ async function fetchCandlePage(
   const params = new URLSearchParams({
     symbol,
     interval: timeframe,
-    limit: String(PAGE_SIZE),
+    limit: String(TIMEFRAME_DEFAULT_BARS[timeframe]),
   });
   if (endTimeMs) params.set("endTime", String(endTimeMs));
 

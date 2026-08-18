@@ -82,6 +82,14 @@ export interface NavbarUser {
  * driven purely by the `data-[state]` attribute Radix already toggles,
  * animated with a plain CSS transition (opacity/scale/translate +
  * pointer-events, ~150ms) instead of a mount/unmount jump.
+ *
+ * `modal={false}` on Root is required alongside `forceMount`: Root's
+ * modal Content wraps itself in react-remove-scroll gated on the static
+ * `modal` prop, not on live open state — since Content is now always
+ * mounted, a modal Root would lock page scroll (wheel-blocked, native
+ * scrollbar drag unaffected) site-wide from first render, forever, menu
+ * open or not. `modal={false}` disables that lock; outside-click/Escape
+ * dismissal still works, it's handled independently of `modal`.
  */
 function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
@@ -100,7 +108,7 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
   }
 
   return (
-    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
+    <DropdownMenu.Root open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenu.Trigger asChild>
         <button
           aria-label="Account menu"

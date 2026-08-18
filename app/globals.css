@@ -56,6 +56,25 @@ body {
   outline-offset: 2px;
 }
 
+/* Radix's forceMount-based dropdowns (e.g. Navbar's AccountDropdown, which
+ * keeps its Content permanently mounted so it can CSS-transition open/closed
+ * instead of mount/unmount-jumping) position that Content through a Popper
+ * wrapper div Radix renders itself: `[data-radix-popper-content-wrapper]`,
+ * `position: fixed`, sized and placed to exactly cover the (possibly
+ * invisible) menu. Our own `data-[state=closed]:pointer-events-none` class
+ * lands on the menu content *inside* that wrapper, not on the wrapper
+ * itself — pointer-events doesn't propagate from child to parent, so the
+ * wrapper stayed hit-testable at all times, real mouse position and all,
+ * silently swallowing clicks aimed at whatever page content sits underneath
+ * it (confirmed live: elementFromPoint() on Trading's timeframe button
+ * returned this wrapper, not the button, because the closed Account menu's
+ * wrapper happened to cover that screen area). Disabling pointer-events on
+ * the wrapper itself whenever its mounted content is closed removes the
+ * invisible click-trap without touching any component's own JSX/animation. */
+[data-radix-popper-content-wrapper]:has([data-state="closed"]) {
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

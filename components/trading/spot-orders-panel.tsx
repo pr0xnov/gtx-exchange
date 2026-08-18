@@ -5,12 +5,8 @@ import { X, Loader2 } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useSpotOrders, useCancelSpotOrder } from "@/hooks/use-api";
-import { DISPLAY_NAMES } from "@/components/trading/asset-watchlist";
+import { PairCell } from "@/components/trading/pair-cell";
 import { toast } from "sonner";
-
-function displaySymbol(symbol: string) {
-  return DISPLAY_NAMES[symbol] ?? symbol;
-}
 
 export function SpotOrdersPanel() {
   const [tab, setTab] = useState<"open" | "history">("open");
@@ -92,7 +88,7 @@ export function SpotOrdersPanel() {
                 className="border-b border-border/50 transition-colors hover:bg-white/[0.02]"
               >
                 <td className="px-4 py-2.5 font-medium text-foreground">
-                  {displaySymbol(o.symbol)}
+                  <PairCell symbol={o.symbol} />
                 </td>
                 <td className="px-2 py-2.5 text-muted">
                   {o.type === "MARKET" ? "Market" : "Limit"}

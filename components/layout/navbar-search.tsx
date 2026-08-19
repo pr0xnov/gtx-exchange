@@ -9,6 +9,7 @@ import { useLivePrices } from "@/hooks/use-live-prices";
 import { filterBySearch, mergeMarketData } from "@/lib/markets/derive";
 import { CoinIcon } from "@/components/markets/coin-icon";
 import { cn, formatPercent, formatPrice } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 const RESULT_LIMIT = 20;
 
@@ -22,6 +23,7 @@ const RESULT_LIMIT = 20;
  * /trading link elsewhere in the app.
  */
 export function NavbarSearch() {
+  const { t } = useLocale();
   const [query, setQuery] = useState("");
   const { data } = useMarkets();
   const { prices } = useLivePrices();
@@ -36,7 +38,7 @@ export function NavbarSearch() {
     <DropdownMenu.Root onOpenChange={(next) => !next && setQuery("")}>
       <DropdownMenu.Trigger asChild>
         <button
-          aria-label="Search cryptocurrencies"
+          aria-label={t("nav.searchAria")}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-muted transition-colors hover:border-primary/40 hover:text-foreground data-[state=open]:border-primary/40 data-[state=open]:text-foreground"
         >
           <Search className="h-4 w-4" />
@@ -56,7 +58,7 @@ export function NavbarSearch() {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search cryptocurrencies"
+              placeholder={t("nav.searchPlaceholder")}
               className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-sm text-foreground outline-none placeholder:text-muted focus:border-primary"
             />
           </div>
@@ -64,7 +66,7 @@ export function NavbarSearch() {
           <div className="max-h-80 overflow-y-auto">
             {results.length === 0 && (
               <div className="px-3 py-6 text-center text-sm text-muted">
-                No cryptocurrencies found.
+                {t("nav.searchNoResults")}
               </div>
             )}
             {results.map((row) => {

@@ -7,6 +7,7 @@ import {
   Menu,
   X,
   Globe,
+  Check,
   User as UserIcon,
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -23,30 +24,108 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
 import { NavbarSearch } from "@/components/layout/navbar-search";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/locale-context";
+import { LOCALES, localeLabel, localeName } from "@/lib/i18n/config";
+import type { DictionaryKey } from "@/lib/i18n/dictionaries";
 
 const NAV_LINKS = [
-  { label: "Trading", href: "/trading" },
-  { label: "Markets", href: "/markets" },
-  { label: "About us", href: "/about" },
-  { label: "Tariffs", href: "/tariffs" },
-  { label: "Contacts", href: "/contacts" },
-];
+  { key: "nav.trading", href: "/trading" },
+  { key: "nav.markets", href: "/markets" },
+  { key: "nav.about", href: "/about" },
+  { key: "nav.tariffs", href: "/tariffs" },
+  { key: "nav.contacts", href: "/contacts" },
+] satisfies { key: DictionaryKey; href: string }[];
 
 // Shown only to an authenticated user, immediately before Trading — guests
 // never see it since /wallet has nothing to show them (middleware.ts also
 // redirects a guest who navigates there directly).
-const WALLET_LINK = { label: "Wallet", href: "/wallet" };
+const WALLET_LINK = { key: "nav.wallet", href: "/wallet" } satisfies {
+  key: DictionaryKey;
+  href: string;
+};
 
 const ACCOUNT_LINKS = [
-  { label: "Account", href: "/account", icon: UserIcon },
-  { label: "Deposit", href: "/deposit", icon: ArrowDownToLine },
-  { label: "Withdrawal", href: "/withdrawal", icon: ArrowUpFromLine },
-  { label: "History", href: "/history", icon: History },
-  { label: "Verification", href: "/verification", icon: ShieldCheck },
-  { label: "Downloads", href: "/downloads", icon: Download },
-  { label: "Settings", href: "/settings", icon: Settings },
-  { label: "Support", href: "/support", icon: LifeBuoy },
-];
+  { key: "nav.account", href: "/account", icon: UserIcon },
+  { key: "nav.deposit", href: "/deposit", icon: ArrowDownToLine },
+  { key: "nav.withdrawal", href: "/withdrawal", icon: ArrowUpFromLine },
+  { key: "nav.history", href: "/history", icon: History },
+  { key: "nav.verification", href: "/verification", icon: ShieldCheck },
+  { key: "nav.downloads", href: "/downloads", icon: Download },
+  { key: "nav.settings", href: "/settings", icon: Settings },
+  { key: "nav.support", href: "/support", icon: LifeBuoy },
+] satisfies { key: DictionaryKey; href: string; icon: typeof UserIcon }[];
+
+/**
+ * The Language item in the existing Navbar (Globe icon + current locale
+ * label) — was a static, non-functional "EN" button; this is the only
+ * language switcher in the app, extended in place rather than adding a
+ * second one. Same open-on-hover Radix pattern as AccountDropdown right
+ * next to it, for the same reason (Content is portaled out of the
+ * trigger's DOM subtree, so a plain onMouseLeave on the button alone would
+ * close it the instant the cursor crosses into the portaled menu).
+ */
+function LanguageDropdown() {
+  const { locale, setLocale, t } = useLocale();
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function cancelClose() {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }
+
+  function scheduleClose() {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  }
+
+  return (
+    <DropdownMenu.Root open={open} onOpenChange={setOpen} modal={false}>
+      <DropdownMenu.Trigger asChild>
+        <button
+          aria-label={t("nav.language")}
+          onMouseEnter={() => {
+            cancelClose();
+            setOpen(true);
+          }}
+          onMouseLeave={scheduleClose}
+          className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-muted transition-colors hover:text-foreground data-[state=open]:text-foreground"
+        >
+          <Globe className="h-4 w-4" />
+          {localeLabel(locale)}
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal forceMount>
+        <DropdownMenu.Content
+          forceMount
+          align="end"
+          sideOffset={8}
+          onMouseEnter={cancelClose}
+          onMouseLeave={scheduleClose}
+          className={cn(
+            "z-50 w-40 origin-top-right rounded-xl border border-border bg-card p-1.5 shadow-card",
+            "transition duration-150 ease-out",
+            "data-[state=closed]:pointer-events-none data-[state=closed]:-translate-y-1 data-[state=closed]:scale-95 data-[state=closed]:opacity-0",
+            "data-[state=open]:pointer-events-auto data-[state=open]:translate-y-0 data-[state=open]:scale-100 data-[state=open]:opacity-100"
+          )}
+        >
+          {LOCALES.map((l) => (
+            <DropdownMenu.Item
+              key={l}
+              onSelect={() => setLocale(l)}
+              className="flex cursor-pointer items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-sm text-muted outline-none transition-colors hover:bg-white/5 hover:text-foreground data-[highlighted]:bg-white/5 data-[highlighted]:text-foreground"
+            >
+              {localeName(l)}
+              {l === locale && <Check className="h-4 w-4 text-primary" />}
+            </DropdownMenu.Item>
+          ))}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
 
 export interface NavbarUser {
   firstName: string;
@@ -92,6 +171,7 @@ export interface NavbarUser {
  * dismissal still works, it's handled independently of `modal`.
  */
 function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () => void }) {
+  const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -111,7 +191,7 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
     <DropdownMenu.Root open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenu.Trigger asChild>
         <button
-          aria-label="Account menu"
+          aria-label={t("nav.accountMenu")}
           onMouseEnter={() => {
             cancelClose();
             setOpen(true);
@@ -152,7 +232,7 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
                   className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted outline-none transition-colors hover:bg-white/5 hover:text-foreground data-[highlighted]:bg-white/5 data-[highlighted]:text-foreground"
                 >
                   <Icon className="h-4 w-4" />
-                  {link.label}
+                  {t(link.key)}
                 </Link>
               </DropdownMenu.Item>
             );
@@ -163,7 +243,7 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
             className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-danger outline-none transition-colors hover:bg-danger/10 data-[highlighted]:bg-danger/10"
           >
             <LogOut className="h-4 w-4" />
-            Log out
+            {t("common.logout")}
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
@@ -178,6 +258,7 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
  * guest. Deposit and Account never show for a guest.
  */
 export function Navbar({ user }: { user: NavbarUser | null }) {
+  const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -187,11 +268,11 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
   async function handleLogout() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      toast.success("You have been logged out");
+      toast.success(t("nav.logoutSuccess"));
       router.push("/");
       router.refresh();
     } catch {
-      toast.error("Failed to log out. Please try again.");
+      toast.error(t("nav.logoutError"));
     }
   }
 
@@ -214,22 +295,19 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
                     : "text-muted hover:text-foreground"
                 )}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
           </nav>
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <button className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-muted transition-colors hover:text-foreground">
-            <Globe className="h-4 w-4" />
-            EN
-          </button>
+          <LanguageDropdown />
           <NavbarSearch />
           {user && (
             <>
               <Button size="sm" asChild>
-                <Link href="/deposit">Deposit</Link>
+                <Link href="/deposit">{t("nav.deposit")}</Link>
               </Button>
               <AccountDropdown user={user} onLogout={handleLogout} />
             </>
@@ -237,10 +315,10 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           {!user && (
             <>
               <Button variant="outline" size="sm" asChild>
-                <Link href="/login">Login</Link>
+                <Link href="/login">{t("common.login")}</Link>
               </Button>
               <Button variant="primary" size="sm" asChild>
-                <Link href="/register">Registration</Link>
+                <Link href="/register">{t("common.register")}</Link>
               </Button>
             </>
           )}
@@ -249,7 +327,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
         <button
           className="p-2 text-foreground lg:hidden"
           onClick={() => setOpen((o) => !o)}
-          aria-label="Toggle menu"
+          aria-label={t("nav.toggleMenu")}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -265,7 +343,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
                 className="text-sm text-muted hover:text-foreground"
                 onClick={() => setOpen(false)}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
             {user ? (
@@ -287,7 +365,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
                         onClick={() => setOpen(false)}
                       >
                         <Icon className="h-4 w-4" />
-                        {link.label}
+                        {t(link.key)}
                       </Link>
                     );
                   })}
@@ -299,7 +377,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
                     className="flex items-center gap-2.5 text-sm text-danger"
                   >
                     <LogOut className="h-4 w-4" />
-                    Log out
+                    {t("common.logout")}
                   </button>
                 </div>
               </>
@@ -307,12 +385,12 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
               <div className="mt-2 flex gap-3">
                 <Button variant="outline" size="sm" className="flex-1" asChild>
                   <Link href="/login" onClick={() => setOpen(false)}>
-                    Login
+                    {t("common.login")}
                   </Link>
                 </Button>
                 <Button variant="primary" size="sm" className="flex-1" asChild>
                   <Link href="/register" onClick={() => setOpen(false)}>
-                    Registration
+                    {t("common.register")}
                   </Link>
                 </Button>
               </div>

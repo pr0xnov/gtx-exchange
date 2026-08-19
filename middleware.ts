@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { LOCALE_COOKIE, resolveLocaleFromAcceptLanguage } from "@/lib/i18n/config";
 
 const ACCESS_COOKIE = "gtx_access_token";
 
@@ -24,35 +25,40 @@ export function middleware(req: NextRequest) {
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
   const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
 
+  let res: NextResponse;
+
   if (isProtected && !hasToken) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
-  }
-
-  if (isAuthPage && hasToken) {
+    res = NextResponse.redirect(url);
+  } else if (isAuthPage && hasToken) {
     const url = req.nextUrl.clone();
     url.pathname = "/account";
-    return NextResponse.redirect(url);
+    res = NextResponse.redirect(url);
+  } else {
+    res = NextResponse.next();
   }
 
-  return NextResponse.next();
+  // Auto-detect locale from Accept-Language on first visit only. Once a
+  // locale cookie exists — set here, or by the manual switcher in
+  // components/layout/navbar.tsx — it's never overridden, so a manual
+  // choice always sticks across reloads/redirects/new tabs.
+  if (!req.cookies.get(LOCALE_COOKIE)?.value) {
+    const locale = resolveLocaleFromAcceptLanguage(req.headers.get("accept-language"));
+    res.cookies.set(LOCALE_COOKIE, locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+
+  return res;
 }
 
 export const config = {
-  matcher: [
-    "/account/:path*",
-    "/deposit/:path*",
-    "/withdrawal/:path*",
-    "/history/:path*",
-    "/settings/:path*",
-    "/support/:path*",
-    "/verification/:path*",
-    "/trading/:path*",
-    "/downloads/:path*",
-    "/wallet/:path*",
-    "/login",
-    "/register",
-  ],
+  // Runs on every page route (locale auto-detection needs to see all of
+  // them, not just the protected/auth ones) except static assets and API
+  // routes. The auth checks above are unchanged and still only act on
+  // PROTECTED_PREFIXES / AUTH_PAGES.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
 };

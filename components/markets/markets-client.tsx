@@ -33,7 +33,7 @@ export const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-const SEARCHABLE_TABS: TabId[] = ["all", "favorites"];
+const SEARCHABLE_TABS: TabId[] = ["all"];
 
 /** Избранные is an authenticated-account feature — hidden from the tab
  *  list entirely for a guest, not just inert. Exported as its own pure

@@ -34,6 +34,7 @@ docker compose up --build
 Then open **http://localhost:3000**.
 
 This one command will:
+
 1. Start Postgres and wait for it to be healthy
 2. Run the `migrator` service (`prisma migrate deploy` + seed script) once, to completion
 3. Start the Next.js app on port 3000

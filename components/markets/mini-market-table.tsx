@@ -17,27 +17,41 @@ const SORT_LABEL: Record<SortKey, string> = {
 };
 
 const SORTABLE_KEYS = Object.keys(SORT_LABEL) as SortKey[];
+// The 3 numeric sortable columns, i.e. everything sortable except "name"
+// (Монета) — its own header is rendered separately so it can suppress
+// the sort-direction arrow (see showIndicator below) without affecting
+// the other three, and so it can sit right after № with nothing between
+// them and Цена/Изменение/Объём/График.
+const NUMERIC_SORTABLE_KEYS = SORTABLE_KEYS.filter((k) => k !== "name");
 
 function SortableHeader({
   sortKeyName,
   active,
   direction,
   onClick,
+  showIndicator = true,
 }: {
   sortKeyName: SortKey;
   active: boolean;
   direction?: SortDirection;
   onClick?: (key: SortKey) => void;
+  /** "Монета" defaults to the active sort column (see AllMarketsTable's
+   *  initial sortKey), so its arrow was always visible even though the
+   *  column's own label already makes it obvious what's sorted — the
+   *  header is still fully clickable/sortable, it just never renders the
+   *  ArrowUp/ArrowDown indicator. */
+  showIndicator?: boolean;
 }) {
   const label = SORT_LABEL[sortKeyName];
   if (!onClick) return <span>{label}</span>;
   return (
     <button
       onClick={() => onClick(sortKeyName)}
-      className="flex items-center gap-1 hover:text-foreground"
+      className="flex w-full items-center justify-center gap-1 hover:text-foreground"
     >
       {label}
-      {active &&
+      {showIndicator &&
+        active &&
         (direction === "asc" ? (
           <ArrowUp className="h-3 w-3" />
         ) : (
@@ -61,9 +75,11 @@ function SortableHeader({
  * order is fixed by the caller.
  *
  * Favorites are an authenticated-account feature: when `isAuthenticated`
- * is false, the star column doesn't render at all (no button, no
- * placeholder header) — there is no favoriting UI for a guest to
- * discover or use. Row hover/click and everything else is unaffected.
+ * is false, the star button doesn't render at all — there is no
+ * favoriting UI for a guest to discover or use. It lives inside the
+ * Монета cell (not a separate column) so the table keeps a fixed 6-column
+ * grid (№/Монета/Цена/Изменение/Объём/График) regardless of auth state.
+ * Row hover/click and everything else is unaffected.
  */
 export function MiniMarketTable({
   title,
@@ -99,9 +115,11 @@ export function MiniMarketTable({
   startIndex?: number;
 }) {
   const router = useRouter();
-  // №, [star], coin, price, change, volume, sparkline — star column only
-  // exists for an authenticated user.
-  const columnCount = isAuthenticated ? 7 : 6;
+  // №, Монета (icon+name, with the favorite star folded into this same
+  // cell — see the colgroup note below for why it isn't a separate
+  // column), Цена, Изменение 24ч, Объём 24ч, График: always 6 columns,
+  // authenticated or not.
+  const columnCount = 6;
 
   function goToTrading(symbol: string) {
     const destination = `/trading?symbol=${symbol}`;
@@ -123,13 +141,55 @@ export function MiniMarketTable({
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full table-fixed text-sm">
+          {/* table-fixed + this colgroup is what keeps every tab's columns
+              at identical widths — with the default table-layout: auto,
+              each render of this table sized its own columns from that
+              tab's own row content (huge numbers in "Максимальный объём"
+              vs. small ones elsewhere), so the same column visually
+              landed in a different place tab to tab. Column count/order
+              here must stay in lockstep with the actual <th>/<td> list
+              below.
+
+              Only 6 columns — the favorite star (when isAuthenticated)
+              is rendered *inside* the Монета cell rather than as its own
+              <col>, so there's no 7th column to make room for.
+
+              These 6 values are the literal target percentages, summing
+              to exactly 100 — reset here to the clean 5/25/14/12/15/29
+              spec after several prior tasks each grew График relative to
+              whatever it last rendered at, compounding into a lopsided
+              layout (Монета down to ~9%, cells pinned to the right edge
+              with dead space alongside). table-layout: fixed reads these
+              directly as-is when they already sum to 100, so what's
+              declared here is exactly what renders — no implicit
+              rescaling to account for. Header <th> and body <td> share
+              this one <colgroup> (same <table>), which is what makes it
+              structurally impossible for header and rows to disagree on
+              column widths — there's only one grid, not a separate one
+              per row. */}
+          <colgroup>
+            <col className="w-[5%]" />
+            <col className="w-[25%]" />
+            <col className="w-[14%]" />
+            <col className="w-[12%]" />
+            <col className="w-[15%]" />
+            <col className="w-[29%]" />
+          </colgroup>
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted">
-              <th className="w-8 px-4 py-2.5 font-medium">№</th>
-              {isAuthenticated && <th className="w-8 px-2 py-2.5 font-medium" />}
-              {SORTABLE_KEYS.map((key) => (
-                <th key={key} className="px-2 py-2.5 font-medium">
+              <th className="px-4 py-2.5 font-medium">№</th>
+              <th className="px-3 py-2.5 text-center font-medium">
+                <SortableHeader
+                  sortKeyName="name"
+                  active={sortKey === "name"}
+                  direction={sortDirection}
+                  onClick={onSort}
+                  showIndicator={false}
+                />
+              </th>
+              {NUMERIC_SORTABLE_KEYS.map((key) => (
+                <th key={key} className="px-3 py-2.5 text-center font-medium">
                   <SortableHeader
                     sortKeyName={key}
                     active={sortKey === key}
@@ -138,7 +198,7 @@ export function MiniMarketTable({
                   />
                 </th>
               ))}
-              <th className="px-2 py-2.5 font-medium">График</th>
+              <th className="px-2 py-2.5 text-center font-medium">График</th>
             </tr>
           </thead>
           <tbody>
@@ -172,52 +232,54 @@ export function MiniMarketTable({
                     <td className="font-tabular px-4 py-3.5 text-muted">
                       {startIndex + i + 1}
                     </td>
-                    {isAuthenticated && (
-                      <td className="px-2 py-3.5">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleFavorite(row.symbol);
-                          }}
-                          className="flex items-center justify-center rounded-lg p-1 text-muted hover:text-foreground"
-                          aria-label={
-                            isFavorite ? "Remove from favorites" : "Add to favorites"
-                          }
-                        >
-                          <Star
-                            className={cn(
-                              "h-4 w-4",
-                              isFavorite && "fill-primary text-primary"
-                            )}
-                          />
-                        </button>
-                      </td>
-                    )}
-                    <td className="px-2 py-3.5">
-                      <div className="flex items-center gap-2">
+                    <td className="px-3 py-3.5">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {isAuthenticated && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleFavorite(row.symbol);
+                            }}
+                            className="flex shrink-0 items-center justify-center rounded-lg p-1 text-muted hover:text-foreground"
+                            aria-label={
+                              isFavorite ? "Remove from favorites" : "Add to favorites"
+                            }
+                          >
+                            <Star
+                              className={cn(
+                                "h-4 w-4",
+                                isFavorite && "fill-primary text-primary"
+                              )}
+                            />
+                          </button>
+                        )}
                         <CoinIcon symbol={row.base} />
-                        <div>
-                          <div className="font-medium text-foreground">{row.name}</div>
-                          <div className="text-xs text-muted">{row.displaySymbol}</div>
+                        <div className="min-w-0">
+                          <div className="truncate font-medium text-foreground">
+                            {row.name}
+                          </div>
+                          <div className="truncate text-xs text-muted">
+                            {row.displaySymbol}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="font-tabular px-2 py-3.5 text-foreground">
+                    <td className="font-tabular truncate px-3 py-3.5 text-center text-foreground">
                       {formatPrice(row.price, row.price < 10 ? 4 : 2)}
                     </td>
                     <td
                       className={cn(
-                        "font-tabular px-2 py-3.5",
+                        "font-tabular truncate px-3 py-3.5 text-center",
                         up ? "text-primary" : "text-danger"
                       )}
                     >
                       {formatPercent(row.change24h)}
                     </td>
-                    <td className="font-tabular px-2 py-3.5 text-foreground">
+                    <td className="font-tabular truncate px-3 py-3.5 text-center text-foreground">
                       {row.volume24h != null ? formatPrice(row.volume24h, 2) : "--"}
                     </td>
                     <td className="px-2 py-3.5">
-                      <div className="w-20">
+                      <div className="mx-auto w-32">
                         <MiniSparkline prices={sparklines[row.symbol]} positive={up} />
                       </div>
                     </td>

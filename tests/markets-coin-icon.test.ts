@@ -205,7 +205,10 @@ describe("CoinIcon — the only icon source used by every Markets table", () => 
       );
     });
 
-    const coinCell = container.querySelector("tbody tr td:nth-child(3)");
+    // 1=№, 2=Монета (the favorite star lives inside this same cell now,
+    // not a separate column — see mini-market-table.tsx's fixed
+    // 5/25/13/12/16/29% column layout).
+    const coinCell = container.querySelector("tbody tr td:nth-child(2)");
     expect(coinCell?.querySelector(".rounded-full")).not.toBeNull();
     expect(coinCell?.querySelector("svg")).not.toBeNull();
   });

@@ -142,6 +142,21 @@ export function CandlestickChart({
       }
     }
 
+    // lightweight-charts defaults every price series to 2-decimal
+    // formatting, which rounds a sub-$10 price like XLM's ~0.1653 down to a
+    // meaningless "0.17" on the right-hand price scale. Reuses the same
+    // <10 -> 4dp convention ChartHeader/mini-market-table's
+    // formatPrice(price, price < 10 ? 4 : 2) already applies elsewhere, so
+    // BTC-sized prices still read as "64,857.00" while cheap assets keep
+    // their significant digits.
+    const last = candles[candles.length - 1];
+    if (last && seriesRef.current) {
+      const precision = last.close < 10 ? 4 : 2;
+      seriesRef.current.applyOptions({
+        priceFormat: { type: "price", precision, minMove: 1 / 10 ** precision },
+      });
+    }
+
     seriesRef.current?.setData(
       candles.map((c) => ({
         time: c.time as never,

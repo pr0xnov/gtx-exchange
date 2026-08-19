@@ -46,6 +46,7 @@ vi.mock("lightweight-charts", () => {
         hoisted.setDataCalls.push({ kind, data });
       },
       update: () => {},
+      applyOptions: () => {},
       priceScale: () => ({ applyOptions: () => {} }),
     };
   }

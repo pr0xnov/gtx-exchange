@@ -8,6 +8,7 @@ import {
   ISeriesApi,
   LogicalRange,
 } from "lightweight-charts";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 export type Timeframe = "5s" | "30s" | "1m" | "15m" | "1h" | "4h" | "1d" | "1w";
 
@@ -93,6 +94,7 @@ export function CandlestickChart({
   timeframe: Timeframe;
   livePrice?: number;
 }) {
+  const { t } = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
@@ -386,7 +388,7 @@ export function CandlestickChart({
     <div className="relative h-full w-full">
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/60 text-sm text-muted">
-          Loading chart…
+          {t("trading.chart.loading")}
         </div>
       )}
       <div ref={containerRef} className="h-full w-full" />

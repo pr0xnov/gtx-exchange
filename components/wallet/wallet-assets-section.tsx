@@ -6,6 +6,7 @@ import { WalletAssetsTable } from "@/components/wallet/assets-table";
 import { WalletOpenOrders } from "@/components/wallet/wallet-open-orders";
 import { WalletTradeHistory } from "@/components/wallet/wallet-trade-history";
 import type { SpotAssetSummaryDto } from "@/hooks/use-api";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
  * "My Assets" / "Open Orders" / "History" tab card. Open Orders and
@@ -24,6 +25,7 @@ export function WalletAssetsSection({
   sparklines: Record<string, number[]>;
   isLoading: boolean;
 }) {
+  const { t } = useLocale();
   const [tab, setTab] = useState<"assets" | "orders" | "history">("assets");
 
   return (
@@ -38,7 +40,7 @@ export function WalletAssetsSection({
               : "border-transparent text-muted hover:text-foreground"
           )}
         >
-          My Assets
+          {t("wallet.tabs.myAssets")}
         </button>
         <button
           onClick={() => setTab("orders")}
@@ -49,7 +51,7 @@ export function WalletAssetsSection({
               : "border-transparent text-muted hover:text-foreground"
           )}
         >
-          Open Orders
+          {t("wallet.tabs.openOrders")}
         </button>
         <button
           onClick={() => setTab("history")}
@@ -60,7 +62,7 @@ export function WalletAssetsSection({
               : "border-transparent text-muted hover:text-foreground"
           )}
         >
-          History
+          {t("wallet.tabs.history")}
         </button>
       </div>
       {tab === "assets" && (

@@ -22,6 +22,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { CoinIcon } from "@/components/markets/coin-icon";
 import { MiniMarketTable } from "@/components/markets/mini-market-table";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { MARKET_REGISTRY } from "@/lib/binance/client";
 import { mergeMarketData } from "@/lib/markets/derive";
 
@@ -193,15 +194,19 @@ describe("CoinIcon — the only icon source used by every Markets table", () => 
     );
     act(() => {
       root.render(
-        React.createElement(MiniMarketTable, {
-          title: "Test",
-          rows,
-          isLoading: false,
-          favorites: new Set<string>(),
-          onToggleFavorite: () => {},
-          sparklines: {},
-          isAuthenticated: true,
-        })
+        React.createElement(
+          LocaleProvider,
+          { initialLocale: "en" },
+          React.createElement(MiniMarketTable, {
+            title: "Test",
+            rows,
+            isLoading: false,
+            favorites: new Set<string>(),
+            onToggleFavorite: () => {},
+            sparklines: {},
+            isAuthenticated: true,
+          })
+        )
       );
     });
 

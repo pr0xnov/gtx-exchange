@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/shared/skeleton";
 import { MARKET_REGISTRY } from "@/lib/binance/client";
 import type { SpotAssetSummaryDto } from "@/hooks/use-api";
 import { cn, formatCurrency, formatPrice } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 const NAME_BY_BASE = new Map(MARKET_REGISTRY.map((e) => [e.baseAsset, e.name]));
 
@@ -46,6 +47,7 @@ export function WalletAssetsTable({
   isLoading: boolean;
 }) {
   const router = useRouter();
+  const { t } = useLocale();
 
   function goToTrading(symbol: string) {
     router.push(`/trading?symbol=${symbol}`);
@@ -56,25 +58,29 @@ export function WalletAssetsTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border text-left text-xs text-muted">
-            <th className="px-5 py-3 font-medium">Asset</th>
-            <th className="px-3 py-3 font-medium">Amount</th>
-            <th className="px-3 py-3 font-medium">Price / Cost basis</th>
-            <th className="px-3 py-3 font-medium">Chart</th>
-            <th className="px-5 py-3 text-right font-medium">Unrealized PnL</th>
+            <th className="px-5 py-3 font-medium">{t("wallet.assets.headers.asset")}</th>
+            <th className="px-3 py-3 font-medium">{t("wallet.assets.headers.amount")}</th>
+            <th className="px-3 py-3 font-medium">
+              {t("wallet.assets.headers.priceCostBasis")}
+            </th>
+            <th className="px-3 py-3 font-medium">{t("wallet.assets.headers.chart")}</th>
+            <th className="px-5 py-3 text-right font-medium">
+              {t("wallet.assets.headers.unrealizedPnl")}
+            </th>
           </tr>
         </thead>
         <tbody>
           {isLoading && (
             <tr>
               <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
-                Loading assets…
+                {t("wallet.assets.loading")}
               </td>
             </tr>
           )}
           {!isLoading && rows.length === 0 && (
             <tr>
               <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
-                You don&apos;t have any assets yet. Buy on Spot to get started.
+                {t("wallet.assets.empty")}
               </td>
             </tr>
           )}
@@ -99,7 +105,7 @@ export function WalletAssetsTable({
                 }}
                 role="link"
                 tabIndex={0}
-                aria-label={`Open ${row.currency} on Trading`}
+                aria-label={`${row.currency}: ${t("wallet.assets.openOnTradingAria")}`}
                 className="cursor-pointer border-b border-border/50 outline-none transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.06] focus-visible:ring-1 focus-visible:ring-primary/50"
               >
                 <td className="px-5 py-3">
@@ -126,7 +132,7 @@ export function WalletAssetsTable({
                     {formatPrice(row.currentPrice, decimals)}
                   </div>
                   <div className="font-tabular text-xs text-muted">
-                    Cost: {formatPrice(costPerUnit, decimals)}
+                    {t("wallet.assets.costLabel")} {formatPrice(costPerUnit, decimals)}
                   </div>
                 </td>
                 <td className="px-3 py-3" data-testid="chart-cell">

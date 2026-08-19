@@ -2,6 +2,7 @@
 
 import { useAccountSummary } from "@/hooks/use-api";
 import { formatCurrency } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
  * Trading-specific stats strip — Balance/Equity/Profit, sourced from the
@@ -12,6 +13,7 @@ import { formatCurrency } from "@/lib/utils";
  * surrounding (dashboard) layout — this no longer duplicates it.
  */
 export function TerminalTopbar() {
+  const { t } = useLocale();
   const { data } = useAccountSummary();
   const profitPositive = (data?.profit ?? 0) >= 0;
 
@@ -20,19 +22,19 @@ export function TerminalTopbar() {
       <div className="flex items-center gap-8">
         <div className="hidden items-center gap-6 text-xs sm:flex">
           <div>
-            <div className="text-muted">Balance</div>
+            <div className="text-muted">{t("trading.topbar.balance")}</div>
             <div className="font-tabular font-semibold text-foreground">
               {formatCurrency(data?.balance ?? 0)}
             </div>
           </div>
           <div>
-            <div className="text-muted">Equity</div>
+            <div className="text-muted">{t("trading.topbar.equity")}</div>
             <div className="font-tabular font-semibold text-foreground">
               {formatCurrency(data?.equity ?? 0)}
             </div>
           </div>
           <div>
-            <div className="text-muted">Profit</div>
+            <div className="text-muted">{t("trading.topbar.profit")}</div>
             <div
               className={`font-tabular font-semibold ${
                 profitPositive ? "text-primary" : "text-danger"

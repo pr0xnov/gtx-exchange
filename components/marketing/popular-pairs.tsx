@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MiniSparkline } from "@/components/markets/mini-sparkline";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 const PAIRS = [
   { symbol: "BTC/USD", price: "66,241.3", change: 1.32, up: true },
@@ -13,12 +14,15 @@ const PAIRS = [
 ];
 
 export function PopularPairs() {
+  const { t } = useLocale();
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border p-5">
-        <h2 className="font-semibold text-foreground">Popular trading pairs</h2>
+        <h2 className="font-semibold text-foreground">
+          {t("marketing.popularPairs.title")}
+        </h2>
         <Link href="/markets" className="text-sm text-primary hover:underline">
-          View all markets
+          {t("marketing.popularPairs.viewAll")}
         </Link>
       </div>
       <div className="divide-y divide-border">
@@ -28,9 +32,9 @@ export function PopularPairs() {
             className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.02]"
           >
             <div className="w-32 font-medium text-foreground">{p.symbol}</div>
-            <div className="w-24 font-tabular text-sm text-foreground">{p.price}</div>
+            <div className="font-tabular w-24 text-sm text-foreground">{p.price}</div>
             <div
-              className={`w-20 font-tabular text-sm ${p.up ? "text-primary" : "text-danger"}`}
+              className={`font-tabular w-20 text-sm ${p.up ? "text-primary" : "text-danger"}`}
             >
               {p.up ? "+" : ""}
               {p.change}%
@@ -39,7 +43,7 @@ export function PopularPairs() {
               <MiniSparkline positive={p.up} />
             </div>
             <Button size="sm" asChild>
-              <Link href="/trading">Trade</Link>
+              <Link href="/trading">{t("marketing.popularPairs.tradeButton")}</Link>
             </Button>
           </div>
         ))}

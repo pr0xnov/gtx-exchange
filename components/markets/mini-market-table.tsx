@@ -7,16 +7,21 @@ import { cn, formatPercent, formatPrice } from "@/lib/utils";
 import { Skeleton } from "@/components/shared/skeleton";
 import { CoinIcon } from "@/components/markets/coin-icon";
 import { MiniSparkline } from "@/components/markets/mini-sparkline";
+import { useLocale } from "@/lib/i18n/locale-context";
+import type { DictionaryKey } from "@/lib/i18n/dictionaries";
 import type { EnrichedMarket, SortDirection, SortKey } from "@/lib/markets/derive";
 
-const SORT_LABEL: Record<SortKey, string> = {
-  name: "Монета",
-  price: "Цена",
-  change24h: "Изменение 24ч",
-  volume24h: "Объём 24ч",
+// Dictionary keys (see lib/i18n/dictionaries.ts, "markets.columns.*"), not
+// the display text itself — SortableHeader below resolves each to text via
+// t() at render time so the header labels follow the active locale.
+const SORT_LABEL_KEY: Record<SortKey, DictionaryKey> = {
+  name: "markets.columns.name",
+  price: "markets.columns.price",
+  change24h: "markets.columns.change24h",
+  volume24h: "markets.columns.volume24h",
 };
 
-const SORTABLE_KEYS = Object.keys(SORT_LABEL) as SortKey[];
+const SORTABLE_KEYS = Object.keys(SORT_LABEL_KEY) as SortKey[];
 // The 3 numeric sortable columns, i.e. everything sortable except "name"
 // (Монета) — its own header is rendered separately so it can suppress
 // the sort-direction arrow (see showIndicator below) without affecting
@@ -42,7 +47,8 @@ function SortableHeader({
    *  ArrowUp/ArrowDown indicator. */
   showIndicator?: boolean;
 }) {
-  const label = SORT_LABEL[sortKeyName];
+  const { t } = useLocale();
+  const label = t(SORT_LABEL_KEY[sortKeyName]);
   if (!onClick) return <span>{label}</span>;
   return (
     <button
@@ -89,7 +95,7 @@ export function MiniMarketTable({
   onToggleFavorite,
   sparklines,
   isAuthenticated,
-  emptyMessage = "No data available.",
+  emptyMessage,
   sortKey,
   sortDirection,
   onSort,
@@ -115,6 +121,8 @@ export function MiniMarketTable({
   startIndex?: number;
 }) {
   const router = useRouter();
+  const { t } = useLocale();
+  const resolvedEmptyMessage = emptyMessage ?? t("common.noData");
   // №, Монета (icon+name, with the favorite star folded into this same
   // cell — see the colgroup note below for why it isn't a separate
   // column), Цена, Изменение 24ч, Объём 24ч, График: always 6 columns,
@@ -178,7 +186,7 @@ export function MiniMarketTable({
           </colgroup>
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted">
-              <th className="px-4 py-2.5 font-medium">№</th>
+              <th className="px-4 py-2.5 font-medium">{t("markets.columns.rank")}</th>
               <th className="px-3 py-2.5 text-center font-medium">
                 <SortableHeader
                   sortKeyName="name"
@@ -198,7 +206,9 @@ export function MiniMarketTable({
                   />
                 </th>
               ))}
-              <th className="px-2 py-2.5 text-center font-medium">График</th>
+              <th className="px-2 py-2.5 text-center font-medium">
+                {t("markets.columns.chart")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -214,7 +224,7 @@ export function MiniMarketTable({
             {!isLoading && rows.length === 0 && (
               <tr>
                 <td colSpan={columnCount} className="px-4 py-8 text-center text-muted">
-                  {emptyMessage}
+                  {resolvedEmptyMessage}
                 </td>
               </tr>
             )}
@@ -242,7 +252,9 @@ export function MiniMarketTable({
                             }}
                             className="flex shrink-0 items-center justify-center rounded-lg p-1 text-muted hover:text-foreground"
                             aria-label={
-                              isFavorite ? "Remove from favorites" : "Add to favorites"
+                              isFavorite
+                                ? t("markets.favorites.remove")
+                                : t("markets.favorites.add")
                             }
                           >
                             <Star

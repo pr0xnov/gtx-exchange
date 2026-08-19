@@ -5,11 +5,16 @@
  * Balance/Equity/Profit (matching Account), and Unrealized PnL is shown as
  * a distinct figure.
  */
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WalletSummary } from "@/components/wallet/wallet-summary";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
 
 let container: HTMLDivElement;
 let root: Root;
@@ -28,15 +33,19 @@ afterEach(() => {
 function render(overrides: Partial<React.ComponentProps<typeof WalletSummary>> = {}) {
   act(() => {
     root.render(
-      React.createElement(WalletSummary, {
-        balance: 1000,
-        equity: 1200,
-        profit: 50,
-        unrealizedPnl: 20,
-        unrealizedPnlPercent: 2,
-        isLoading: false,
-        ...overrides,
-      })
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(WalletSummary, {
+          balance: 1000,
+          equity: 1200,
+          profit: 50,
+          unrealizedPnl: 20,
+          unrealizedPnlPercent: 2,
+          isLoading: false,
+          ...overrides,
+        })
+      )
     );
   });
 }

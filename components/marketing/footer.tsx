@@ -1,41 +1,43 @@
 import Link from "next/link";
 import { Logo } from "@/components/shared/logo";
+import { getServerTranslator } from "@/lib/i18n/get-locale";
 
-const COLUMNS = [
-  {
-    title: "Platform",
-    links: [
-      { label: "Trading", href: "/trading" },
-      { label: "Markets", href: "/markets" },
-      { label: "Tariffs", href: "/tariffs" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About us", href: "/about" },
-      { label: "Contacts", href: "/contacts" },
-      { label: "Support", href: "/support" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-    ],
-  },
-];
+export async function Footer() {
+  const t = await getServerTranslator();
 
-export function Footer() {
+  const COLUMNS = [
+    {
+      title: t("marketing.footer.platform"),
+      links: [
+        { label: t("nav.trading"), href: "/trading" },
+        { label: t("nav.markets"), href: "/markets" },
+        { label: t("nav.tariffs"), href: "/tariffs" },
+      ],
+    },
+    {
+      title: t("marketing.footer.company"),
+      links: [
+        { label: t("nav.about"), href: "/about" },
+        { label: t("nav.contacts"), href: "/contacts" },
+        { label: t("nav.support"), href: "/support" },
+      ],
+    },
+    {
+      title: t("marketing.footer.legal"),
+      links: [
+        { label: t("marketing.footer.privacyPolicy"), href: "/privacy" },
+        { label: t("marketing.footer.termsOfService"), href: "/terms" },
+      ],
+    },
+  ];
+
   return (
     <footer className="border-t border-border bg-surface/30">
       <div className="container grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Logo />
           <p className="mt-4 max-w-xs text-sm text-muted">
-            GTX is a paper-trading education platform. All balances are virtual and all
-            trades are simulated — no real funds are ever at risk.
+            {t("marketing.footer.description")}
           </p>
         </div>
         {COLUMNS.map((col) => (
@@ -58,11 +60,10 @@ export function Footer() {
       </div>
       <div className="border-t border-border py-6 text-center text-xs text-muted">
         <p>
-          © {new Date().getFullYear()} GTX. Virtual trading simulator for educational
-          purposes only.
+          © {new Date().getFullYear()} {t("marketing.footer.copyright")}
         </p>
         <p className="mt-1">
-          Charts powered by{" "}
+          {t("marketing.footer.chartsPoweredBy")}{" "}
           <a
             href="https://www.tradingview.com/"
             target="_blank"

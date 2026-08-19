@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 interface FieldErrors {
   firstName?: string;
@@ -19,6 +20,7 @@ interface FieldErrors {
 
 export function RegisterForm() {
   const router = useRouter();
+  const { t } = useLocale();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -51,16 +53,16 @@ export function RegisterForm() {
           }
           setErrors(fieldErrors);
         } else {
-          toast.error(json.error ?? "Registration failed");
+          toast.error(json.error ?? t("auth.register.registrationFailed"));
         }
         return;
       }
 
-      toast.success("Account created — welcome to GTX!");
+      toast.success(t("auth.register.successToast"));
       router.push("/account");
       router.refresh();
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,7 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="firstName">First name</Label>
+          <Label htmlFor="firstName">{t("auth.register.firstNameLabel")}</Label>
           <Input
             id="firstName"
             className="mt-1.5"
@@ -81,7 +83,7 @@ export function RegisterForm() {
           />
         </div>
         <div>
-          <Label htmlFor="lastName">Last name</Label>
+          <Label htmlFor="lastName">{t("auth.register.lastNameLabel")}</Label>
           <Input
             id="lastName"
             className="mt-1.5"
@@ -94,7 +96,7 @@ export function RegisterForm() {
       </div>
 
       <div>
-        <Label htmlFor="email">E-mail</Label>
+        <Label htmlFor="email">{t("auth.emailLabel")}</Label>
         <Input
           id="email"
           type="email"
@@ -107,7 +109,7 @@ export function RegisterForm() {
       </div>
 
       <div>
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("auth.passwordLabel")}</Label>
         <div className="relative mt-1.5">
           <Input
             id="password"
@@ -137,9 +139,9 @@ export function RegisterForm() {
           }
         />
         <Label htmlFor="agree" className="cursor-pointer font-normal leading-snug">
-          I agree to the{" "}
+          {t("auth.register.agreeToTermsPrefix")}{" "}
           <a href="/privacy" className="text-primary hover:underline">
-            Privacy Policy
+            {t("auth.register.privacyPolicy")}
           </a>
         </Label>
       </div>
@@ -148,7 +150,11 @@ export function RegisterForm() {
       )}
 
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign up"}
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          t("auth.register.submitButton")
+        )}
       </Button>
     </form>
   );

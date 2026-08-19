@@ -6,37 +6,35 @@ import { PhoneMockup } from "@/components/marketing/phone-mockup";
 import { StatsBar } from "@/components/marketing/stats-bar";
 import { PopularPairs } from "@/components/marketing/popular-pairs";
 import { Footer } from "@/components/marketing/footer";
+import { getServerTranslator } from "@/lib/i18n/get-locale";
 import { ShieldCheck, Zap, LineChart, Wallet } from "lucide-react";
-
-const FEATURES = [
-  {
-    icon: Zap,
-    title: "Zero risk, real conditions",
-    description:
-      "Trade with live market prices and a realistic order book — without ever risking real capital.",
-  },
-  {
-    icon: LineChart,
-    title: "Professional charting",
-    description:
-      "Candlestick charts, multiple timeframes, and volume — the same tools used on institutional desks.",
-  },
-  {
-    icon: Wallet,
-    title: "$10,000 virtual balance",
-    description:
-      "Every new account starts with $10,000 in virtual USDT so you can practice sizing and risk management.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Built-in risk controls",
-    description:
-      "Set Take Profit and Stop Loss on every position to learn disciplined trade management from day one.",
-  },
-];
 
 export default async function HomePage() {
   const user = await getOptionalUser();
+  const t = await getServerTranslator();
+
+  const FEATURES = [
+    {
+      icon: Zap,
+      title: t("marketing.home.features.zeroRisk.title"),
+      description: t("marketing.home.features.zeroRisk.description"),
+    },
+    {
+      icon: LineChart,
+      title: t("marketing.home.features.charting.title"),
+      description: t("marketing.home.features.charting.description"),
+    },
+    {
+      icon: Wallet,
+      title: t("marketing.home.features.balance.title"),
+      description: t("marketing.home.features.balance.description"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("marketing.home.features.riskControls.title"),
+      description: t("marketing.home.features.riskControls.description"),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,21 +52,20 @@ export default async function HomePage() {
         <div className="container relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
           <div className="animate-fade-up">
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Earn on the best{" "}
+              {t("marketing.home.hero.titleLine1")}{" "}
               <span className="bg-gradient-to-r from-primary to-emerald-300 bg-clip-text text-transparent">
-                financial assets
+                {t("marketing.home.hero.titleHighlight")}
               </span>
             </h1>
             <p className="mt-6 max-w-md text-base leading-relaxed text-muted">
-              Reliable, simple, innovative. Trade the most popular assets in Europe:
-              S&amp;P/ASX 200, Bitcoin, EUR/USD, with our CFD-style paper trading service.
+              {t("marketing.home.hero.subtitle")}
             </p>
             <div className="mt-8 flex items-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/register">Start trading</Link>
+                <Link href="/register">{t("marketing.home.hero.startTrading")}</Link>
               </Button>
               <Button size="lg" variant="ghost" asChild>
-                <Link href="/markets">View markets</Link>
+                <Link href="/markets">{t("marketing.home.hero.viewMarkets")}</Link>
               </Button>
             </div>
           </div>
@@ -83,12 +80,9 @@ export default async function HomePage() {
       <section className="container py-20">
         <div className="mb-12 max-w-xl">
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            Why traders choose GTX
+            {t("marketing.home.features.title")}
           </h2>
-          <p className="mt-3 text-muted">
-            Everything you need to learn the mechanics of trading, with none of the
-            downside.
-          </p>
+          <p className="mt-3 text-muted">{t("marketing.home.features.subtitle")}</p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f) => (
@@ -115,14 +109,13 @@ export default async function HomePage() {
       <section className="container pb-24">
         <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-10 text-center sm:p-16">
           <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-            Ready to start trading?
+            {t("marketing.home.cta.title")}
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-muted">
-            Create a free account and get $10,000 in virtual funds instantly. No card, no
-            risk.
+            {t("marketing.home.cta.subtitle")}
           </p>
           <Button size="lg" className="mt-8" asChild>
-            <Link href="/register">Create free account</Link>
+            <Link href="/register">{t("marketing.home.cta.button")}</Link>
           </Button>
         </div>
       </section>

@@ -13,6 +13,7 @@ import {
 import { SpotOrderPanel } from "@/components/trading/spot-order-panel";
 import { SpotOrdersPanel } from "@/components/trading/spot-orders-panel";
 import { useLivePrices } from "@/hooks/use-live-prices";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 const TIMEFRAME_STORAGE_KEY = "gtx-trading-timeframe";
 
@@ -29,6 +30,7 @@ function isValidTimeframe(value: string | null): value is Timeframe {
  * reinstatement — this file just no longer imports or renders them.
  */
 export function TradingTerminal() {
+  const { t } = useLocale();
   const searchParams = useSearchParams();
   const initialSymbol = searchParams.get("symbol") ?? "BTCUSDT";
 
@@ -123,7 +125,7 @@ export function TradingTerminal() {
               <div className="min-h-0 flex-1">
                 <div className="relative h-full w-full">
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/60 text-sm text-muted">
-                    Loading chart…
+                    {t("trading.chart.loading")}
                   </div>
                 </div>
               </div>

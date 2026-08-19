@@ -5,6 +5,7 @@ import { InfoPanel } from "@/components/dashboard/info-panel";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/session";
 import { isUserVerified } from "@/lib/verification/status";
+import { getServerTranslator } from "@/lib/i18n/get-locale";
 
 // Verification is required here and nowhere else — Trading/Spot Buy/Sell,
 // Deposit, Markets and Wallet all stay open to any authenticated user.
@@ -12,10 +13,13 @@ import { isUserVerified } from "@/lib/verification/status";
 export default async function WithdrawalPage() {
   const user = await requireUser();
   const verified = await isUserVerified(user.id);
+  const t = await getServerTranslator();
 
   return (
     <div className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-foreground">Withdrawal</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">
+        {t("withdrawal.pageTitle")}
+      </h1>
       <div className="grid gap-6 lg:grid-cols-3">
         {verified ? (
           <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
@@ -28,23 +32,23 @@ export default async function WithdrawalPage() {
             </div>
             <div>
               <h2 className="mb-1 text-sm font-semibold text-foreground">
-                Verification required
+                {t("withdrawal.verificationRequiredTitle")}
               </h2>
               <p className="max-w-md text-sm text-muted">
-                To withdraw funds, please complete account verification first.
+                {t("withdrawal.verificationRequiredDesc")}
               </p>
             </div>
             <Button asChild>
-              <Link href="/verification">Go to verification</Link>
+              <Link href="/verification">{t("withdrawal.goToVerification")}</Link>
             </Button>
           </div>
         )}
         <InfoPanel
-          title="Important information"
+          title={t("withdrawal.infoTitle")}
           items={[
-            "Withdrawals are processed within 1-3 business days.",
-            "Make sure that all trading positions are closed before making a withdrawal.",
-            "There is no fee for withdrawal.",
+            t("withdrawal.infoProcessingTime"),
+            t("withdrawal.infoClosePositions"),
+            t("withdrawal.infoNoFee"),
           ]}
         />
       </div>

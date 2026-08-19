@@ -16,9 +16,11 @@ import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { TradingTerminal } from "@/components/trading/trading-terminal";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({ get: () => null }),
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
 vi.mock("@/hooks/use-live-prices", () => ({
@@ -83,7 +85,13 @@ afterEach(() => {
 
 function renderTerminal() {
   act(() => {
-    root.render(React.createElement(TradingTerminal));
+    root.render(
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(TradingTerminal)
+      )
+    );
   });
 }
 

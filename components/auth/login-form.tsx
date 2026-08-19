@@ -7,9 +7,11 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 export function LoginForm() {
   const router = useRouter();
+  const { t } = useLocale();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,15 +31,15 @@ export function LoginForm() {
       const json = await res.json();
 
       if (!res.ok) {
-        setError(json.error ?? "Login failed");
+        setError(json.error ?? t("auth.login.loginFailed"));
         return;
       }
 
-      toast.success("Welcome back!");
+      toast.success(t("auth.login.welcomeToast"));
       router.push("/account");
       router.refresh();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -46,7 +48,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="email">E-mail</Label>
+        <Label htmlFor="email">{t("auth.emailLabel")}</Label>
         <Input
           id="email"
           type="email"
@@ -58,7 +60,7 @@ export function LoginForm() {
       </div>
 
       <div>
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("auth.passwordLabel")}</Label>
         <div className="relative mt-1.5">
           <Input
             id="password"
@@ -81,11 +83,12 @@ export function LoginForm() {
       {error && <p className="text-sm text-danger">{error}</p>}
 
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Login"}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("common.login")}
       </Button>
 
       <div className="rounded-xl border border-border bg-surface/60 p-3 text-center text-xs text-muted">
-        Demo account: <span className="text-foreground">demo@gtx.com</span> /{" "}
+        {t("auth.login.demoAccountLabel")}{" "}
+        <span className="text-foreground">demo@gtx.com</span> /{" "}
         <span className="text-foreground">Demo123!</span>
       </div>
     </form>

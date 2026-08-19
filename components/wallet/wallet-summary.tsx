@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AnimatedCurrency } from "@/components/dashboard/animated-currency";
 import { Skeleton } from "@/components/shared/skeleton";
 import { WalletChart } from "@/components/wallet/wallet-chart";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
  * Purely presentational — WalletOverview supplies `balance`/`equity`/
@@ -36,14 +37,15 @@ export function WalletSummary({
   unrealizedPnlPercent: number;
   isLoading: boolean;
 }) {
+  const { t } = useLocale();
   const profitPositive = profit >= 0;
   const unrealizedPositive = unrealizedPnl >= 0;
 
   const cards = [
-    { label: "Balance", value: balance, accent: "text-foreground" },
-    { label: "Equity", value: equity, accent: "text-blue-300" },
+    { label: t("wallet.summary.balance"), value: balance, accent: "text-foreground" },
+    { label: t("wallet.summary.equity"), value: equity, accent: "text-blue-300" },
     {
-      label: "Profit",
+      label: t("wallet.summary.profit"),
       value: profit,
       accent: profitPositive ? "text-primary" : "text-danger",
       showSign: true,
@@ -73,7 +75,7 @@ export function WalletSummary({
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-xs text-muted">
-        <span>Unrealized PnL</span>
+        <span>{t("wallet.summary.unrealizedPnl")}</span>
         {!isLoading && (
           <span
             className={cn(
@@ -92,19 +94,19 @@ export function WalletSummary({
         <Button variant="primary" size="sm" asChild>
           <Link href="/deposit">
             <ArrowDownToLine className="h-4 w-4" />
-            Deposit
+            {t("wallet.summary.deposit")}
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
           <Link href="/withdrawal">
             <ArrowUpFromLine className="h-4 w-4" />
-            Withdraw
+            {t("wallet.summary.withdraw")}
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
           <Link href="/history">
             <History className="h-4 w-4" />
-            History
+            {t("wallet.summary.history")}
           </Link>
         </Button>
       </div>

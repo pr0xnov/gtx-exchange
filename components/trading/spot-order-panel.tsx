@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn, formatCurrency, formatPrice } from "@/lib/utils";
 import { useCreateSpotOrder, useSpotWallet } from "@/hooks/use-api";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 // All tracked pairs quote in USDT — see lib/binance/client.ts's
 // TRACKED_SYMBOLS and lib/spot/currencies.ts's SPOT_CURRENCIES.
@@ -40,6 +41,7 @@ export function SpotOrderPanel({
   displayName: string;
   livePrice?: number;
 }) {
+  const { t } = useLocale();
   const [orderType, setOrderType] = useState<"LIMIT" | "MARKET">("MARKET");
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
   const [limitPrice, setLimitPrice] = useState("");
@@ -107,14 +109,14 @@ export function SpotOrderPanel({
 
   async function submit() {
     if (!numericQuantity || numericQuantity <= 0) {
-      toast.error("Enter a valid amount");
+      toast.error(t("trading.orderPanel.errors.invalidAmount"));
       return;
     }
     if (numericQuantity > maxQuantity) {
       toast.error(
-        side === "BUY"
-          ? "Amount exceeds available USDT"
-          : `Amount exceeds available ${baseCurrency}`
+        `${t("trading.orderPanel.errors.amountExceedsAvailable")} ${
+          side === "BUY" ? QUOTE_CURRENCY : baseCurrency
+        }`
       );
       return;
     }
@@ -123,7 +125,7 @@ export function SpotOrderPanel({
       orderType === "LIMIT" &&
       (!limitPrice || !numericLimitPrice || numericLimitPrice <= 0)
     ) {
-      toast.error("Enter a price");
+      toast.error(t("trading.orderPanel.errors.priceRequired"));
       return;
     }
 
@@ -137,18 +139,28 @@ export function SpotOrderPanel({
       });
       toast.success(
         orderType === "MARKET"
-          ? `${side === "BUY" ? "Bought" : "Sold"} ${quantity} ${baseCurrency}`
-          : `Limit ${side === "BUY" ? "buy" : "sell"} order placed`
+          ? `${
+              side === "BUY"
+                ? t("trading.orderPanel.success.bought")
+                : t("trading.orderPanel.success.sold")
+            } ${quantity} ${baseCurrency}`
+          : side === "BUY"
+            ? t("trading.orderPanel.success.limitBuyPlaced")
+            : t("trading.orderPanel.success.limitSellPlaced")
       );
       if (orderType === "LIMIT") setLimitPrice("");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Order failed");
+      toast.error(
+        err instanceof Error ? err.message : t("trading.orderPanel.errors.orderFailed")
+      );
     }
   }
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto p-4">
-      <h3 className="mb-4 text-sm font-semibold text-foreground">Spot trade</h3>
+      <h3 className="mb-4 text-sm font-semibold text-foreground">
+        {t("trading.orderPanel.title")}
+      </h3>
 
       <div className="mb-3 grid grid-cols-2 gap-2">
         {(["BUY", "SELL"] as const).map((s) => (
@@ -164,22 +176,24 @@ export function SpotOrderPanel({
                 : "bg-surface text-muted hover:text-foreground"
             )}
           >
-            {s === "BUY" ? "Buy" : "Sell"}
+            {s === "BUY" ? t("trading.orderPanel.buy") : t("trading.orderPanel.sell")}
           </button>
         ))}
       </div>
 
       <div className="mb-4 flex rounded-xl bg-surface p-1">
-        {(["MARKET", "LIMIT"] as const).map((t) => (
+        {(["MARKET", "LIMIT"] as const).map((ot) => (
           <button
-            key={t}
-            onClick={() => setOrderType(t)}
+            key={ot}
+            onClick={() => setOrderType(ot)}
             className={cn(
               "flex-1 rounded-lg py-2 text-xs font-medium transition-colors",
-              orderType === t ? "bg-primary/15 text-primary" : "text-muted"
+              orderType === ot ? "bg-primary/15 text-primary" : "text-muted"
             )}
           >
-            {t === "LIMIT" ? "Limit" : "Market"}
+            {ot === "LIMIT"
+              ? t("trading.orderPanel.limit")
+              : t("trading.orderPanel.market")}
           </button>
         ))}
       </div>
@@ -187,7 +201,9 @@ export function SpotOrderPanel({
       <div className="space-y-4">
         {orderType === "LIMIT" && (
           <div>
-            <Label>Price ({QUOTE_CURRENCY})</Label>
+            <Label>
+              {t("trading.orderPanel.priceLabel")} ({QUOTE_CURRENCY})
+            </Label>
             <Input
               type="number"
               step="0.0001"
@@ -202,9 +218,11 @@ export function SpotOrderPanel({
 
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <Label>Quantity ({baseCurrency})</Label>
+            <Label>
+              {t("trading.orderPanel.quantityLabel")} ({baseCurrency})
+            </Label>
             <span className="text-xs text-muted">
-              Available:{" "}
+              {t("trading.orderPanel.available")}{" "}
               <span className="font-tabular text-foreground">
                 {side === "BUY"
                   ? `${formatCurrency(quoteAvailable)} ${QUOTE_CURRENCY}`
@@ -233,7 +251,11 @@ export function SpotOrderPanel({
               value={Math.round(sliderPercent)}
               onChange={(e) => handleSliderChange(Number(e.target.value))}
               disabled={maxQuantity <= 0}
-              aria-label={`${side === "BUY" ? "Buy" : "Sell"} amount as a percent of available`}
+              aria-label={
+                side === "BUY"
+                  ? t("trading.orderPanel.sliderBuyAria")
+                  : t("trading.orderPanel.sliderSellAria")
+              }
               className="h-6 w-full cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-40"
             />
             <div className="mt-1.5 flex justify-between text-[10px] text-muted">
@@ -248,7 +270,7 @@ export function SpotOrderPanel({
 
         <div className="rounded-xl bg-surface p-3 text-xs text-muted">
           <div className="flex justify-between">
-            <span>Total</span>
+            <span>{t("trading.orderPanel.total")}</span>
             <span className="font-tabular text-foreground">
               {estimatedTotal ? `${formatCurrency(estimatedTotal)}` : "—"}
             </span>
@@ -267,7 +289,7 @@ export function SpotOrderPanel({
           {createOrder.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            `${side === "BUY" ? "Buy" : "Sell"} ${baseCurrency}`
+            `${side === "BUY" ? t("trading.orderPanel.buy") : t("trading.orderPanel.sell")} ${baseCurrency}`
           )}
         </Button>
       </div>

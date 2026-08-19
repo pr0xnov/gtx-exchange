@@ -5,8 +5,10 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { FileUploadRow } from "@/components/dashboard/file-upload-row";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 export function VerificationForm() {
+  const { t } = useLocale();
   const [identityFile, setIdentityFile] = useState<string | null>(null);
   const [addressFile, setAddressFile] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -14,7 +16,7 @@ export function VerificationForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!identityFile || !addressFile) {
-      toast.error("Please upload both required documents");
+      toast.error(t("verification.missingDocsError"));
       return;
     }
     setLoading(true);
@@ -29,9 +31,11 @@ export function VerificationForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
-      toast.success("Documents submitted for review");
+      toast.success(t("verification.submitSuccess"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Submission failed");
+      toast.error(
+        err instanceof Error ? err.message : t("verification.submitFailedFallback")
+      );
     } finally {
       setLoading(false);
     }
@@ -39,11 +43,21 @@ export function VerificationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <FileUploadRow label="Identity document" onFileSelected={setIdentityFile} />
-      <FileUploadRow label="Proof of address" onFileSelected={setAddressFile} />
+      <FileUploadRow
+        label={t("verification.identityDocumentLabel")}
+        onFileSelected={setIdentityFile}
+      />
+      <FileUploadRow
+        label={t("verification.proofOfAddressLabel")}
+        onFileSelected={setAddressFile}
+      />
 
       <Button type="submit" size="lg" className="w-full" disabled={loading}>
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit documents"}
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          t("verification.submitButton")
+        )}
       </Button>
     </form>
   );

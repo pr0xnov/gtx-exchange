@@ -16,6 +16,11 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WalletTradeHistory } from "@/components/wallet/wallet-trade-history";
 import type { SpotOrderDto } from "@/hooks/use-api";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
 
 let ordersData: SpotOrderDto[] = [];
 let isLoading = false;
@@ -57,7 +62,13 @@ afterEach(() => {
 
 function render() {
   act(() => {
-    root.render(React.createElement(WalletTradeHistory));
+    root.render(
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(WalletTradeHistory)
+      )
+    );
   });
 }
 

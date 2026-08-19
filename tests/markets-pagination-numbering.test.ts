@@ -16,6 +16,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { AllMarketsTable } from "@/components/markets/all-markets-table";
 import { MiniMarketTable } from "@/components/markets/mini-market-table";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { mergeMarketData, type MarketAssetLike } from "@/lib/markets/derive";
 
 vi.mock("next/navigation", () => ({
@@ -55,16 +56,20 @@ afterEach(() => {
 function renderAllMarketsTable() {
   act(() => {
     root.render(
-      React.createElement(AllMarketsTable, {
-        title: "Все криптовалюты",
-        rows: SIXTY_ROWS,
-        isLoading: false,
-        search: "",
-        favorites: new Set<string>(),
-        onToggleFavorite: vi.fn(),
-        sparklines: {},
-        isAuthenticated: true,
-      })
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(AllMarketsTable, {
+          title: "Все криптовалюты",
+          rows: SIXTY_ROWS,
+          isLoading: false,
+          search: "",
+          favorites: new Set<string>(),
+          onToggleFavorite: vi.fn(),
+          sparklines: {},
+          isAuthenticated: true,
+        })
+      )
     );
   });
 }
@@ -136,15 +141,19 @@ describe("MiniMarketTable — non-paginated blocks keep numbering from 1 (unchan
     const rows = mergeMarketData(SIXTY_ASSETS.slice(0, 5), {});
     act(() => {
       root.render(
-        React.createElement(MiniMarketTable, {
-          title: "Популярные",
-          rows,
-          isLoading: false,
-          favorites: new Set<string>(),
-          onToggleFavorite: vi.fn(),
-          sparklines: {},
-          isAuthenticated: true,
-        })
+        React.createElement(
+          LocaleProvider,
+          { initialLocale: "en" },
+          React.createElement(MiniMarketTable, {
+            title: "Популярные",
+            rows,
+            isLoading: false,
+            favorites: new Set<string>(),
+            onToggleFavorite: vi.fn(),
+            sparklines: {},
+            isAuthenticated: true,
+          })
+        )
       );
     });
     const numbers = Array.from(container.querySelectorAll("tbody tr td:first-child")).map(

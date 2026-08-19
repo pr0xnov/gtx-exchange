@@ -29,6 +29,11 @@ import { createRoot, type Root } from "react-dom/client";
 import { AssetWatchlist, DISPLAY_NAMES } from "@/components/trading/asset-watchlist";
 import { MARKET_REGISTRY } from "@/lib/binance/client";
 import type { LiveTicker } from "@/hooks/use-live-prices";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
 
 const PRICES: Record<string, LiveTicker> = {
   BTCUSDT: {
@@ -67,12 +72,16 @@ afterEach(() => {
 function render(props: Partial<Parameters<typeof AssetWatchlist>[0]> = {}) {
   act(() => {
     root.render(
-      React.createElement(AssetWatchlist, {
-        prices: PRICES,
-        selected: "BTCUSDT",
-        onSelect: vi.fn(),
-        ...props,
-      })
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(AssetWatchlist, {
+          prices: PRICES,
+          selected: "BTCUSDT",
+          onSelect: vi.fn(),
+          ...props,
+        })
+      )
     );
   });
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { MiniMarketTable } from "@/components/markets/mini-market-table";
 import {
   filterBySearch,
@@ -40,6 +41,7 @@ export function AllMarketsTable({
   isAuthenticated: boolean;
   emptyMessage?: string;
 }) {
+  const { t } = useLocale();
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(1);
@@ -65,7 +67,7 @@ export function AllMarketsTable({
   }
 
   const resolvedEmptyMessage =
-    rows.length === 0 && emptyMessage ? emptyMessage : "No cryptocurrencies found.";
+    rows.length === 0 && emptyMessage ? emptyMessage : t("nav.searchNoResults");
 
   return (
     <MiniMarketTable
@@ -85,7 +87,9 @@ export function AllMarketsTable({
         !isLoading && sorted.length > PAGE_SIZE ? (
           <div className="flex items-center justify-between border-t border-border px-4 py-3 text-sm text-muted">
             <span>
-              Page {currentPage} of {pageCount} · {sorted.length} assets
+              {t("markets.pagination.pageLabel")} {currentPage}{" "}
+              {t("markets.pagination.of")} {pageCount} · {sorted.length}{" "}
+              {t("markets.pagination.assets")}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -94,14 +98,14 @@ export function AllMarketsTable({
                 className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-white/5 hover:text-foreground disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Prev
+                {t("markets.pagination.prev")}
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
                 disabled={currentPage >= pageCount}
                 className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-white/5 hover:text-foreground disabled:opacity-40"
               >
-                Next
+                {t("markets.pagination.next")}
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>

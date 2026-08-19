@@ -1,16 +1,19 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { RegisterForm } from "@/components/auth/register-form";
+import { getServerTranslator } from "@/lib/i18n/get-locale";
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const t = await getServerTranslator();
+
   return (
     <AuthShell
-      title="Create an account"
+      title={t("auth.register.title")}
       footer={
         <>
-          Already have an account?{" "}
+          {t("auth.register.haveAccountPrompt")}{" "}
           <Link href="/login" className="text-primary hover:underline">
-            Login
+            {t("common.login")}
           </Link>
         </>
       }

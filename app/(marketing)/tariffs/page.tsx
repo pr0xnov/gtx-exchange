@@ -3,58 +3,60 @@ import { getOptionalUser } from "@/lib/auth/session";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { Button } from "@/components/ui/button";
+import { getServerTranslator } from "@/lib/i18n/get-locale";
 import { Check } from "lucide-react";
-
-const TIERS = [
-  {
-    name: "Standard",
-    price: "Free",
-    description: "Everything you need to start practicing.",
-    startingBalance: "$10,000 virtual USDT",
-    leverage: "Up to 1:50",
-    highlight: false,
-    features: [
-      "Spot and Futures paper trading",
-      "Live Binance market data",
-      "Market and Limit orders",
-      "Take Profit / Stop Loss",
-      "Standard support",
-    ],
-  },
-  {
-    name: "Pro",
-    price: "Free",
-    description: "For traders who want more room to size positions.",
-    startingBalance: "$25,000 virtual USDT",
-    leverage: "Up to 1:100",
-    highlight: true,
-    features: [
-      "Everything in Standard",
-      "Higher starting balance",
-      "Full 1:100 leverage on majors",
-      "Priority order execution queue",
-      "Priority support",
-    ],
-  },
-  {
-    name: "VIP",
-    price: "Free",
-    description: "For traders preparing for prop-desk style evaluations.",
-    startingBalance: "$100,000 virtual USDT",
-    leverage: "Up to 1:100",
-    highlight: false,
-    features: [
-      "Everything in Pro",
-      "Highest starting balance",
-      "Balance reset on request",
-      "Early access to new markets",
-      "Dedicated support channel",
-    ],
-  },
-];
 
 export default async function TariffsPage() {
   const user = await getOptionalUser();
+  const t = await getServerTranslator();
+
+  const TIERS = [
+    {
+      name: "Standard",
+      price: t("marketing.tariffs.priceFree"),
+      description: t("marketing.tariffs.standard.description"),
+      startingBalance: t("marketing.tariffs.standard.startingBalance"),
+      leverage: t("marketing.tariffs.leverageUpTo50"),
+      highlight: false,
+      features: [
+        t("marketing.tariffs.standard.feature1"),
+        t("marketing.tariffs.standard.feature2"),
+        t("marketing.tariffs.standard.feature3"),
+        t("marketing.tariffs.standard.feature4"),
+        t("marketing.tariffs.standard.feature5"),
+      ],
+    },
+    {
+      name: "Pro",
+      price: t("marketing.tariffs.priceFree"),
+      description: t("marketing.tariffs.pro.description"),
+      startingBalance: t("marketing.tariffs.pro.startingBalance"),
+      leverage: t("marketing.tariffs.leverageUpTo100"),
+      highlight: true,
+      features: [
+        t("marketing.tariffs.pro.feature1"),
+        t("marketing.tariffs.pro.feature2"),
+        t("marketing.tariffs.pro.feature3"),
+        t("marketing.tariffs.pro.feature4"),
+        t("marketing.tariffs.pro.feature5"),
+      ],
+    },
+    {
+      name: "VIP",
+      price: t("marketing.tariffs.priceFree"),
+      description: t("marketing.tariffs.vip.description"),
+      startingBalance: t("marketing.tariffs.vip.startingBalance"),
+      leverage: t("marketing.tariffs.leverageUpTo100"),
+      highlight: false,
+      features: [
+        t("marketing.tariffs.vip.feature1"),
+        t("marketing.tariffs.vip.feature2"),
+        t("marketing.tariffs.vip.feature3"),
+        t("marketing.tariffs.vip.feature4"),
+        t("marketing.tariffs.vip.feature5"),
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -70,14 +72,13 @@ export default async function TariffsPage() {
         <div className="absolute inset-0 bg-grid-fade bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,black,transparent)]" />
         <div className="container relative py-20 text-center">
           <h1 className="mx-auto max-w-2xl text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-            Simple,{" "}
+            {t("marketing.tariffs.hero.titlePrefix")}{" "}
             <span className="bg-gradient-to-r from-primary to-emerald-300 bg-clip-text text-transparent">
-              free tariffs
+              {t("marketing.tariffs.hero.titleHighlight")}
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted">
-            GTX never charges real money — every tier only changes your starting virtual
-            balance and leverage cap. Pick the one that matches what you're training for.
+            {t("marketing.tariffs.hero.subtitle")}
           </p>
         </div>
       </section>
@@ -95,7 +96,7 @@ export default async function TariffsPage() {
             >
               {tier.highlight && (
                 <span className="mb-4 w-fit rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
-                  Most popular
+                  {t("marketing.tariffs.mostPopular")}
                 </span>
               )}
               <h3 className="text-xl font-bold text-foreground">{tier.name}</h3>
@@ -106,13 +107,15 @@ export default async function TariffsPage() {
 
               <div className="mt-6 space-y-2 rounded-xl border border-border bg-surface p-4 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted">Starting balance</span>
+                  <span className="text-muted">
+                    {t("marketing.tariffs.startingBalance")}
+                  </span>
                   <span className="font-medium text-foreground">
                     {tier.startingBalance}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted">Max leverage</span>
+                  <span className="text-muted">{t("marketing.tariffs.maxLeverage")}</span>
                   <span className="font-medium text-foreground">{tier.leverage}</span>
                 </div>
               </div>
@@ -131,18 +134,18 @@ export default async function TariffsPage() {
                 variant={tier.highlight ? "primary" : "outline"}
                 asChild
               >
-                <Link href="/register">Get started</Link>
+                <Link href="/register">{t("marketing.tariffs.getStarted")}</Link>
               </Button>
             </div>
           ))}
         </div>
 
         <p className="mt-10 text-center text-sm text-muted">
-          Already have an account?{" "}
+          {t("marketing.tariffs.contactPrompt")}{" "}
           <Link href="/support" className="text-primary hover:underline">
-            Contact support
+            {t("marketing.tariffs.contactSupport")}
           </Link>{" "}
-          to request a tier change.
+          {t("marketing.tariffs.contactSuffix")}
         </p>
       </section>
 

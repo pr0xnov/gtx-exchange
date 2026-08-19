@@ -12,6 +12,11 @@ import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { SpotOrderPanel } from "@/components/trading/spot-order-panel";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
 
 const mutateAsync = vi.fn().mockResolvedValue({});
 vi.mock("@/hooks/use-api", () => ({
@@ -43,11 +48,15 @@ afterEach(() => {
 function render() {
   act(() => {
     root.render(
-      React.createElement(SpotOrderPanel, {
-        symbol: "BTCUSDT",
-        displayName: "BTC/USD",
-        livePrice: 63620,
-      })
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(SpotOrderPanel, {
+          symbol: "BTCUSDT",
+          displayName: "BTC/USD",
+          livePrice: 63620,
+        })
+      )
     );
   });
 }

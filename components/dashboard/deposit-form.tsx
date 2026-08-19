@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PaymentMethodSelector } from "@/components/dashboard/payment-method-selector";
 import { useDeposit } from "@/hooks/use-api";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 export function DepositForm() {
+  const { t } = useLocale();
   const [method, setMethod] = useState("VISA_MASTERCARD");
   const [amount, setAmount] = useState("1000");
   const deposit = useDeposit();
@@ -19,29 +21,31 @@ export function DepositForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (numericAmount < 250) {
-      toast.error("Minimum deposit amount is 250 USD");
+      toast.error(t("deposit.minAmountError"));
       return;
     }
     try {
       await deposit.mutateAsync({ amount: numericAmount, method });
-      toast.success(`Deposit of $${numericAmount.toFixed(2)} completed`);
+      toast.success(
+        `${t("deposit.completedPrefix")} $${numericAmount.toFixed(2)} ${t("deposit.completedSuffix")}`
+      );
       setAmount("1000");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Deposit failed");
+      toast.error(err instanceof Error ? err.message : t("deposit.failedFallback"));
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <Label>Select payment method</Label>
+        <Label>{t("deposit.selectPaymentMethod")}</Label>
         <div className="mt-2">
           <PaymentMethodSelector value={method} onChange={setMethod} />
         </div>
       </div>
 
       <div>
-        <Label>Deposit details</Label>
+        <Label>{t("deposit.detailsLabel")}</Label>
         <div className="relative mt-2">
           <Input
             type="number"
@@ -56,20 +60,16 @@ export function DepositForm() {
           </span>
         </div>
         <p className="mt-2 text-sm text-muted">
-          You will get <span className="text-foreground">{numericAmount.toFixed(2)} USD</span>
+          {t("deposit.youWillGet")}{" "}
+          <span className="text-foreground">{numericAmount.toFixed(2)} USD</span>
         </p>
       </div>
 
-      <Button
-        type="submit"
-        size="lg"
-        className="w-full"
-        disabled={deposit.isPending}
-      >
+      <Button type="submit" size="lg" className="w-full" disabled={deposit.isPending}>
         {deposit.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          "Make a deposit"
+          t("deposit.submitButton")
         )}
       </Button>
     </form>

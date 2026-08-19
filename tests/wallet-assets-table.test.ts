@@ -12,6 +12,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WalletAssetsTable } from "@/components/wallet/assets-table";
 import type { SpotAssetSummaryDto } from "@/hooks/use-api";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -60,7 +61,11 @@ afterEach(() => {
 function render(rows: SpotAssetSummaryDto[], sparklines: Record<string, number[]> = {}) {
   act(() => {
     root.render(
-      React.createElement(WalletAssetsTable, { rows, sparklines, isLoading: false })
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(WalletAssetsTable, { rows, sparklines, isLoading: false })
+      )
     );
   });
 }
@@ -68,7 +73,7 @@ function render(rows: SpotAssetSummaryDto[], sparklines: Record<string, number[]
 describe("WalletAssetsTable — clickable rows navigate to Trading", () => {
   it("clicking the BTC row navigates to /trading?symbol=BTCUSDT (Trading's own existing param)", () => {
     render([BTC_ROW]);
-    const row = container.querySelector('tr[aria-label="Open BTC on Trading"]')!;
+    const row = container.querySelector('tr[aria-label="BTC: Open on Trading"]')!;
     act(() => {
       row.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -78,7 +83,7 @@ describe("WalletAssetsTable — clickable rows navigate to Trading", () => {
   it("pressing Enter on a focused row also navigates", () => {
     render([BTC_ROW]);
     const row = container.querySelector(
-      'tr[aria-label="Open BTC on Trading"]'
+      'tr[aria-label="BTC: Open on Trading"]'
     )! as HTMLElement;
     act(() => {
       row.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
@@ -88,7 +93,7 @@ describe("WalletAssetsTable — clickable rows navigate to Trading", () => {
 
   it("rows are focusable and marked as links for accessibility", () => {
     render([BTC_ROW]);
-    const row = container.querySelector('tr[aria-label="Open BTC on Trading"]')!;
+    const row = container.querySelector('tr[aria-label="BTC: Open on Trading"]')!;
     expect(row.getAttribute("role")).toBe("link");
     expect(row.getAttribute("tabindex")).toBe("0");
   });

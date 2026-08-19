@@ -24,7 +24,12 @@ export function LocaleProvider({
   children,
 }: {
   initialLocale: Locale;
-  children: React.ReactNode;
+  // Optional only so React.createElement(LocaleProvider, { initialLocale },
+  // child) — the 3-arg form tests in this repo use, since they're .ts (no
+  // JSX) — type-checks: @types/react's createElement overloads don't merge
+  // variadic children into a props type where children sits alongside
+  // another required prop. Every real call site still always passes it.
+  children?: React.ReactNode;
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
   const router = useRouter();

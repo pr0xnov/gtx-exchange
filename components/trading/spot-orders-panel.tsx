@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSpotOrders, useCancelSpotOrder, type SpotOrderDto } from "@/hooks/use-api";
 import { PairCell } from "@/components/trading/pair-cell";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
  * One tab's table (thead + rows) — rendered twice by SpotOrdersPanel
@@ -31,16 +32,17 @@ function OrdersTable({
   cancelPending: boolean;
   onCancel: (id: string) => void;
 }) {
+  const { t } = useLocale();
   return (
     <table className="w-full text-xs">
       <thead className="sticky top-0 bg-background">
         <tr className="border-b border-border text-left text-muted">
-          <th className="px-4 py-2 font-medium">Pair</th>
-          <th className="px-2 py-2 font-medium">Type</th>
-          <th className="px-2 py-2 font-medium">Side</th>
-          <th className="px-2 py-2 font-medium">Price</th>
-          <th className="px-2 py-2 font-medium">Quantity</th>
-          <th className="px-2 py-2 font-medium">Status</th>
+          <th className="px-4 py-2 font-medium">{t("trading.orders.columnPair")}</th>
+          <th className="px-2 py-2 font-medium">{t("trading.orders.columnType")}</th>
+          <th className="px-2 py-2 font-medium">{t("trading.orders.columnSide")}</th>
+          <th className="px-2 py-2 font-medium">{t("trading.orders.columnPrice")}</th>
+          <th className="px-2 py-2 font-medium">{t("trading.orders.columnQuantity")}</th>
+          <th className="px-2 py-2 font-medium">{t("trading.orders.columnStatus")}</th>
           <th className="px-4 py-2" />
         </tr>
       </thead>
@@ -48,7 +50,7 @@ function OrdersTable({
         {isLoading && (
           <tr>
             <td colSpan={7} className="px-4 py-6 text-center text-muted">
-              Loading orders…
+              {t("trading.orders.loading")}
             </td>
           </tr>
         )}
@@ -68,11 +70,15 @@ function OrdersTable({
               <PairCell symbol={o.symbol} />
             </td>
             <td className="px-2 py-2.5 text-muted">
-              {o.type === "MARKET" ? "Market" : "Limit"}
+              {o.type === "MARKET"
+                ? t("trading.orderPanel.market")
+                : t("trading.orderPanel.limit")}
             </td>
             <td className="px-2 py-2.5">
               <Badge variant={o.side === "BUY" ? "success" : "danger"}>
-                {o.side === "BUY" ? "Buy" : "Sell"}
+                {o.side === "BUY"
+                  ? t("trading.orderPanel.buy")
+                  : t("trading.orderPanel.sell")}
               </Badge>
             </td>
             <td className="font-tabular px-2 py-2.5 text-foreground">
@@ -81,7 +87,10 @@ function OrdersTable({
             <td className="font-tabular px-2 py-2.5 text-foreground">
               {o.quantity}
               {o.status !== "OPEN" && (
-                <span className="text-muted"> ({o.filledQuantity} filled)</span>
+                <span className="text-muted">
+                  {" "}
+                  ({o.filledQuantity} {t("trading.orders.filledSuffix")})
+                </span>
               )}
             </td>
             <td className="px-2 py-2.5">
@@ -95,10 +104,10 @@ function OrdersTable({
                 }
               >
                 {o.status === "OPEN"
-                  ? "Open"
+                  ? t("trading.orders.statusOpen")
                   : o.status === "FILLED"
-                    ? "Filled"
-                    : "Cancelled"}
+                    ? t("trading.orders.statusFilled")
+                    : t("trading.orders.statusCancelled")}
               </Badge>
             </td>
             <td className="px-4 py-2.5 text-right">
@@ -107,7 +116,7 @@ function OrdersTable({
                   onClick={() => onCancel(o.id)}
                   disabled={cancelPending}
                   className="rounded-md p-1 text-muted hover:bg-danger/10 hover:text-danger"
-                  aria-label="Cancel order"
+                  aria-label={t("trading.orders.cancelAria")}
                 >
                   {cancelPending ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -125,6 +134,7 @@ function OrdersTable({
 }
 
 export function SpotOrdersPanel() {
+  const { t } = useLocale();
   const [tab, setTab] = useState<"open" | "history">("open");
   const { data: orders, isLoading } = useSpotOrders();
   const cancelOrder = useCancelSpotOrder();
@@ -135,9 +145,9 @@ export function SpotOrdersPanel() {
   async function handleCancel(id: string) {
     try {
       await cancelOrder.mutateAsync(id);
-      toast.success("Order cancelled");
+      toast.success(t("trading.orders.cancelSuccess"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to cancel order");
+      toast.error(err instanceof Error ? err.message : t("trading.orders.cancelError"));
     }
   }
 
@@ -153,7 +163,8 @@ export function SpotOrdersPanel() {
               : "border-transparent text-muted hover:text-foreground"
           )}
         >
-          Open orders {openOrders.length > 0 && `(${openOrders.length})`}
+          {t("trading.orders.openTab")}{" "}
+          {openOrders.length > 0 && `(${openOrders.length})`}
         </button>
         <button
           onClick={() => setTab("history")}
@@ -164,7 +175,7 @@ export function SpotOrdersPanel() {
               : "border-transparent text-muted hover:text-foreground"
           )}
         >
-          Order history
+          {t("trading.orders.historyTab")}
         </button>
       </div>
 
@@ -182,7 +193,7 @@ export function SpotOrdersPanel() {
         <OrdersTable
           rows={openOrders}
           isLoading={isLoading}
-          emptyMessage="No open orders."
+          emptyMessage={t("trading.orders.emptyOpen")}
           cancelPending={cancelOrder.isPending}
           onCancel={handleCancel}
         />
@@ -196,7 +207,7 @@ export function SpotOrdersPanel() {
         <OrdersTable
           rows={historyOrders}
           isLoading={isLoading}
-          emptyMessage="No order history yet."
+          emptyMessage={t("trading.orders.emptyHistory")}
           cancelPending={cancelOrder.isPending}
           onCancel={handleCancel}
         />

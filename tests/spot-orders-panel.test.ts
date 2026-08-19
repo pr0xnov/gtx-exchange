@@ -17,6 +17,11 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { SpotOrdersPanel } from "@/components/trading/spot-orders-panel";
 import type { SpotOrderDto } from "@/hooks/use-api";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
 
 const SYMBOLS = [
   "BTCUSDT",
@@ -71,7 +76,13 @@ afterEach(() => {
 
 function render() {
   act(() => {
-    root.render(React.createElement(SpotOrdersPanel));
+    root.render(
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(SpotOrdersPanel)
+      )
+    );
   });
 }
 

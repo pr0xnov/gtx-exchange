@@ -8,6 +8,7 @@ import { CoinIcon } from "@/components/markets/coin-icon";
 import { useFavorites } from "@/hooks/use-favorites";
 import { MARKET_REGISTRY, TRACKED_SYMBOLS } from "@/lib/binance/client";
 import { LiveTicker } from "@/hooks/use-live-prices";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 // Single source of truth for every tracked symbol's name/base/display
 // form: MARKET_REGISTRY (lib/binance/client.ts) — the same registry
@@ -37,6 +38,7 @@ export function AssetWatchlist({
   selected: string;
   onSelect: (symbol: string) => void;
 }) {
+  const { t } = useLocale();
   const [search, setSearch] = useState("");
   // Trading is already an authenticated-only route (middleware.ts), so
   // there's no guest case to gate on here — reuses the exact same
@@ -65,7 +67,7 @@ export function AssetWatchlist({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           <Input
-            placeholder="Search"
+            placeholder={t("common.search")}
             className="h-9 pl-8 text-xs"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -109,7 +111,11 @@ export function AssetWatchlist({
                     toggleFavorite(symbol);
                   }}
                   className="flex shrink-0 items-center justify-center rounded-lg p-1 text-muted hover:text-foreground"
-                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  aria-label={
+                    isFavorite
+                      ? t("trading.watchlist.removeFavorite")
+                      : t("trading.watchlist.addFavorite")
+                  }
                 >
                   <Star
                     className={cn(

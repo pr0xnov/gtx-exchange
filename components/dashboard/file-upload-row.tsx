@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { FileCheck2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 export function FileUploadRow({
   label,
@@ -11,6 +12,7 @@ export function FileUploadRow({
   label: string;
   onFileSelected: (fileName: string) => void;
 }) {
+  const { t } = useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
@@ -46,7 +48,7 @@ export function FileUploadRow({
         onClick={() => inputRef.current?.click()}
       >
         <Upload className="mr-1.5 h-3.5 w-3.5" />
-        Choose file
+        {t("verification.chooseFile")}
       </Button>
     </div>
   );

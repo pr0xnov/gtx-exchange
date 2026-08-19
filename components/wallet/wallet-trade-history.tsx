@@ -6,6 +6,7 @@ import { DISPLAY_NAMES } from "@/components/trading/asset-watchlist";
 import { MARKET_REGISTRY } from "@/lib/binance/client";
 import { useSpotOrders } from "@/hooks/use-api";
 import { formatCurrency, formatDate, formatPrice } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 const REGISTRY_BY_SYMBOL = new Map(MARKET_REGISTRY.map((e) => [e.symbol, e]));
 
@@ -32,6 +33,7 @@ const REGISTRY_BY_SYMBOL = new Map(MARKET_REGISTRY.map((e) => [e.symbol, e]));
  * desktop widths, not a vertical scroll box.
  */
 export function WalletTradeHistory() {
+  const { t } = useLocale();
   const { data: orders, isLoading } = useSpotOrders();
   const trades = orders?.filter((o) => o.status === "FILLED") ?? [];
 
@@ -40,28 +42,32 @@ export function WalletTradeHistory() {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border text-left text-xs text-muted">
-            <th className="px-5 py-3 font-medium">Crypto / Pair</th>
-            <th className="px-3 py-3 font-medium">Type</th>
-            <th className="px-3 py-3 font-medium">Side</th>
-            <th className="px-3 py-3 font-medium">Price</th>
-            <th className="px-3 py-3 font-medium">Quantity</th>
-            <th className="px-3 py-3 font-medium">Total</th>
-            <th className="px-3 py-3 font-medium">Status</th>
-            <th className="px-5 py-3 font-medium">Date / Time</th>
+            <th className="px-5 py-3 font-medium">
+              {t("wallet.history.headers.cryptoPair")}
+            </th>
+            <th className="px-3 py-3 font-medium">{t("wallet.table.type")}</th>
+            <th className="px-3 py-3 font-medium">{t("wallet.table.side")}</th>
+            <th className="px-3 py-3 font-medium">{t("wallet.table.price")}</th>
+            <th className="px-3 py-3 font-medium">{t("wallet.table.quantity")}</th>
+            <th className="px-3 py-3 font-medium">{t("wallet.history.headers.total")}</th>
+            <th className="px-3 py-3 font-medium">{t("wallet.table.status")}</th>
+            <th className="px-5 py-3 font-medium">
+              {t("wallet.history.headers.dateTime")}
+            </th>
           </tr>
         </thead>
         <tbody>
           {isLoading && (
             <tr>
               <td colSpan={8} className="px-5 py-8 text-center text-muted">
-                Loading history…
+                {t("wallet.history.loading")}
               </td>
             </tr>
           )}
           {!isLoading && trades.length === 0 && (
             <tr>
               <td colSpan={8} className="px-5 py-8 text-center text-muted">
-                No trading history.
+                {t("wallet.history.empty")}
               </td>
             </tr>
           )}
@@ -88,11 +94,15 @@ export function WalletTradeHistory() {
                   </div>
                 </td>
                 <td className="px-3 py-3 text-muted">
-                  {o.type === "MARKET" ? "Market" : "Limit"}
+                  {o.type === "MARKET"
+                    ? t("wallet.table.typeMarket")
+                    : t("wallet.table.typeLimit")}
                 </td>
                 <td className="px-3 py-3">
                   <Badge variant={o.side === "BUY" ? "success" : "danger"}>
-                    {o.side === "BUY" ? "Buy" : "Sell"}
+                    {o.side === "BUY"
+                      ? t("wallet.table.sideBuy")
+                      : t("wallet.table.sideSell")}
                   </Badge>
                 </td>
                 <td className="font-tabular px-3 py-3 text-foreground">
@@ -105,7 +115,7 @@ export function WalletTradeHistory() {
                   {formatCurrency(filledQty * price)}
                 </td>
                 <td className="px-3 py-3">
-                  <Badge variant="success">Filled</Badge>
+                  <Badge variant="success">{t("wallet.history.statusFilled")}</Badge>
                 </td>
                 <td className="px-5 py-3 text-muted">{formatDate(o.createdAt)}</td>
               </tr>

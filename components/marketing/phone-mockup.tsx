@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 const FLOATING_ASSETS = [
   { symbol: "AAPL", top: "8%", left: "-8%", delay: 0 },
@@ -11,6 +12,7 @@ const FLOATING_ASSETS = [
 ];
 
 export function PhoneMockup() {
+  const { t } = useLocale();
   return (
     <div className="relative mx-auto flex h-[420px] w-full max-w-sm items-center justify-center">
       {/* Glow behind phone */}
@@ -28,7 +30,9 @@ export function PhoneMockup() {
             <span>9:41</span>
             <span>GTX</span>
           </div>
-          <div className="mb-2 text-xs text-muted">Portfolio value</div>
+          <div className="mb-2 text-xs text-muted">
+            {t("marketing.phone.portfolioValue")}
+          </div>
           <div className="mb-4 text-xl font-bold text-foreground">$14,382.90</div>
           <div className="flex flex-1 items-end gap-1">
             {[40, 55, 35, 70, 50, 85, 60, 95, 75, 100].map((h, i) => (

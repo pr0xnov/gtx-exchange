@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PaymentMethodSelector } from "@/components/dashboard/payment-method-selector";
 import { useWithdraw, usePortfolio } from "@/hooks/use-api";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 export function WithdrawalForm() {
+  const { t } = useLocale();
   const [method, setMethod] = useState("VISA_MASTERCARD");
   const [amount, setAmount] = useState("500");
   const withdraw = useWithdraw();
@@ -20,33 +22,35 @@ export function WithdrawalForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (numericAmount < 50) {
-      toast.error("Minimum withdrawal amount is 50 USD");
+      toast.error(t("withdrawal.minAmountError"));
       return;
     }
     if (portfolio && numericAmount > portfolio.balance) {
-      toast.error("Insufficient balance for this withdrawal");
+      toast.error(t("withdrawal.insufficientBalanceError"));
       return;
     }
     try {
       await withdraw.mutateAsync({ amount: numericAmount, method });
-      toast.success(`Withdrawal request for $${numericAmount.toFixed(2)} submitted`);
+      toast.success(
+        `${t("withdrawal.requestPrefix")} $${numericAmount.toFixed(2)} ${t("withdrawal.requestSuffix")}`
+      );
       setAmount("500");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Withdrawal failed");
+      toast.error(err instanceof Error ? err.message : t("withdrawal.failedFallback"));
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <Label>Select payment method</Label>
+        <Label>{t("withdrawal.selectPaymentMethod")}</Label>
         <div className="mt-2">
           <PaymentMethodSelector value={method} onChange={setMethod} />
         </div>
       </div>
 
       <div>
-        <Label>Withdrawal details</Label>
+        <Label>{t("withdrawal.detailsLabel")}</Label>
         <div className="relative mt-2">
           <Input
             type="number"
@@ -61,7 +65,8 @@ export function WithdrawalForm() {
           </span>
         </div>
         <p className="mt-2 text-sm text-muted">
-          You will get <span className="text-foreground">{numericAmount.toFixed(2)} USD</span>
+          {t("withdrawal.youWillGet")}{" "}
+          <span className="text-foreground">{numericAmount.toFixed(2)} USD</span>
         </p>
       </div>
 
@@ -69,7 +74,7 @@ export function WithdrawalForm() {
         {withdraw.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          "Request withdrawal"
+          t("withdrawal.submitButton")
         )}
       </Button>
     </form>

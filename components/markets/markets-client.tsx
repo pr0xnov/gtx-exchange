@@ -8,6 +8,7 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { POPULAR_SYMBOLS, TRACKED_SYMBOLS } from "@/lib/binance/client";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { AllMarketsTable } from "@/components/markets/all-markets-table";
 import { MiniMarketTable } from "@/components/markets/mini-market-table";
 import {
@@ -21,14 +22,19 @@ import {
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+// `label` is a dictionary key (see lib/i18n/dictionaries.ts, "markets.tabs.*"),
+// resolved to display text at render time via t() — kept as a plain data
+// key (not the translated string itself) so this array stays a pure,
+// locale-independent constant that getVisibleTabs/tests can use without a
+// hook, while the rendered tab nav below translates each label.
 export const TABS = [
-  { id: "all", label: "Все криптовалюты" },
-  { id: "favorites", label: "Избранные" },
-  { id: "popular", label: "Популярные" },
-  { id: "gainers", label: "Показывают рост" },
-  { id: "losers", label: "Теряют в цене" },
-  { id: "volume", label: "Максимальный объём" },
-  { id: "movers", label: "Наибольшее движение" },
+  { id: "all", label: "markets.tabs.all" },
+  { id: "favorites", label: "markets.tabs.favorites" },
+  { id: "popular", label: "markets.tabs.popular" },
+  { id: "gainers", label: "markets.tabs.gainers" },
+  { id: "losers", label: "markets.tabs.losers" },
+  { id: "volume", label: "markets.tabs.volume" },
+  { id: "movers", label: "markets.tabs.movers" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -58,6 +64,7 @@ export function getVisibleTabs(isAuthenticated: boolean) {
  * never touches localStorage at all while isAuthenticated is false.
  */
 export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const { t } = useLocale();
   const { data, isLoading } = useMarkets();
   const { prices } = useLivePrices();
   const sparklines = useSparklines(TRACKED_SYMBOLS);
@@ -91,7 +98,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Markets</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("markets.title")}</h1>
 
         <nav className="mt-4 flex gap-1 overflow-x-auto border-b border-border">
           {visibleTabs.map((tab) => (
@@ -105,7 +112,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
                   : "border-transparent text-muted hover:text-foreground"
               )}
             >
-              {tab.label}
+              {t(tab.label)}
             </button>
           ))}
         </nav>
@@ -114,7 +121,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
           <div className="relative mt-4 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <Input
-              placeholder="Search cryptocurrencies"
+              placeholder={t("nav.searchPlaceholder")}
               className="pl-9"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -125,7 +132,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
 
       {activeTab === "all" && (
         <AllMarketsTable
-          title="Все криптовалюты"
+          title={t("markets.tabs.all")}
           rows={rows}
           isLoading={isLoading}
           search={debouncedSearch}
@@ -138,7 +145,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
 
       {activeTab === "favorites" && (
         <AllMarketsTable
-          title="Избранные"
+          title={t("markets.tabs.favorites")}
           rows={favoriteRows}
           isLoading={isLoading}
           search={debouncedSearch}
@@ -146,13 +153,13 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
           onToggleFavorite={toggleFavorite}
           sparklines={sparklines}
           isAuthenticated={isAuthenticated}
-          emptyMessage="У вас пока нет избранных криптовалют"
+          emptyMessage={t("markets.emptyFavorites")}
         />
       )}
 
       {activeTab === "popular" && (
         <MiniMarketTable
-          title="Популярные"
+          title={t("markets.tabs.popular")}
           rows={popular}
           isLoading={isLoading}
           favorites={favorites}
@@ -164,7 +171,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
 
       {activeTab === "gainers" && (
         <MiniMarketTable
-          title="Показывают рост"
+          title={t("markets.tabs.gainers")}
           rows={gainers}
           isLoading={isLoading}
           favorites={favorites}
@@ -176,7 +183,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
 
       {activeTab === "losers" && (
         <MiniMarketTable
-          title="Теряют в цене"
+          title={t("markets.tabs.losers")}
           rows={losers}
           isLoading={isLoading}
           favorites={favorites}
@@ -188,7 +195,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
 
       {activeTab === "volume" && (
         <MiniMarketTable
-          title="Максимальный объём"
+          title={t("markets.tabs.volume")}
           rows={topVolume}
           isLoading={isLoading}
           favorites={favorites}
@@ -200,7 +207,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
 
       {activeTab === "movers" && (
         <MiniMarketTable
-          title="Наибольшее движение"
+          title={t("markets.tabs.movers")}
           rows={biggestMovers}
           isLoading={isLoading}
           favorites={favorites}

@@ -17,6 +17,7 @@ import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Navbar, type NavbarUser } from "@/components/layout/navbar";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
@@ -68,7 +69,13 @@ afterEach(() => {
 
 function renderNavbar(user: NavbarUser | null) {
   act(() => {
-    root.render(React.createElement(Navbar, { user }));
+    root.render(
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(Navbar, { user })
+      )
+    );
   });
 }
 
@@ -103,13 +110,24 @@ function mouseLeave(el: Element | null) {
   });
 }
 
+/** The Navbar now renders two independent forceMount dropdowns (Language
+ *  and Account), so a plain `document.querySelector('[role="menu"]')`
+ *  would ambiguously grab whichever one happens to be first in the portal
+ *  order — every test in this file cares specifically about the Account
+ *  menu, identified by its "Log out" item (unique to it, unlike the
+ *  Language menu's locale list). */
+function accountMenuEl(): Element | null {
+  const menus = Array.from(document.querySelectorAll('[role="menu"]'));
+  return menus.find((m) => m.textContent?.includes("Log out")) ?? null;
+}
+
 /** The dropdown Content is `forceMount`ed (kept in the DOM at all times so
  *  its open/close transition can animate instead of jumping on
  *  mount/unmount), so `document.body.textContent` now always contains the
  *  menu's text regardless of visibility — the open/closed state has to be
  *  read from the `data-state` attribute Radix toggles on the menu node. */
 function menuState(): string | null {
-  return document.querySelector('[role="menu"]')?.getAttribute("data-state") ?? null;
+  return accountMenuEl()?.getAttribute("data-state") ?? null;
 }
 
 function typeInto(input: HTMLInputElement, value: string) {
@@ -217,7 +235,7 @@ describe("Navbar — Account dropdown opens on hover, with a bridge to the porta
   it("dropdown content is mounted up front (forceMount) and only toggles data-state + the animated visibility classes — never remounted", () => {
     renderNavbar(USER);
     const trigger = container.querySelector('button[aria-label="Account menu"]');
-    const content = document.querySelector('[role="menu"]');
+    const content = accountMenuEl();
     expect(content).not.toBeNull();
     expect(content!.getAttribute("data-state")).toBe("closed");
     expect(content!.className).toContain("data-[state=closed]:opacity-0");
@@ -226,7 +244,7 @@ describe("Navbar — Account dropdown opens on hover, with a bridge to the porta
 
     mouseEnter(trigger);
 
-    const sameContent = document.querySelector('[role="menu"]');
+    const sameContent = accountMenuEl();
     expect(sameContent).toBe(content); // same DOM node — no unmount/remount jump
     expect(sameContent!.getAttribute("data-state")).toBe("open");
   });
@@ -243,7 +261,7 @@ describe("Navbar — Account dropdown opens on hover, with a bridge to the porta
     const trigger = container.querySelector('button[aria-label="Account menu"]');
     mouseEnter(trigger);
     mouseLeave(trigger); // schedules a close
-    const content = document.querySelector('[role="menu"]');
+    const content = accountMenuEl();
     mouseEnter(content); // reaches the dropdown before the close fires -> cancels it
     act(() => {
       vi.advanceTimersByTime(500);

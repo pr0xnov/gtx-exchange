@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-api";
 import { Skeleton } from "@/components/shared/skeleton";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 function ToggleRow({
   label,
@@ -45,14 +46,15 @@ function ToggleRow({
 
 export default function SettingsPage() {
   const { data: user, isLoading } = useCurrentUser();
+  const { t } = useLocale();
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
-      <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t("settings.title")}</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
+          <CardTitle>{t("settings.profile")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           {isLoading ? (
@@ -63,22 +65,22 @@ export default function SettingsPage() {
           ) : (
             <>
               <div>
-                <Label>First name</Label>
+                <Label>{t("settings.firstName")}</Label>
                 <Input className="mt-1.5" defaultValue={user?.firstName} />
               </div>
               <div>
-                <Label>Last name</Label>
+                <Label>{t("settings.lastName")}</Label>
                 <Input className="mt-1.5" defaultValue={user?.lastName} />
               </div>
               <div className="sm:col-span-2">
-                <Label>E-mail</Label>
+                <Label>{t("settings.email")}</Label>
                 <Input className="mt-1.5" defaultValue={user?.email} disabled />
               </div>
             </>
           )}
           <div className="sm:col-span-2">
-            <Button onClick={() => toast.success("Profile updated")}>
-              Save changes
+            <Button onClick={() => toast.success(t("settings.toastProfileUpdated"))}>
+              {t("settings.saveChanges")}
             </Button>
           </div>
         </CardContent>
@@ -86,61 +88,61 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Password &amp; Security</CardTitle>
+          <CardTitle>{t("settings.passwordSecurity")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label>Current password</Label>
+              <Label>{t("settings.currentPassword")}</Label>
               <Input type="password" className="mt-1.5" placeholder="••••••••" />
             </div>
             <div>
-              <Label>New password</Label>
+              <Label>{t("settings.newPassword")}</Label>
               <Input type="password" className="mt-1.5" placeholder="••••••••" />
             </div>
           </div>
           <ToggleRow
-            label="Two-factor authentication (2FA)"
-            description="Add an extra layer of security to your account"
+            label={t("settings.twoFactorAuth")}
+            description={t("settings.twoFactorAuthDesc")}
           />
           <Button
             variant="outline"
-            onClick={() => toast.success("Password updated")}
+            onClick={() => toast.success(t("settings.toastPasswordUpdated"))}
           >
-            Update password
+            {t("settings.updatePassword")}
           </Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Notifications</CardTitle>
+          <CardTitle>{t("settings.notifications")}</CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-border">
           <ToggleRow
-            label="E-mail notifications"
-            description="Receive updates about deposits, withdrawals and trades"
+            label={t("settings.emailNotifications")}
+            description={t("settings.emailNotificationsDesc")}
             defaultChecked
           />
           <ToggleRow
-            label="Push notifications"
-            description="Get notified in real time on this device"
+            label={t("settings.pushNotifications")}
+            description={t("settings.pushNotificationsDesc")}
             defaultChecked
           />
           <ToggleRow
-            label="Market alerts"
-            description="Notify me about significant price movements"
+            label={t("settings.marketAlerts")}
+            description={t("settings.marketAlertsDesc")}
           />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Language &amp; Theme</CardTitle>
+          <CardTitle>{t("settings.languageTheme")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label>Language</Label>
+            <Label>{t("settings.language")}</Label>
             <select className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-4 text-sm text-foreground">
               <option>English</option>
               <option>Русский</option>
@@ -148,13 +150,13 @@ export default function SettingsPage() {
             </select>
           </div>
           <div>
-            <Label>Theme</Label>
+            <Label>{t("settings.theme")}</Label>
             <select
               className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-4 text-sm text-foreground"
               defaultValue="dark"
             >
-              <option value="dark">Dark</option>
-              <option value="light">Light</option>
+              <option value="dark">{t("settings.themeDark")}</option>
+              <option value="light">{t("settings.themeLight")}</option>
             </select>
           </div>
         </CardContent>
@@ -162,15 +164,15 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>API Keys</CardTitle>
+          <CardTitle>{t("settings.apiKeys")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-muted">
-            Generate API credentials to connect third-party tools to your paper
-            trading account.
-          </p>
-          <Button variant="outline" onClick={() => toast.success("API key generated")}>
-            Generate new key
+          <p className="text-sm text-muted">{t("settings.apiKeysDesc")}</p>
+          <Button
+            variant="outline"
+            onClick={() => toast.success(t("settings.toastApiKeyGenerated"))}
+          >
+            {t("settings.generateNewKey")}
           </Button>
         </CardContent>
       </Card>

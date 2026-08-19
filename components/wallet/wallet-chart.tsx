@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MiniSparkline } from "@/components/markets/mini-sparkline";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 const MAX_SAMPLES = 60;
 
@@ -19,6 +20,7 @@ const MAX_SAMPLES = 60;
  * page must avoid.
  */
 export function WalletChart({ value }: { value: number }) {
+  const { t } = useLocale();
   const [samples, setSamples] = useState<number[]>([]);
   const lastValue = useRef<number | null>(null);
 
@@ -31,7 +33,7 @@ export function WalletChart({ value }: { value: number }) {
   if (samples.length < 2) {
     return (
       <div className="flex h-10 items-center text-[11px] leading-tight text-muted">
-        Value history will appear here as it changes during this session.
+        {t("wallet.chart.emptyState")}
       </div>
     );
   }

@@ -25,6 +25,10 @@ import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
+
 // The mock's setData just forwards whatever the component passed in.
 // `open` only exists on "candles" calls (not "volume"), hence optional —
 // it's the marker this test tags each symbol's candles with, read back in
@@ -121,6 +125,31 @@ function resolvePending(matcher: (url: string) => boolean, candles: unknown[]) {
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
+// CandlestickChart now reads its "Loading chart…" text through useLocale(),
+// so every render needs a LocaleProvider ancestor. This has to be the SAME
+// LocaleProvider — same underlying React.createContext() instance — that
+// candlestick-chart.tsx itself resolves useLocale() against. Since these
+// tests force a fresh module graph per scenario (vi.resetModules() +
+// cache-busted dynamic import, right above), a LocaleProvider imported
+// once at this file's top level would come from a *different* module
+// generation than the one CandlestickChart's fresh copy pulls in
+// internally — two distinct Context objects that can't see each other,
+// so useLocale() would still throw "must be used within a LocaleProvider"
+// despite a Provider visibly wrapping it in the tree. Re-importing
+// LocaleProvider dynamically, after the same resetModules() call, lands
+// it in the same fresh generation as CandlestickChart's own import.
+async function chartElement(
+  Component: React.ComponentType<{ symbol: string; timeframe: string }>,
+  props: { symbol: string; timeframe: string }
+) {
+  const { LocaleProvider } = await import("@/lib/i18n/locale-context");
+  return React.createElement(
+    LocaleProvider,
+    { initialLocale: "en" },
+    React.createElement(Component, props)
+  );
+}
+
 function makeCandles(count: number, startTime: number, marker: number) {
   return Array.from({ length: count }, (_, i) => ({
     time: startTime + i,
@@ -176,7 +205,7 @@ describe("candlestick chart: stale pagination response race", () => {
 
     await act(async () => {
       root.render(
-        React.createElement(CandlestickChart, { symbol: "AAAUSDT", timeframe: "1h" })
+        await chartElement(CandlestickChart, { symbol: "AAAUSDT", timeframe: "1h" })
       );
       await flush();
     });
@@ -201,7 +230,7 @@ describe("candlestick chart: stale pagination response race", () => {
     // resolved. While it's pending, the user switches to a different pair.
     await act(async () => {
       root.render(
-        React.createElement(CandlestickChart, { symbol: "BBBUSDT", timeframe: "1h" })
+        await chartElement(CandlestickChart, { symbol: "BBBUSDT", timeframe: "1h" })
       );
       await flush();
     });
@@ -287,7 +316,7 @@ describe("candlestick chart: stale pagination response race", () => {
 
     await act(async () => {
       root.render(
-        React.createElement(CandlestickChart, { symbol: "AAAUSDT", timeframe: "1h" })
+        await chartElement(CandlestickChart, { symbol: "AAAUSDT", timeframe: "1h" })
       );
       await flush();
     });

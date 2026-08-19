@@ -15,6 +15,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WalletAssetsSection } from "@/components/wallet/wallet-assets-section";
 import type { SpotOrderDto } from "@/hooks/use-api";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -75,11 +76,15 @@ afterEach(() => {
 function render() {
   act(() => {
     root.render(
-      React.createElement(WalletAssetsSection, {
-        rows: [],
-        sparklines: {},
-        isLoading: false,
-      })
+      React.createElement(
+        LocaleProvider,
+        { initialLocale: "en" },
+        React.createElement(WalletAssetsSection, {
+          rows: [],
+          sparklines: {},
+          isLoading: false,
+        })
+      )
     );
   });
 }

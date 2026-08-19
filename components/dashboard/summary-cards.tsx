@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useAccountSummary } from "@/hooks/use-api";
 import { AnimatedCurrency } from "@/components/dashboard/animated-currency";
 import { Skeleton } from "@/components/shared/skeleton";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
  * Exactly three cards: Balance, Equity, Profit — sourced from the one
@@ -14,23 +15,24 @@ import { Skeleton } from "@/components/shared/skeleton";
  */
 export function SummaryCards() {
   const { data, isLoading } = useAccountSummary();
+  const { t } = useLocale();
   const profitPositive = (data?.profit ?? 0) >= 0;
 
   const cards = [
     {
-      label: "Balance",
+      label: t("account.balance"),
       value: data?.balance ?? 0,
       tone: "bg-surface",
       accent: "text-foreground",
     },
     {
-      label: "Equity",
+      label: t("account.equity"),
       value: data?.equity ?? 0,
       tone: "bg-[#1E2A44]",
       accent: "text-blue-300",
     },
     {
-      label: "Profit",
+      label: t("account.profit"),
       value: data?.profit ?? 0,
       tone: "bg-primary/10",
       accent: profitPositive ? "text-primary" : "text-danger",

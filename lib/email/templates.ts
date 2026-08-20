@@ -69,6 +69,44 @@ export function emailChangeConfirmEmail(
   };
 }
 
+/**
+ * Sent after an admin's Balance Adjustment (see
+ * app/api/admin/balance-adjustments/route.ts) — deliberately carries only
+ * asset/amount/direction. No admin identity, internal reason text, or
+ * anything else from the Audit Log entry leaks into what the user sees.
+ */
+export function balanceAdjustedEmail(
+  locale: Locale,
+  to: string,
+  params: { asset: string; amount: number; direction: "CREDIT" | "DEBIT" }
+): MailMessage {
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  const bodyKey =
+    params.direction === "CREDIT"
+      ? "email.balanceAdjusted.bodyCredit"
+      : "email.balanceAdjusted.bodyDebit";
+  const headingKey =
+    params.direction === "CREDIT"
+      ? "email.balanceAdjusted.headingCredit"
+      : "email.balanceAdjusted.headingDebit";
+  const body = interpolate(t(bodyKey), {
+    asset: params.asset,
+    amount: String(params.amount),
+  });
+  const footer = t("email.balanceAdjusted.footer");
+
+  return {
+    to,
+    subject: t("email.balanceAdjusted.subject"),
+    text: `${body}\n\n${footer}`,
+    html: wrapHtml(
+      t(headingKey),
+      `<p style="color:#D1D5DB;font-size:14px;line-height:1.6;">${body}</p>
+       <p style="color:#9CA3AF;font-size:13px;line-height:1.6;margin-top:24px;">${footer}</p>`
+    ),
+  };
+}
+
 export function emailChangedNoticeEmail(
   locale: Locale,
   to: string,

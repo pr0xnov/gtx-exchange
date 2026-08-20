@@ -14,6 +14,15 @@ const PROTECTED_PREFIXES = [
   "/trading",
   "/downloads",
   "/wallet",
+  // Only gates "must be logged in at all" — middleware runs on the Edge
+  // runtime and can't safely check `role` against the DB (Prisma/bcrypt
+  // aren't Edge-safe here, and the access-token JWT deliberately doesn't
+  // carry a role claim a stolen/decoded token could spoof). The real
+  // role check happens server-side, fresh from the DB, in
+  // app/admin/layout.tsx (via requireAdmin()) and independently in every
+  // /api/admin/** route — this is just the same "redirect to /login if
+  // no session cookie at all" every other protected prefix already gets.
+  "/admin",
 ];
 
 const AUTH_PAGES = ["/login", "/register"];

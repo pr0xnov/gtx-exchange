@@ -11,6 +11,18 @@ datasource db {
 // USER & AUTH
 // ---------------------------------------------------------------------------
 
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  SUSPENDED
+}
+
 model User {
   id           String   @id @default(cuid())
   firstName    String
@@ -22,6 +34,15 @@ model User {
   login        String   @unique @default(cuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  // Admin Panel: role is the sole gate for /admin and /api/admin/** (every
+  // admin route re-checks this fresh from the DB via requireAdmin() —
+  // never trusts a client-supplied role or an unverified JWT claim).
+  // status is the account's own standing, independent of role — a BLOCKED
+  // or SUSPENDED account (any role) is refused at login (see
+  // app/api/auth/login/route.ts) even with a correct password/2FA.
+  role   Role       @default(USER)
+  status UserStatus @default(ACTIVE)
 
   // Email-change verification (Settings > Profile): the new address is
   // held here, unapplied, until the token sent to it is confirmed — the
@@ -44,24 +65,31 @@ model User {
   spotWallets   SpotWallet[]
   spotOrders    SpotOrder[]
 
+  // Admin Panel relations — named because a User can appear on both sides
+  // (an admin's own account still has the User-side relations above too).
+  balanceAdjustmentsReceived BalanceAdjustment[] @relation("BalanceAdjustmentUser")
+  balanceAdjustmentsMade     BalanceAdjustment[] @relation("BalanceAdjustmentAdmin")
+  auditLogEntries            AuditLog[]          @relation("AuditLogAdmin")
+
   @@index([email])
+  @@index([role])
 }
 
 model UserSettings {
-  id           String  @id @default(cuid())
-  userId       String  @unique
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  language     String  @default("en")
-  theme        String  @default("dark")
-  twoFactorOn  Boolean @default(false)
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language        String  @default("en")
+  theme           String  @default("dark")
+  twoFactorOn     Boolean @default(false)
   // AES-256-GCM-encrypted TOTP secret (see lib/auth/crypto.ts) — set once
   // Enable 2FA's setup step is confirmed with a valid code, cleared on
   // disable. Never the raw base32 secret at rest, and never returned to
   // the client after setup completes.
   twoFactorSecret String?
-  notifyEmail  Boolean @default(true)
-  notifyPush   Boolean @default(true)
-  notifyMarket Boolean @default(false)
+  notifyEmail     Boolean @default(true)
+  notifyPush      Boolean @default(true)
+  notifyMarket    Boolean @default(false)
 }
 
 model Session {
@@ -104,14 +132,27 @@ model Wallet {
 }
 
 model Transaction {
-  id        String            @id @default(cuid())
+  id        String                @id @default(cuid())
   userId    String
-  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      TransactionType
   method    String?
-  amount    Decimal           @db.Decimal(20, 8)
-  status    TransactionStatus @default(COMPLETED)
-  createdAt DateTime          @default(now())
+  amount    Decimal               @db.Decimal(20, 8)
+  // Every pre-existing TransactionType (DEPOSIT/WITHDRAWAL/BONUS/
+  // TRADE_SETTLEMENT) only ever moved the futures-margin Wallet, which is
+  // implicitly USDT-only — this default backfills that for every row that
+  // predates ADMIN_BALANCE_ADJUSTMENT (the first type that can touch any
+  // SpotWallet currency) without a data migration.
+  asset     String                @default("USDT")
+  // Only meaningful for ADMIN_BALANCE_ADJUSTMENT so far — the older types
+  // each have a fixed, implied sign already baked into how the UI reads
+  // `type` (see components/dashboard/history-table.tsx's TYPE_SIGN), so
+  // backfilling this for them would be redundant, not corrective.
+  direction TransactionDirection?
+  status    TransactionStatus     @default(COMPLETED)
+  createdAt DateTime              @default(now())
+
+  balanceAdjustment BalanceAdjustment?
 
   @@index([userId, createdAt])
 }
@@ -121,6 +162,7 @@ enum TransactionType {
   WITHDRAWAL
   BONUS
   TRADE_SETTLEMENT
+  ADMIN_BALANCE_ADJUSTMENT
 }
 
 enum TransactionStatus {
@@ -129,20 +171,84 @@ enum TransactionStatus {
   FAILED
 }
 
+enum TransactionDirection {
+  CREDIT
+  DEBIT
+}
+
+// ---------------------------------------------------------------------------
+// ADMIN PANEL
+// ---------------------------------------------------------------------------
+
+/**
+ * The admin-facing record of a single manual balance correction — who did
+ * it, to whom, why. Deliberately its own model rather than cramming
+ * admin-only columns (adminId, reason) onto the general-purpose
+ * Transaction: every OTHER transaction type has neither, and this way
+ * Transaction stays exactly what every non-admin part of the app already
+ * expects. The linked `transaction` row is what makes the adjustment show
+ * up in the user's own existing History (see app/api/history) — one
+ * financial ledger, not two.
+ */
+model BalanceAdjustment {
+  id            String               @id @default(cuid())
+  userId        String
+  user          User                 @relation("BalanceAdjustmentUser", fields: [userId], references: [id], onDelete: Cascade)
+  adminId       String
+  admin         User                 @relation("BalanceAdjustmentAdmin", fields: [adminId], references: [id])
+  asset         String
+  direction     TransactionDirection
+  amount        Decimal              @db.Decimal(20, 8)
+  reason        String
+  transactionId String               @unique
+  transaction   Transaction          @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime             @default(now())
+
+  @@index([userId])
+  @@index([adminId])
+}
+
+/**
+ * Append-only security/administrative event log — no route in this app
+ * ever updates or deletes a row here (see app/api/admin/audit-log), which
+ * is what "append-only" means in practice for a Prisma model with no
+ * delete-capable API surface. `adminId` is nullable so this can also
+ * record a plain user's own security events (login/logout/password/2FA —
+ * see lib/audit/log.ts) without a fake admin actor; `targetUserId` is a
+ * plain string, not a relation, so an entry is never at risk of being
+ * cascade-deleted or blocked by referential integrity tied to the
+ * (currently nonexistent) ability to delete a User.
+ */
+model AuditLog {
+  id           String   @id @default(cuid())
+  adminId      String?
+  admin        User?    @relation("AuditLogAdmin", fields: [adminId], references: [id])
+  targetUserId String?
+  action       String
+  metadata     Json?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  @@index([adminId])
+  @@index([targetUserId])
+  @@index([action])
+  @@index([createdAt])
+}
+
 // ---------------------------------------------------------------------------
 // MARKET / ASSETS
 // ---------------------------------------------------------------------------
 
 model Asset {
-  id          String   @id @default(cuid())
-  symbol      String   @unique // e.g. BTCUSDT
-  displaySymbol String @default("")
-  baseAsset   String
-  quoteAsset  String   @default("USDT")
-  category    String   @default("Cryptocurrencies")
-  lastPrice   Decimal  @default(0) @db.Decimal(20, 8)
-  change24h   Decimal  @default(0) @db.Decimal(10, 4)
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  symbol        String   @unique // e.g. BTCUSDT
+  displaySymbol String   @default("")
+  baseAsset     String
+  quoteAsset    String   @default("USDT")
+  category      String   @default("Cryptocurrencies")
+  lastPrice     Decimal  @default(0) @db.Decimal(20, 8)
+  change24h     Decimal  @default(0) @db.Decimal(10, 4)
+  updatedAt     DateTime @updatedAt
 
   orders    Order[]
   positions Position[]
@@ -172,21 +278,21 @@ enum OrderStatus {
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assetId     String
-  asset       Asset       @relation(fields: [assetId], references: [id])
-  type        OrderType
-  side        OrderSide
-  amount      Decimal     @db.Decimal(20, 8)
-  leverage    Int         @default(1)
-  limitPrice  Decimal?    @db.Decimal(20, 8)
-  takeProfit  Decimal?    @db.Decimal(20, 8)
-  stopLoss    Decimal?    @db.Decimal(20, 8)
-  status      OrderStatus @default(PENDING)
-  createdAt   DateTime    @default(now())
-  filledAt    DateTime?
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetId    String
+  asset      Asset       @relation(fields: [assetId], references: [id])
+  type       OrderType
+  side       OrderSide
+  amount     Decimal     @db.Decimal(20, 8)
+  leverage   Int         @default(1)
+  limitPrice Decimal?    @db.Decimal(20, 8)
+  takeProfit Decimal?    @db.Decimal(20, 8)
+  stopLoss   Decimal?    @db.Decimal(20, 8)
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  filledAt   DateTime?
 
   position Position?
 
@@ -204,26 +310,26 @@ enum PositionStatus {
 }
 
 model Position {
-  id             String         @id @default(cuid())
-  userId         String
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assetId        String
-  asset          Asset          @relation(fields: [assetId], references: [id])
-  orderId        String?        @unique
-  order          Order?         @relation(fields: [orderId], references: [id])
-  side           PositionSide
-  amount         Decimal        @db.Decimal(20, 8)
-  leverage       Int            @default(1)
-  entryPrice     Decimal        @db.Decimal(20, 8)
-  currentPrice   Decimal        @db.Decimal(20, 8)
-  takeProfit     Decimal?       @db.Decimal(20, 8)
-  stopLoss       Decimal?       @db.Decimal(20, 8)
-  margin         Decimal        @db.Decimal(20, 8)
-  liquidationPrice Decimal?     @db.Decimal(20, 8)
-  status         PositionStatus @default(OPEN)
-  realizedPnl    Decimal?       @db.Decimal(20, 8)
-  openedAt       DateTime       @default(now())
-  closedAt       DateTime?
+  id               String         @id @default(cuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetId          String
+  asset            Asset          @relation(fields: [assetId], references: [id])
+  orderId          String?        @unique
+  order            Order?         @relation(fields: [orderId], references: [id])
+  side             PositionSide
+  amount           Decimal        @db.Decimal(20, 8)
+  leverage         Int            @default(1)
+  entryPrice       Decimal        @db.Decimal(20, 8)
+  currentPrice     Decimal        @db.Decimal(20, 8)
+  takeProfit       Decimal?       @db.Decimal(20, 8)
+  stopLoss         Decimal?       @db.Decimal(20, 8)
+  margin           Decimal        @db.Decimal(20, 8)
+  liquidationPrice Decimal?       @db.Decimal(20, 8)
+  status           PositionStatus @default(OPEN)
+  realizedPnl      Decimal?       @db.Decimal(20, 8)
+  openedAt         DateTime       @default(now())
+  closedAt         DateTime?
 
   trade Trade?
 
@@ -231,20 +337,20 @@ model Position {
 }
 
 model Trade {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assetId     String
-  asset       Asset    @relation(fields: [assetId], references: [id])
-  positionId  String?  @unique
-  position    Position? @relation(fields: [positionId], references: [id])
-  side        PositionSide
-  amount      Decimal  @db.Decimal(20, 8)
-  entryPrice  Decimal  @db.Decimal(20, 8)
-  exitPrice   Decimal  @db.Decimal(20, 8)
-  pnl         Decimal  @db.Decimal(20, 8)
-  leverage    Int      @default(1)
-  closedAt    DateTime @default(now())
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetId    String
+  asset      Asset        @relation(fields: [assetId], references: [id])
+  positionId String?      @unique
+  position   Position?    @relation(fields: [positionId], references: [id])
+  side       PositionSide
+  amount     Decimal      @db.Decimal(20, 8)
+  entryPrice Decimal      @db.Decimal(20, 8)
+  exitPrice  Decimal      @db.Decimal(20, 8)
+  pnl        Decimal      @db.Decimal(20, 8)
+  leverage   Int          @default(1)
+  closedAt   DateTime     @default(now())
 
   @@index([userId, closedAt])
 }

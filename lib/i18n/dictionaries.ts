@@ -221,10 +221,12 @@ const en = {
   "history.filterDeposits": "Deposits",
   "history.filterWithdrawals": "Withdrawals",
   "history.filterBonuses": "Bonuses",
+  "history.filterAdjustments": "Adjustments",
   "history.typeDeposit": "Deposit",
   "history.typeWithdrawal": "Withdrawal",
   "history.typeBonus": "Bonus",
   "history.typeTrade": "Trade",
+  "history.typeAdjustment": "Balance Adjustment",
   "history.columnId": "ID",
   "history.columnType": "Type",
   "history.columnAmount": "Amount",
@@ -548,6 +550,16 @@ const en = {
     "Your GTX account email was changed to {newEmail} on {date}.",
   "email.emailChanged.notYouNotice":
     "If you didn't make this change, please contact support immediately.",
+
+  "email.balanceAdjusted.subject": "Your GTX balance was updated",
+  "email.balanceAdjusted.headingCredit": "Balance credited",
+  "email.balanceAdjusted.headingDebit": "Balance adjusted",
+  "email.balanceAdjusted.bodyCredit":
+    "Your {asset} balance has been credited by {amount} {asset}.",
+  "email.balanceAdjusted.bodyDebit":
+    "Your {asset} balance has been debited by {amount} {asset}.",
+  "email.balanceAdjusted.footer":
+    "If you have questions about this change, please contact support.",
 } as const;
 
 export type DictionaryKey = keyof typeof en;
@@ -755,10 +767,12 @@ const ru: Dictionary = {
   "history.filterDeposits": "Пополнения",
   "history.filterWithdrawals": "Выводы",
   "history.filterBonuses": "Бонусы",
+  "history.filterAdjustments": "Корректировки",
   "history.typeDeposit": "Пополнение",
   "history.typeWithdrawal": "Вывод",
   "history.typeBonus": "Бонус",
   "history.typeTrade": "Сделка",
+  "history.typeAdjustment": "Корректировка баланса",
   "history.columnId": "ID",
   "history.columnType": "Тип",
   "history.columnAmount": "Сумма",
@@ -1073,6 +1087,15 @@ const ru: Dictionary = {
     "Email вашего аккаунта GTX был изменён на {newEmail} {date}.",
   "email.emailChanged.notYouNotice":
     "Если это были не вы, немедленно свяжитесь с поддержкой.",
+
+  "email.balanceAdjusted.subject": "Ваш баланс GTX обновлён",
+  "email.balanceAdjusted.headingCredit": "Баланс пополнен",
+  "email.balanceAdjusted.headingDebit": "Баланс скорректирован",
+  "email.balanceAdjusted.bodyCredit":
+    "Ваш баланс {asset} был пополнен на {amount} {asset}.",
+  "email.balanceAdjusted.bodyDebit": "С вашего баланса {asset} списано {amount} {asset}.",
+  "email.balanceAdjusted.footer":
+    "Если у вас есть вопросы по этому изменению, обратитесь в поддержку.",
 };
 
 const uk: Dictionary = {
@@ -1278,9 +1301,11 @@ const uk: Dictionary = {
   "history.filterDeposits": "Поповнення",
   "history.filterWithdrawals": "Виведення коштів",
   "history.filterBonuses": "Бонуси",
+  "history.filterAdjustments": "Коригування",
   "history.typeDeposit": "Поповнення",
   "history.typeWithdrawal": "Виведення",
   "history.typeBonus": "Бонус",
+  "history.typeAdjustment": "Коригування балансу",
   "history.typeTrade": "Угода",
   "history.columnId": "ID",
   "history.columnType": "Тип",
@@ -1593,6 +1618,14 @@ const uk: Dictionary = {
     "Email вашого акаунта GTX було змінено на {newEmail} {date}.",
   "email.emailChanged.notYouNotice":
     "Якщо це були не ви, негайно зв'яжіться з підтримкою.",
+
+  "email.balanceAdjusted.subject": "Ваш баланс GTX оновлено",
+  "email.balanceAdjusted.headingCredit": "Баланс поповнено",
+  "email.balanceAdjusted.headingDebit": "Баланс скориговано",
+  "email.balanceAdjusted.bodyCredit": "Ваш баланс {asset} поповнено на {amount} {asset}.",
+  "email.balanceAdjusted.bodyDebit": "З вашого балансу {asset} списано {amount} {asset}.",
+  "email.balanceAdjusted.footer":
+    "Якщо у вас є запитання щодо цієї зміни, зверніться до підтримки.",
 };
 
 export const dictionaries: Record<Locale, Dictionary> = { en, ru, uk };

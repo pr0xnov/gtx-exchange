@@ -16,6 +16,10 @@ export async function resetDatabase() {
     prisma.refreshToken.deleteMany(),
     prisma.session.deleteMany(),
     prisma.userSettings.deleteMany(),
+    // Both reference Transaction/User with a RESTRICT (not CASCADE) delete
+    // rule on adminId/transactionId — must go before those two.
+    prisma.balanceAdjustment.deleteMany(),
+    prisma.auditLog.deleteMany(),
     prisma.transaction.deleteMany(),
     prisma.wallet.deleteMany(),
     prisma.user.deleteMany(),

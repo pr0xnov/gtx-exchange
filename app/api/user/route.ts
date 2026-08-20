@@ -10,6 +10,7 @@ export async function GET() {
       lastName: user.lastName,
       email: user.email,
       login: user.login,
+      role: user.role,
       accountType: user.accountType,
       leverageMax: user.leverageMax,
       wallet: user.wallet,

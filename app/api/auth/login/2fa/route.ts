@@ -7,6 +7,7 @@ import { verifyTotpCode } from "@/lib/auth/totp";
 import { decryptSecret } from "@/lib/auth/crypto";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { createAuditLog } from "@/lib/audit/log";
 
 const verify2faLoginSchema = z.object({
   challengeToken: z.string().min(1),
@@ -42,6 +43,19 @@ export async function POST(req: NextRequest) {
       return apiError("Login expired — please sign in again", 401);
     }
 
+    // Re-checked here too, not just in /api/auth/login before the
+    // challenge token was issued — this is the call that actually grants
+    // a session, so it's the one that must be correct even if status
+    // somehow changed in the gap between the two requests.
+    if (user.status !== "ACTIVE") {
+      return apiError(
+        user.status === "BLOCKED"
+          ? "This account has been blocked. Please contact support."
+          : "This account is suspended. Please contact support.",
+        403
+      );
+    }
+
     const secret = decryptSecret(user.settings.twoFactorSecret);
     const valid = verifyTotpCode(secret, input.code);
     if (!valid) {
@@ -50,6 +64,15 @@ export async function POST(req: NextRequest) {
 
     await establishSession(user);
 
+    if (user.role !== "USER") {
+      await createAuditLog({
+        adminId: user.id,
+        targetUserId: user.id,
+        action: "ADMIN_LOGIN",
+        ipAddress: ip,
+      });
+    }
+
     return apiSuccess({
       user: {
         id: user.id,
@@ -57,6 +80,7 @@ export async function POST(req: NextRequest) {
         lastName: user.lastName,
         email: user.email,
         login: user.login,
+        role: user.role,
       },
       wallet: user.wallet,
     });

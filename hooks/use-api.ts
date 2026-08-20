@@ -38,6 +38,7 @@ export interface CurrentUser {
   lastName: string;
   email: string;
   login: string;
+  role: "USER" | "ADMIN" | "SUPER_ADMIN";
   accountType: string;
   leverageMax: number;
   wallet: { balance: string; credit: string; currency: string } | null;
@@ -180,9 +181,16 @@ export function useSparklines(symbols: readonly string[]): Record<string, number
 
 export interface TransactionDto {
   id: string;
-  type: "DEPOSIT" | "WITHDRAWAL" | "BONUS" | "TRADE_SETTLEMENT";
+  type:
+    | "DEPOSIT"
+    | "WITHDRAWAL"
+    | "BONUS"
+    | "TRADE_SETTLEMENT"
+    | "ADMIN_BALANCE_ADJUSTMENT";
   method: string | null;
   amount: string;
+  asset: string;
+  direction: "CREDIT" | "DEBIT" | null;
   status: "PENDING" | "COMPLETED" | "FAILED";
   createdAt: string;
 }

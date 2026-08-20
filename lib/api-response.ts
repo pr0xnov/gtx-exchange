@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { UnauthorizedError } from "@/lib/auth/session";
+import { UnauthorizedError, ForbiddenError } from "@/lib/auth/session";
 
 export function apiSuccess<T>(data: T, status = 200) {
   return NextResponse.json({ success: true, data }, { status });
@@ -17,6 +17,9 @@ export function handleApiError(error: unknown) {
   }
   if (error instanceof UnauthorizedError) {
     return apiError(error.message, 401);
+  }
+  if (error instanceof ForbiddenError) {
+    return apiError(error.message, 403);
   }
   if (error instanceof Error) {
     // eslint-disable-next-line no-console

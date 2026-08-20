@@ -25,6 +25,15 @@ export function LoginForm() {
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [code, setCode] = useState("");
 
+  // ADMIN/SUPER_ADMIN land on the Admin Panel instead of the regular
+  // Account page — everything else about login (session, cookies, 2FA) is
+  // identical for every role; this is purely a post-login destination.
+  function redirectAfterLogin(role: string | undefined) {
+    toast.success(t("auth.login.welcomeToast"));
+    router.push(role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin" : "/account");
+    router.refresh();
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -48,9 +57,7 @@ export function LoginForm() {
         return;
       }
 
-      toast.success(t("auth.login.welcomeToast"));
-      router.push("/account");
-      router.refresh();
+      redirectAfterLogin(json.data?.user?.role);
     } catch {
       setError(t("common.error"));
     } finally {
@@ -76,9 +83,7 @@ export function LoginForm() {
         return;
       }
 
-      toast.success(t("auth.login.welcomeToast"));
-      router.push("/account");
-      router.refresh();
+      redirectAfterLogin(json.data?.user?.role);
     } catch {
       setError(t("common.error"));
     } finally {

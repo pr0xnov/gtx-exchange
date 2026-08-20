@@ -6,6 +6,7 @@ import { establishSession } from "@/lib/auth/session";
 import { loginSchema } from "@/lib/validation/auth";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { createAuditLog } from "@/lib/audit/log";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,6 +32,15 @@ export async function POST(req: NextRequest) {
     const validPassword = await verifyPassword(input.password, user.passwordHash);
     if (!validPassword) return invalidCreds();
 
+    if (user.status !== "ACTIVE") {
+      return apiError(
+        user.status === "BLOCKED"
+          ? "This account has been blocked. Please contact support."
+          : "This account is suspended. Please contact support.",
+        403
+      );
+    }
+
     if (user.settings?.twoFactorOn) {
       // Password is correct, but no session yet — the client must submit
       // this challenge token + a TOTP code to /api/auth/login/2fa before
@@ -42,6 +52,18 @@ export async function POST(req: NextRequest) {
 
     await establishSession(user);
 
+    // Only admin logins, not every routine user sign-in — an
+    // administrative event log, not a general access log (see
+    // lib/audit/log.ts's own doc comment on what belongs here).
+    if (user.role !== "USER") {
+      await createAuditLog({
+        adminId: user.id,
+        targetUserId: user.id,
+        action: "ADMIN_LOGIN",
+        ipAddress: ip,
+      });
+    }
+
     return apiSuccess({
       user: {
         id: user.id,
@@ -49,6 +71,7 @@ export async function POST(req: NextRequest) {
         lastName: user.lastName,
         email: user.email,
         login: user.login,
+        role: user.role,
       },
       wallet: user.wallet,
     });

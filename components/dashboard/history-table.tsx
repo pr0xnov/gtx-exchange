@@ -13,6 +13,7 @@ const FILTERS = [
   { id: "deposits", labelKey: "history.filterDeposits" as DictionaryKey },
   { id: "withdrawals", labelKey: "history.filterWithdrawals" as DictionaryKey },
   { id: "bonuses", labelKey: "history.filterBonuses" as DictionaryKey },
+  { id: "adjustments", labelKey: "history.filterAdjustments" as DictionaryKey },
 ];
 
 const TYPE_LABEL_KEY: Record<string, DictionaryKey> = {
@@ -20,8 +21,13 @@ const TYPE_LABEL_KEY: Record<string, DictionaryKey> = {
   WITHDRAWAL: "history.typeWithdrawal",
   BONUS: "history.typeBonus",
   TRADE_SETTLEMENT: "history.typeTrade",
+  ADMIN_BALANCE_ADJUSTMENT: "history.typeAdjustment",
 };
 
+// Every other type has one fixed, implied sign — only
+// ADMIN_BALANCE_ADJUSTMENT can go either way (Add Balance vs Remove
+// Balance), so its sign comes from the row's own `direction` instead of
+// this static table (see the CREDIT/DEBIT branch in the render below).
 const TYPE_SIGN: Record<string, 1 | -1> = {
   DEPOSIT: 1,
   BONUS: 1,
@@ -96,7 +102,12 @@ export function HistoryTable() {
             )}
 
             {data?.map((tx) => {
-              const sign = TYPE_SIGN[tx.type] ?? 1;
+              const sign =
+                tx.type === "ADMIN_BALANCE_ADJUSTMENT"
+                  ? tx.direction === "DEBIT"
+                    ? -1
+                    : 1
+                  : (TYPE_SIGN[tx.type] ?? 1);
               const typeKey = TYPE_LABEL_KEY[tx.type];
               const statusKey = STATUS_LABEL_KEY[tx.status];
 
@@ -119,7 +130,8 @@ export function HistoryTable() {
                       sign > 0 ? "text-primary" : "text-danger"
                     )}
                   >
-                    {sign > 0 ? "+" : "-"}${Math.abs(parseFloat(tx.amount)).toFixed(2)}
+                    {sign > 0 ? "+" : "-"}
+                    {Math.abs(parseFloat(tx.amount)).toFixed(2)} {tx.asset}
                   </td>
 
                   <td className="px-5 py-4">

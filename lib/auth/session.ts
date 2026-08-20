@@ -15,6 +15,16 @@ export class UnauthorizedError extends Error {
   }
 }
 
+/** Authenticated, but the account's role doesn't permit this action —
+ *  distinct from UnauthorizedError (not authenticated at all) so callers
+ *  can map this to 403 instead of 401. */
+export class ForbiddenError extends Error {
+  constructor(message = "Forbidden") {
+    super(message);
+    this.name = "ForbiddenError";
+  }
+}
+
 /**
  * Resolves the current user from the access token cookie.
  * Throws UnauthorizedError if missing/invalid — callers (API routes) should
@@ -47,6 +57,34 @@ export async function getOptionalUser() {
   } catch {
     return null;
   }
+}
+
+/**
+ * The single authorization gate for every /api/admin/** route and the
+ * /admin UI itself — always re-derives role from a fresh DB read via
+ * requireUser() (never a client-supplied role or a JWT claim), so a
+ * demoted admin's already-issued access token can't keep working past
+ * this check. Throws ForbiddenError (map to 403) for a real, authenticated
+ * USER — as opposed to UnauthorizedError (401) for not being logged in at
+ * all, which requireUser() itself already covers.
+ */
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    throw new ForbiddenError("Admin access required");
+  }
+  return user;
+}
+
+/** For the handful of actions only SUPER_ADMIN may perform — managing
+ *  other admins' roles and viewing/administering audit-log-adjacent
+ *  controls a regular ADMIN shouldn't have (see app/api/admin/admins/**). */
+export async function requireSuperAdmin() {
+  const user = await requireUser();
+  if (user.role !== "SUPER_ADMIN") {
+    throw new ForbiddenError("Super admin access required");
+  }
+  return user;
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   LogicalRange,
 } from "lightweight-charts";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { useTheme } from "@/lib/theme/theme-context";
 
 export type Timeframe = "5s" | "30s" | "1m" | "15m" | "1h" | "4h" | "1d" | "1w";
 
@@ -95,6 +96,7 @@ export function CandlestickChart({
   livePrice?: number;
 }) {
   const { t } = useLocale();
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
@@ -277,6 +279,10 @@ export function CandlestickChart({
     seriesRef.current = candleSeries;
     volumeSeriesRef.current = volumeSeries;
 
+    // Candle/volume colors (green/down-red/green) stay constant across
+    // themes on purpose — see the theme-color effect below for the
+    // chrome (grid/axis/text) that does need to flip with Light/Dark.
+
     const handleRangeChange = (range: LogicalRange | null) => {
       if (!range) return;
       if (range.from < PREFETCH_THRESHOLD_BARS) {
@@ -297,6 +303,26 @@ export function CandlestickChart({
       generationRef.current += 1;
     };
   }, [loadOlderPage]);
+
+  // Re-colors the chart's chrome (grid lines, axis text/border) in place
+  // via applyOptions() whenever the theme flips — deliberately a separate,
+  // lightweight effect from chart setup above rather than adding `theme`
+  // to that effect's deps, which would tear down and recreate the whole
+  // chart (losing zoom/pan position) just to recolor grid lines.
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    const isDark = theme === "dark";
+    chart.applyOptions({
+      layout: { textColor: isDark ? "#9CA3AF" : "#6B7280" },
+      grid: {
+        vertLines: { color: isDark ? "#1F2937" : "#E5E7EB" },
+        horzLines: { color: isDark ? "#1F2937" : "#E5E7EB" },
+      },
+      timeScale: { borderColor: isDark ? "#1F2937" : "#E5E7EB" },
+      rightPriceScale: { borderColor: isDark ? "#1F2937" : "#E5E7EB" },
+    });
+  }, [theme]);
 
   // Load the most recent page whenever symbol/timeframe changes.
   useEffect(() => {

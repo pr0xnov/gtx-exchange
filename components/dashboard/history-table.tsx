@@ -57,7 +57,7 @@ export function HistoryTable() {
               "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
               filter === f.id
                 ? "bg-primary/10 text-primary"
-                : "text-muted hover:bg-white/5 hover:text-foreground"
+                : "text-muted hover:bg-foreground/5 hover:text-foreground"
             )}
           >
             {t(f.labelKey)}
@@ -103,7 +103,7 @@ export function HistoryTable() {
               return (
                 <tr
                   key={tx.id}
-                  className="border-b border-border/50 transition-colors last:border-0 hover:bg-white/[0.02]"
+                  className="border-b border-border/50 transition-colors last:border-0 hover:bg-foreground/[0.02]"
                 >
                   <td className="font-tabular px-5 py-4 text-muted">
                     {tx.id.slice(0, 8).toUpperCase()}

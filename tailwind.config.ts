@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
   darkMode: ["class"],
@@ -15,26 +16,36 @@ const config: Config = {
     },
     extend: {
       colors: {
-        background: "#0B0F17",
-        surface: "#111827",
-        card: "#131A23",
-        border: "#1F2937",
+        // Each token reads its RGB channels from a CSS custom property
+        // (app/globals.css defines the light values on :root and the dark
+        // values on .dark — toggled on <html> by lib/theme/theme-context.tsx)
+        // via the rgb(var(...) / <alpha-value>) pattern, which is what lets
+        // Tailwind's own opacity modifiers (bg-background/80, border-border/60,
+        // bg-foreground/5, …) keep working unchanged across both themes —
+        // a plain hex value can't respond to those. Every existing className
+        // in the app already only ever uses these named tokens (never a raw
+        // hex/rgb literal for anything structural), so this swap alone makes
+        // the whole UI theme-aware with no per-component changes required.
+        background: "rgb(var(--color-background) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        card: "rgb(var(--color-card) / <alpha-value>)",
+        border: "rgb(var(--color-border) / <alpha-value>)",
         primary: {
-          DEFAULT: "#22C55E",
-          hover: "#16A34A",
-          foreground: "#0B0F17",
+          DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
+          hover: "rgb(var(--color-primary-hover) / <alpha-value>)",
+          foreground: "rgb(var(--color-primary-foreground) / <alpha-value>)",
           50: "#EAFBF0",
-          500: "#22C55E",
-          600: "#16A34A",
+          500: "rgb(var(--color-primary) / <alpha-value>)",
+          600: "rgb(var(--color-primary-hover) / <alpha-value>)",
         },
         danger: {
-          DEFAULT: "#EF4444",
-          hover: "#DC2626",
+          DEFAULT: "rgb(var(--color-danger) / <alpha-value>)",
+          hover: "rgb(var(--color-danger-hover) / <alpha-value>)",
         },
-        foreground: "#F3F4F6",
+        foreground: "rgb(var(--color-foreground) / <alpha-value>)",
         muted: {
-          DEFAULT: "#9CA3AF",
-          foreground: "#6B7280",
+          DEFAULT: "rgb(var(--color-muted) / <alpha-value>)",
+          foreground: "rgb(var(--color-muted-foreground) / <alpha-value>)",
         },
       },
       fontFamily: {
@@ -88,7 +99,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 };
 
 export default config;

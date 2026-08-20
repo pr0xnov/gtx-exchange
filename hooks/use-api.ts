@@ -389,3 +389,133 @@ export function useWithdraw() {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// SETTINGS
+// ---------------------------------------------------------------------------
+
+export interface UserSettingsDto {
+  language: string;
+  theme: string;
+  twoFactorOn: boolean;
+  notifyEmail: boolean;
+  notifyPush: boolean;
+  notifyMarket: boolean;
+}
+
+export interface SettingsDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  pendingEmail: string | null;
+  settings: UserSettingsDto;
+}
+
+export function useSettings() {
+  return useQuery({
+    queryKey: ["settings"],
+    queryFn: () => fetchJson<SettingsDto>("/api/settings"),
+  });
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { firstName: string; lastName: string }) =>
+      fetchJson("/api/settings/profile", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (payload: {
+      currentPassword: string;
+      newPassword: string;
+      confirmPassword: string;
+    }) =>
+      fetchJson("/api/settings/password", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+  });
+}
+
+export function useRequestEmailChange() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { newEmail: string; currentPassword: string }) =>
+      fetchJson<{ pendingEmail: string }>("/api/settings/email/request", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
+  });
+}
+
+export function useUpdatePreferences() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (
+      payload: Partial<
+        Pick<UserSettingsDto, "notifyEmail" | "notifyPush" | "notifyMarket">
+      >
+    ) =>
+      fetchJson<UserSettingsDto>("/api/settings/preferences", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
+  });
+}
+
+export interface TwoFaSetupDto {
+  qrCodeDataUrl: string;
+  secret: string;
+  setupToken: string;
+}
+
+export function useSetup2FA() {
+  return useMutation({
+    mutationFn: () =>
+      fetchJson<TwoFaSetupDto>("/api/settings/2fa/setup", { method: "POST" }),
+  });
+}
+
+export function useEnable2FA() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { setupToken: string; code: string }) =>
+      fetchJson("/api/settings/2fa/enable", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
+  });
+}
+
+export function useDisable2FA() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { code: string }) =>
+      fetchJson("/api/settings/2fa/disable", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
+  });
+}

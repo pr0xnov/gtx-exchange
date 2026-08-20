@@ -80,6 +80,7 @@ vi.mock("lightweight-charts", () => {
           getVisibleLogicalRange: () => ({ from: 0, to: 500 }),
           setVisibleLogicalRange: () => {},
         }),
+        applyOptions: () => {},
         remove: () => {},
       };
     },
@@ -143,10 +144,15 @@ async function chartElement(
   props: { symbol: string; timeframe: string }
 ) {
   const { LocaleProvider } = await import("@/lib/i18n/locale-context");
+  const { ThemeProvider } = await import("@/lib/theme/theme-context");
   return React.createElement(
     LocaleProvider,
     { initialLocale: "en" },
-    React.createElement(Component, props)
+    React.createElement(
+      ThemeProvider,
+      { initialTheme: "dark" },
+      React.createElement(Component, props)
+    )
   );
 }
 

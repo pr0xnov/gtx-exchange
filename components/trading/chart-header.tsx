@@ -66,7 +66,7 @@ export function ChartHeader({
                   "cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-medium outline-none transition-colors",
                   timeframe === tf.value
                     ? "bg-primary/15 text-primary"
-                    : "text-muted hover:bg-white/5 hover:text-foreground data-[highlighted]:bg-white/5 data-[highlighted]:text-foreground"
+                    : "text-muted hover:bg-foreground/5 hover:text-foreground data-[highlighted]:bg-foreground/5 data-[highlighted]:text-foreground"
                 )}
               >
                 {tf.label}

@@ -115,7 +115,7 @@ function LanguageDropdown() {
             <DropdownMenu.Item
               key={l}
               onSelect={() => setLocale(l)}
-              className="flex cursor-pointer items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-sm text-muted outline-none transition-colors hover:bg-white/5 hover:text-foreground data-[highlighted]:bg-white/5 data-[highlighted]:text-foreground"
+              className="flex cursor-pointer items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-sm text-muted outline-none transition-colors hover:bg-foreground/5 hover:text-foreground data-[highlighted]:bg-foreground/5 data-[highlighted]:text-foreground"
             >
               {localeName(l)}
               {l === locale && <Check className="h-4 w-4 text-primary" />}
@@ -229,7 +229,7 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
               <DropdownMenu.Item key={link.href} asChild>
                 <Link
                   href={link.href}
-                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted outline-none transition-colors hover:bg-white/5 hover:text-foreground data-[highlighted]:bg-white/5 data-[highlighted]:text-foreground"
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted outline-none transition-colors hover:bg-foreground/5 hover:text-foreground data-[highlighted]:bg-foreground/5 data-[highlighted]:text-foreground"
                 >
                   <Icon className="h-4 w-4" />
                   {t(link.key)}

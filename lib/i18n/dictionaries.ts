@@ -104,11 +104,43 @@ const en = {
   "settings.theme": "Theme",
   "settings.themeDark": "Dark",
   "settings.themeLight": "Light",
-  "settings.apiKeys": "API Keys",
-  "settings.apiKeysDesc":
-    "Generate API credentials to connect third-party tools to your paper trading account.",
-  "settings.generateNewKey": "Generate new key",
-  "settings.toastApiKeyGenerated": "API key generated",
+
+  "settings.emailCurrentLabel": "Current email",
+  "settings.emailChangeButton": "Change email",
+  "settings.emailNewLabel": "New email",
+  "settings.emailCurrentPasswordLabel": "Current password",
+  "settings.emailSendConfirmation": "Send confirmation email",
+  "settings.emailCancelChange": "Cancel",
+  "settings.emailPendingNotice":
+    "A confirmation link was sent to {email}. Click it to finish changing your email.",
+  "settings.toastEmailChangeRequested": "Confirmation email sent",
+  "settings.toastEmailChangeConfirmed": "Your email address has been updated",
+  "settings.toastEmailChangeExpired": "That confirmation link has expired",
+  "settings.toastEmailChangeInvalid": "That confirmation link is invalid",
+  "settings.toastSaveFailed": "Failed to save changes",
+
+  "settings.confirmNewPassword": "Confirm new password",
+  "settings.toastPasswordChangeFailed": "Failed to change password",
+  "settings.passwordMismatch": "Passwords do not match",
+
+  "settings.twoFactorEnabledLabel": "2FA enabled",
+  "settings.twoFactorDisabledLabel": "2FA disabled",
+  "settings.twoFactorEnableButton": "Enable 2FA",
+  "settings.twoFactorDisableButton": "Disable 2FA",
+  "settings.twoFactorSetupTitle": "Set up two-factor authentication",
+  "settings.twoFactorSetupInstructions":
+    "Scan this QR code with Google Authenticator, Microsoft Authenticator, Authy, or any compatible TOTP app.",
+  "settings.twoFactorManualEntry": "Or enter this code manually:",
+  "settings.twoFactorCodeLabel": "6-digit code",
+  "settings.twoFactorConfirmButton": "Confirm & enable",
+  "settings.twoFactorCancelButton": "Cancel",
+  "settings.twoFactorDisableTitle": "Disable two-factor authentication",
+  "settings.twoFactorDisableInstructions":
+    "Enter a current code from your authenticator app to confirm.",
+  "settings.toastTwoFactorEnabled": "2FA enabled successfully",
+  "settings.toastTwoFactorDisabled": "2FA disabled successfully",
+  "settings.toastInvalidCode": "Invalid verification code",
+  "settings.toastTwoFactorSetupFailed": "Failed to start 2FA setup",
 
   // Support
   "support.title": "Support",
@@ -456,6 +488,12 @@ const en = {
   "auth.login.loginFailed": "Login failed",
   "auth.login.welcomeToast": "Welcome back!",
   "auth.login.demoAccountLabel": "Demo account:",
+  "auth.login.twoFactorTitle": "Two-factor verification",
+  "auth.login.twoFactorPrompt": "Enter the 6-digit code from your authenticator app.",
+  "auth.login.codeLabel": "Verification code",
+  "auth.login.verifyButton": "Verify",
+  "auth.login.backToLogin": "Back to login",
+  "auth.login.invalidCode": "Invalid verification code",
   "auth.register.title": "Create an account",
   "auth.register.haveAccountPrompt": "Already have an account?",
   "auth.register.firstNameLabel": "First name",
@@ -489,6 +527,27 @@ const en = {
   "markets.pagination.assets": "assets",
   "markets.pagination.prev": "Prev",
   "markets.pagination.next": "Next",
+
+  // Transactional email (lib/email/templates.ts) — server-rendered using
+  // the recipient's saved UserSettings.language, not the request locale.
+  "email.passwordChanged.subject": "Security alert: Your password was changed",
+  "email.passwordChanged.heading": "Your password was changed",
+  "email.passwordChanged.body": "Your GTX account password was changed on {date}.",
+  "email.passwordChanged.notYouNotice":
+    "If you didn't make this change, please contact support immediately.",
+  "email.emailChangeConfirm.subject": "Confirm your new GTX email address",
+  "email.emailChangeConfirm.heading": "Confirm your new email address",
+  "email.emailChangeConfirm.body":
+    "We received a request to change the email address on your GTX account to this one. Click the link below to confirm it.",
+  "email.emailChangeConfirm.button": "Confirm new email",
+  "email.emailChangeConfirm.expiryNotice":
+    "This link expires in 1 hour. If you didn't request this change, you can safely ignore this email.",
+  "email.emailChanged.subject": "Your GTX account email was changed",
+  "email.emailChanged.heading": "Your account email was changed",
+  "email.emailChanged.body":
+    "Your GTX account email was changed to {newEmail} on {date}.",
+  "email.emailChanged.notYouNotice":
+    "If you didn't make this change, please contact support immediately.",
 } as const;
 
 export type DictionaryKey = keyof typeof en;
@@ -583,11 +642,43 @@ const ru: Dictionary = {
   "settings.theme": "Тема",
   "settings.themeDark": "Тёмная",
   "settings.themeLight": "Светлая",
-  "settings.apiKeys": "API-ключи",
-  "settings.apiKeysDesc":
-    "Создайте API-ключи, чтобы подключить сторонние инструменты к вашему учебному торговому счёту.",
-  "settings.generateNewKey": "Создать новый ключ",
-  "settings.toastApiKeyGenerated": "API-ключ создан",
+
+  "settings.emailCurrentLabel": "Текущий email",
+  "settings.emailChangeButton": "Изменить email",
+  "settings.emailNewLabel": "Новый email",
+  "settings.emailCurrentPasswordLabel": "Текущий пароль",
+  "settings.emailSendConfirmation": "Отправить письмо для подтверждения",
+  "settings.emailCancelChange": "Отмена",
+  "settings.emailPendingNotice":
+    "Ссылка для подтверждения отправлена на {email}. Перейдите по ней, чтобы завершить смену email.",
+  "settings.toastEmailChangeRequested": "Письмо для подтверждения отправлено",
+  "settings.toastEmailChangeConfirmed": "Ваш email успешно обновлён",
+  "settings.toastEmailChangeExpired": "Срок действия этой ссылки истёк",
+  "settings.toastEmailChangeInvalid": "Эта ссылка недействительна",
+  "settings.toastSaveFailed": "Не удалось сохранить изменения",
+
+  "settings.confirmNewPassword": "Подтвердите новый пароль",
+  "settings.toastPasswordChangeFailed": "Не удалось изменить пароль",
+  "settings.passwordMismatch": "Пароли не совпадают",
+
+  "settings.twoFactorEnabledLabel": "2FA включена",
+  "settings.twoFactorDisabledLabel": "2FA отключена",
+  "settings.twoFactorEnableButton": "Включить 2FA",
+  "settings.twoFactorDisableButton": "Отключить 2FA",
+  "settings.twoFactorSetupTitle": "Настройка двухфакторной аутентификации",
+  "settings.twoFactorSetupInstructions":
+    "Отсканируйте этот QR-код в Google Authenticator, Microsoft Authenticator, Authy или совместимом TOTP-приложении.",
+  "settings.twoFactorManualEntry": "Или введите этот код вручную:",
+  "settings.twoFactorCodeLabel": "6-значный код",
+  "settings.twoFactorConfirmButton": "Подтвердить и включить",
+  "settings.twoFactorCancelButton": "Отмена",
+  "settings.twoFactorDisableTitle": "Отключение двухфакторной аутентификации",
+  "settings.twoFactorDisableInstructions":
+    "Введите текущий код из приложения-аутентификатора для подтверждения.",
+  "settings.toastTwoFactorEnabled": "2FA успешно включена",
+  "settings.toastTwoFactorDisabled": "2FA успешно отключена",
+  "settings.toastInvalidCode": "Неверный код подтверждения",
+  "settings.toastTwoFactorSetupFailed": "Не удалось начать настройку 2FA",
 
   "support.title": "Поддержка",
   "support.contactUs": "Связаться с нами",
@@ -924,6 +1015,12 @@ const ru: Dictionary = {
   "auth.login.loginFailed": "Не удалось войти",
   "auth.login.welcomeToast": "С возвращением!",
   "auth.login.demoAccountLabel": "Демо-аккаунт:",
+  "auth.login.twoFactorTitle": "Двухфакторная проверка",
+  "auth.login.twoFactorPrompt": "Введите 6-значный код из приложения-аутентификатора.",
+  "auth.login.codeLabel": "Код подтверждения",
+  "auth.login.verifyButton": "Подтвердить",
+  "auth.login.backToLogin": "Назад ко входу",
+  "auth.login.invalidCode": "Неверный код подтверждения",
   "auth.register.title": "Создать аккаунт",
   "auth.register.haveAccountPrompt": "Уже есть аккаунт?",
   "auth.register.firstNameLabel": "Имя",
@@ -956,6 +1053,26 @@ const ru: Dictionary = {
   "markets.pagination.assets": "активов",
   "markets.pagination.prev": "Назад",
   "markets.pagination.next": "Далее",
+
+  "email.passwordChanged.subject":
+    "Оповещение безопасности: пароль вашего аккаунта изменён",
+  "email.passwordChanged.heading": "Пароль вашего аккаунта был изменён",
+  "email.passwordChanged.body": "Пароль вашего аккаунта GTX был изменён {date}.",
+  "email.passwordChanged.notYouNotice":
+    "Если это были не вы, немедленно свяжитесь с поддержкой.",
+  "email.emailChangeConfirm.subject": "Подтвердите новый email для GTX",
+  "email.emailChangeConfirm.heading": "Подтвердите новый адрес email",
+  "email.emailChangeConfirm.body":
+    "Мы получили запрос на изменение email вашего аккаунта GTX на этот адрес. Нажмите на ссылку ниже, чтобы подтвердить его.",
+  "email.emailChangeConfirm.button": "Подтвердить новый email",
+  "email.emailChangeConfirm.expiryNotice":
+    "Ссылка действительна в течение 1 часа. Если вы не запрашивали это изменение, просто проигнорируйте это письмо.",
+  "email.emailChanged.subject": "Email вашего аккаунта GTX изменён",
+  "email.emailChanged.heading": "Email вашего аккаунта был изменён",
+  "email.emailChanged.body":
+    "Email вашего аккаунта GTX был изменён на {newEmail} {date}.",
+  "email.emailChanged.notYouNotice":
+    "Если это были не вы, немедленно свяжитесь с поддержкой.",
 };
 
 const uk: Dictionary = {
@@ -1047,11 +1164,43 @@ const uk: Dictionary = {
   "settings.theme": "Тема",
   "settings.themeDark": "Темна",
   "settings.themeLight": "Світла",
-  "settings.apiKeys": "API-ключі",
-  "settings.apiKeysDesc":
-    "Створіть API-ключі, щоб підключити сторонні інструменти до вашого навчального торгового рахунку.",
-  "settings.generateNewKey": "Створити новий ключ",
-  "settings.toastApiKeyGenerated": "API-ключ створено",
+
+  "settings.emailCurrentLabel": "Поточний email",
+  "settings.emailChangeButton": "Змінити email",
+  "settings.emailNewLabel": "Новий email",
+  "settings.emailCurrentPasswordLabel": "Поточний пароль",
+  "settings.emailSendConfirmation": "Надіслати лист для підтвердження",
+  "settings.emailCancelChange": "Скасувати",
+  "settings.emailPendingNotice":
+    "Посилання для підтвердження надіслано на {email}. Перейдіть за ним, щоб завершити зміну email.",
+  "settings.toastEmailChangeRequested": "Лист для підтвердження надіслано",
+  "settings.toastEmailChangeConfirmed": "Ваш email успішно оновлено",
+  "settings.toastEmailChangeExpired": "Термін дії цього посилання минув",
+  "settings.toastEmailChangeInvalid": "Це посилання недійсне",
+  "settings.toastSaveFailed": "Не вдалося зберегти зміни",
+
+  "settings.confirmNewPassword": "Підтвердьте новий пароль",
+  "settings.toastPasswordChangeFailed": "Не вдалося змінити пароль",
+  "settings.passwordMismatch": "Паролі не збігаються",
+
+  "settings.twoFactorEnabledLabel": "2FA увімкнена",
+  "settings.twoFactorDisabledLabel": "2FA вимкнена",
+  "settings.twoFactorEnableButton": "Увімкнути 2FA",
+  "settings.twoFactorDisableButton": "Вимкнути 2FA",
+  "settings.twoFactorSetupTitle": "Налаштування двофакторної автентифікації",
+  "settings.twoFactorSetupInstructions":
+    "Відскануйте цей QR-код у Google Authenticator, Microsoft Authenticator, Authy або сумісному TOTP-застосунку.",
+  "settings.twoFactorManualEntry": "Або введіть цей код вручну:",
+  "settings.twoFactorCodeLabel": "6-значний код",
+  "settings.twoFactorConfirmButton": "Підтвердити й увімкнути",
+  "settings.twoFactorCancelButton": "Скасувати",
+  "settings.twoFactorDisableTitle": "Вимкнення двофакторної автентифікації",
+  "settings.twoFactorDisableInstructions":
+    "Введіть поточний код із застосунку-автентифікатора для підтвердження.",
+  "settings.toastTwoFactorEnabled": "2FA успішно увімкнена",
+  "settings.toastTwoFactorDisabled": "2FA успішно вимкнена",
+  "settings.toastInvalidCode": "Невірний код підтвердження",
+  "settings.toastTwoFactorSetupFailed": "Не вдалося розпочати налаштування 2FA",
 
   "support.title": "Підтримка",
   "support.contactUs": "Зв'язатися з нами",
@@ -1387,6 +1536,12 @@ const uk: Dictionary = {
   "auth.login.loginFailed": "Не вдалося увійти",
   "auth.login.welcomeToast": "З поверненням!",
   "auth.login.demoAccountLabel": "Демо-акаунт:",
+  "auth.login.twoFactorTitle": "Двофакторна перевірка",
+  "auth.login.twoFactorPrompt": "Введіть 6-значний код із застосунку-автентифікатора.",
+  "auth.login.codeLabel": "Код підтвердження",
+  "auth.login.verifyButton": "Підтвердити",
+  "auth.login.backToLogin": "Назад до входу",
+  "auth.login.invalidCode": "Невірний код підтвердження",
   "auth.register.title": "Створити акаунт",
   "auth.register.haveAccountPrompt": "Вже є акаунт?",
   "auth.register.firstNameLabel": "Ім'я",
@@ -1419,6 +1574,25 @@ const uk: Dictionary = {
   "markets.pagination.assets": "активів",
   "markets.pagination.prev": "Назад",
   "markets.pagination.next": "Далі",
+
+  "email.passwordChanged.subject": "Сповіщення безпеки: пароль вашого акаунта змінено",
+  "email.passwordChanged.heading": "Пароль вашого акаунта було змінено",
+  "email.passwordChanged.body": "Пароль вашого акаунта GTX було змінено {date}.",
+  "email.passwordChanged.notYouNotice":
+    "Якщо це були не ви, негайно зв'яжіться з підтримкою.",
+  "email.emailChangeConfirm.subject": "Підтвердьте новий email для GTX",
+  "email.emailChangeConfirm.heading": "Підтвердьте нову адресу email",
+  "email.emailChangeConfirm.body":
+    "Ми отримали запит на зміну email вашого акаунта GTX на цю адресу. Натисніть посилання нижче, щоб підтвердити його.",
+  "email.emailChangeConfirm.button": "Підтвердити новий email",
+  "email.emailChangeConfirm.expiryNotice":
+    "Посилання дійсне протягом 1 години. Якщо ви не запитували цю зміну, просто проігноруйте цей лист.",
+  "email.emailChanged.subject": "Email вашого акаунта GTX змінено",
+  "email.emailChanged.heading": "Email вашого акаунта було змінено",
+  "email.emailChanged.body":
+    "Email вашого акаунта GTX було змінено на {newEmail} {date}.",
+  "email.emailChanged.notYouNotice":
+    "Якщо це були не ви, негайно зв'яжіться з підтримкою.",
 };
 
 export const dictionaries: Record<Locale, Dictionary> = { en, ru, uk };

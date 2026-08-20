@@ -17,6 +17,14 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ email: "", password: "" });
 
+  // Set once /api/auth/login reports the account has 2FA on — the form
+  // then swaps to asking for the TOTP code instead of resubmitting
+  // email/password. challengeToken proves the password step already
+  // passed (see lib/auth/jwt.ts's LoginChallengeTokenPayload); it carries
+  // no session by itself.
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -35,6 +43,11 @@ export function LoginForm() {
         return;
       }
 
+      if (json.data?.requires2FA) {
+        setChallengeToken(json.data.challengeToken);
+        return;
+      }
+
       toast.success(t("auth.login.welcomeToast"));
       router.push("/account");
       router.refresh();
@@ -43,6 +56,89 @@ export function LoginForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/login/2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ challengeToken, code }),
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        setError(json.error ?? t("auth.login.invalidCode"));
+        return;
+      }
+
+      toast.success(t("auth.login.welcomeToast"));
+      router.push("/account");
+      router.refresh();
+    } catch {
+      setError(t("common.error"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (challengeToken) {
+    return (
+      <form onSubmit={handleVerify} className="space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">
+            {t("auth.login.twoFactorTitle")}
+          </h2>
+          <p className="mt-1 text-xs text-muted">{t("auth.login.twoFactorPrompt")}</p>
+        </div>
+
+        <div>
+          <Label htmlFor="code">{t("auth.login.codeLabel")}</Label>
+          <Input
+            id="code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            className="font-tabular mt-1.5 text-center text-lg tracking-[0.5em]"
+            maxLength={6}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            autoFocus
+            required
+          />
+        </div>
+
+        {error && <p className="text-sm text-danger">{error}</p>}
+
+        <Button
+          type="submit"
+          className="w-full"
+          size="lg"
+          disabled={loading || code.length !== 6}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            t("auth.login.verifyButton")
+          )}
+        </Button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setChallengeToken(null);
+            setCode("");
+            setError(null);
+          }}
+          className="w-full text-center text-xs text-muted hover:text-foreground"
+        >
+          {t("auth.login.backToLogin")}
+        </button>
+      </form>
+    );
   }
 
   return (

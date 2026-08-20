@@ -75,7 +75,7 @@ export function NavbarSearch() {
                 <DropdownMenu.Item key={row.symbol} asChild>
                   <Link
                     href={`/trading?symbol=${row.symbol}`}
-                    className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 outline-none transition-colors hover:bg-white/5 data-[highlighted]:bg-white/5"
+                    className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 outline-none transition-colors hover:bg-foreground/5 data-[highlighted]:bg-foreground/5"
                   >
                     <CoinIcon symbol={row.base} />
                     <div className="min-w-0 flex-1">

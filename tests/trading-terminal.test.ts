@@ -17,6 +17,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { TradingTerminal } from "@/components/trading/trading-terminal";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
+import { ThemeProvider } from "@/lib/theme/theme-context";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({ get: () => null }),
@@ -89,7 +90,11 @@ function renderTerminal() {
       React.createElement(
         LocaleProvider,
         { initialLocale: "en" },
-        React.createElement(TradingTerminal)
+        React.createElement(
+          ThemeProvider,
+          { initialTheme: "dark" },
+          React.createElement(TradingTerminal)
+        )
       )
     );
   });

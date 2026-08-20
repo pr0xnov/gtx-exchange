@@ -23,6 +23,14 @@ export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value);
 }
 
+/** UserSettings.language is a plain `String` column (Prisma has no enum
+ *  binding to Locale), so anywhere that value flows into a Locale-typed
+ *  API (e.g. an email template) needs this same narrow-or-fall-back —
+ *  centralized here instead of repeated at each call site. */
+export function resolveUserLocale(language: string | null | undefined): Locale {
+  return language && isLocale(language) ? language : DEFAULT_LOCALE;
+}
+
 /**
  * Picks the best supported locale out of a raw Accept-Language header
  * value (e.g. "uk-UA,uk;q=0.9,en;q=0.8,*;q=0.5") — the same signal

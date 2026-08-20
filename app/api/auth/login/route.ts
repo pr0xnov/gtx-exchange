@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth/password";
-import { signAccessToken, signRefreshToken, refreshTokenExpiryDate } from "@/lib/auth/jwt";
-import { setAuthCookies } from "@/lib/auth/cookies";
+import { signLoginChallengeToken } from "@/lib/auth/jwt";
+import { establishSession } from "@/lib/auth/session";
 import { loginSchema } from "@/lib/validation/auth";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: input.email },
-      include: { wallet: true },
+      include: { wallet: true, settings: true },
     });
 
     // Constant-shape response to avoid leaking which emails exist.
@@ -31,17 +31,16 @@ export async function POST(req: NextRequest) {
     const validPassword = await verifyPassword(input.password, user.passwordHash);
     if (!validPassword) return invalidCreds();
 
-    const accessToken = signAccessToken({ sub: user.id, email: user.email });
-    const refreshRecord = await prisma.refreshToken.create({
-      data: { token: "", userId: user.id, expiresAt: refreshTokenExpiryDate() },
-    });
-    const refreshToken = signRefreshToken({ sub: user.id, tokenId: refreshRecord.id });
-    await prisma.refreshToken.update({
-      where: { id: refreshRecord.id },
-      data: { token: refreshToken },
-    });
+    if (user.settings?.twoFactorOn) {
+      // Password is correct, but no session yet — the client must submit
+      // this challenge token + a TOTP code to /api/auth/login/2fa before
+      // any auth cookie is set. Keeps 2FA a real second factor on login
+      // itself, not just a Settings toggle nothing else checks.
+      const challengeToken = signLoginChallengeToken({ sub: user.id });
+      return apiSuccess({ requires2FA: true, challengeToken });
+    }
 
-    await setAuthCookies(accessToken, refreshToken);
+    await establishSession(user);
 
     return apiSuccess({
       user: {

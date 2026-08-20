@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/db";
-import { getAccessTokenFromCookies } from "@/lib/auth/cookies";
-import { verifyAccessToken } from "@/lib/auth/jwt";
+import { setAuthCookies, getAccessTokenFromCookies } from "@/lib/auth/cookies";
+import {
+  verifyAccessToken,
+  signAccessToken,
+  signRefreshToken,
+  refreshTokenExpiryDate,
+} from "@/lib/auth/jwt";
+import type { User } from "@prisma/client";
 
 export class UnauthorizedError extends Error {
   constructor(message = "Unauthorized") {
@@ -41,4 +47,25 @@ export async function getOptionalUser() {
   } catch {
     return null;
   }
+}
+
+/**
+ * Issues a real access/refresh token pair and sets the auth cookies —
+ * the actual "you are now logged in" step, shared by both plain login
+ * (app/api/auth/login) and the 2FA completion step
+ * (app/api/auth/login/2fa) so there's exactly one place that does this,
+ * not two copies that could drift.
+ */
+export async function establishSession(user: Pick<User, "id" | "email">) {
+  const accessToken = signAccessToken({ sub: user.id, email: user.email });
+  const refreshRecord = await prisma.refreshToken.create({
+    data: { token: "", userId: user.id, expiresAt: refreshTokenExpiryDate() },
+  });
+  const refreshToken = signRefreshToken({ sub: user.id, tokenId: refreshRecord.id });
+  await prisma.refreshToken.update({
+    where: { id: refreshRecord.id },
+    data: { token: refreshToken },
+  });
+
+  await setAuthCookies(accessToken, refreshToken);
 }

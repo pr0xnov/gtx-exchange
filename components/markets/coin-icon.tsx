@@ -252,7 +252,7 @@ export function CoinIcon({ symbol, className }: { symbol: string; className?: st
   return (
     <span
       className={cn(
-        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold text-muted",
+        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-[10px] font-bold text-muted",
         className
       )}
       aria-hidden="true"

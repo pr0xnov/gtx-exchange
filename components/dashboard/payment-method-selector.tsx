@@ -55,7 +55,7 @@ export function PaymentMethodSelector({
               "flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all",
               active
                 ? "border-primary bg-primary/10"
-                : "border-border bg-surface hover:border-white/20"
+                : "border-border bg-surface hover:border-foreground/20"
             )}
           >
             <Icon className={cn("h-6 w-6", active ? "text-primary" : "text-muted")} />

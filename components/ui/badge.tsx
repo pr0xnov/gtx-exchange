@@ -8,11 +8,11 @@ export function Badge({
   variant?: "default" | "success" | "danger" | "pending" | "muted";
 }) {
   const variants = {
-    default: "bg-white/10 text-foreground",
+    default: "bg-foreground/10 text-foreground",
     success: "bg-primary/15 text-primary",
     danger: "bg-danger/15 text-danger",
     pending: "bg-amber-500/15 text-amber-400",
-    muted: "bg-white/5 text-muted",
+    muted: "bg-foreground/5 text-muted",
   };
 
   return (

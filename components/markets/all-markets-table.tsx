@@ -95,7 +95,7 @@ export function AllMarketsTable({
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage <= 1}
-                className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-white/5 hover:text-foreground disabled:opacity-40"
+                className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-foreground/5 hover:text-foreground disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
                 {t("markets.pagination.prev")}
@@ -103,7 +103,7 @@ export function AllMarketsTable({
               <button
                 onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
                 disabled={currentPage >= pageCount}
-                className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-white/5 hover:text-foreground disabled:opacity-40"
+                className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-foreground/5 hover:text-foreground disabled:opacity-40"
               >
                 {t("markets.pagination.next")}
                 <ChevronRight className="h-4 w-4" />

@@ -23,6 +23,14 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // Email-change verification (Settings > Profile): the new address is
+  // held here, unapplied, until the token sent to it is confirmed — the
+  // live `email` above never changes until then. One pending change at a
+  // time; requesting a new one overwrites these.
+  pendingEmail         String?
+  emailChangeTokenHash String?   @unique
+  emailChangeExpiresAt DateTime?
+
   wallet        Wallet?
   orders        Order[]
   positions     Position[]
@@ -40,17 +48,20 @@ model User {
 }
 
 model UserSettings {
-  id            String  @id @default(cuid())
-  userId        String  @unique
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  language      String  @default("en")
-  theme         String  @default("dark")
-  twoFactorOn   Boolean @default(false)
-  notifyEmail   Boolean @default(true)
-  notifyPush    Boolean @default(true)
-  notifyMarket  Boolean @default(false)
-  apiKeyPublic  String?
-  apiKeySecret  String?
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language     String  @default("en")
+  theme        String  @default("dark")
+  twoFactorOn  Boolean @default(false)
+  // AES-256-GCM-encrypted TOTP secret (see lib/auth/crypto.ts) — set once
+  // Enable 2FA's setup step is confirmed with a valid code, cleared on
+  // disable. Never the raw base32 secret at rest, and never returned to
+  // the client after setup completes.
+  twoFactorSecret String?
+  notifyEmail  Boolean @default(true)
+  notifyPush   Boolean @default(true)
+  notifyMarket Boolean @default(false)
 }
 
 model Session {

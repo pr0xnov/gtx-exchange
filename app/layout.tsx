@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getServerLocale } from "@/lib/i18n/get-locale";
+import { getServerTheme } from "@/lib/theme/get-theme";
 
 export const metadata: Metadata = {
   title: "GTX — Earn on the Best Financial Assets",
@@ -18,11 +19,17 @@ export default async function RootLayout({
   // response is already in the right language — no client-side detection
   // step, so nothing to hydrate-mismatch or flash.
   const locale = await getServerLocale();
+  // Theme has no browser-preference detection (unlike locale) — an absent
+  // cookie always resolves to "dark", so this is equally flash-free on
+  // first paint without needing middleware involvement.
+  const theme = await getServerTheme();
 
   return (
-    <html lang={locale} className="dark">
+    <html lang={locale} className={theme === "dark" ? "dark" : undefined}>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
-        <Providers initialLocale={locale}>{children}</Providers>
+        <Providers initialLocale={locale} initialTheme={theme}>
+          {children}
+        </Providers>
       </body>
     </html>
   );

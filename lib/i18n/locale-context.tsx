@@ -47,6 +47,17 @@ export function LocaleProvider({
       // client components already re-render from the state update above.
       // The current route/URL is untouched, so this never navigates.
       router.refresh();
+
+      // Best-effort persistence to the authenticated user's UserSettings
+      // row (same pattern as lib/theme/theme-context.tsx's setTheme) —
+      // works from anywhere setLocale is called (Navbar's dropdown, not
+      // just Settings), and a guest's fetch just 401s harmlessly; the
+      // cookie above already carries the choice for this session either way.
+      fetch("/api/settings/preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language: next }),
+      }).catch(() => {});
     },
     [router]
   );

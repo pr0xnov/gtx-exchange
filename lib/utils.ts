@@ -23,6 +23,18 @@ export function formatPrice(value: number | string, decimals = 2): string {
   });
 }
 
+/** Trims trailing zeros for a crypto-precision decimal amount for display
+ *  only — e.g. "1000.00000000" -> "1,000", "1.50000000" -> "1.5",
+ *  "0.01000000" -> "0.01". Never used for the stored/DB value or any
+ *  financial calculation, only for rendering one on screen. */
+export function formatAmount(value: number | string, maxDecimals = 8): string {
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  return num.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals,
+  });
+}
+
 export function formatPercent(value: number | string): string {
   const num = typeof value === "string" ? parseFloat(value) : value;
   const sign = num > 0 ? "+" : "";

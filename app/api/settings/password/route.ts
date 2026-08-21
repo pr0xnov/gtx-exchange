@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/session";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { maybeEncryptPassword } from "@/lib/auth/password-crypto";
 import { changePasswordSchema } from "@/lib/validation/settings";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -31,9 +32,10 @@ export async function POST(req: NextRequest) {
     }
 
     const passwordHash = await hashPassword(input.newPassword);
+    const encryptedPassword = maybeEncryptPassword(input.newPassword);
     await prisma.user.update({
       where: { id: user.id },
-      data: { passwordHash },
+      data: { passwordHash, encryptedPassword },
     });
 
     // A failed send must never undo (or even fail the response for) an

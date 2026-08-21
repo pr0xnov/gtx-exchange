@@ -38,6 +38,10 @@ services:
       DATABASE_URL: postgresql://gtx:gtx_password@postgres:5432/gtx_exchange
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change_this_access_secret_to_something_random_32chars}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_this_refresh_secret_to_something_random_32}
+      # No insecure fallback here on purpose (unlike the two JWT secrets
+      # above) — see .env.example. If unset, only the SUPER_ADMIN "Show
+      # password" feature reports a config error; nothing else breaks.
+      PASSWORD_ENCRYPTION_KEY: ${PASSWORD_ENCRYPTION_KEY}
       NODE_ENV: production
       NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8080}
     ports:

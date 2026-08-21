@@ -52,6 +52,32 @@ export function useAdminUsers(params: { search?: string; page?: number }) {
   });
 }
 
+/** Called only on an explicit "Show" click (SUPER_ADMIN-only server-side —
+ *  see app/api/admin/users/[id]/password/route.ts). A useMutation, not a
+ *  cached useQuery: every click should be a fresh, individually
+ *  audit-logged server round trip, not a silently-reused cached result. */
+export function useRevealUserPassword() {
+  return useMutation({
+    mutationFn: (userId: string) =>
+      fetchJson<{ available: boolean; password?: string }>(
+        `/api/admin/users/${userId}/password`
+      ),
+  });
+}
+
+export function useResetUserPassword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) =>
+      fetchJson<{ newPassword: string }>(`/api/admin/users/${userId}/reset-password`, {
+        method: "POST",
+      }),
+    onSuccess: (_data, userId) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "user", userId] });
+    },
+  });
+}
+
 export function useAdminUserDetail(id: string) {
   return useQuery({
     queryKey: ["admin", "user", id],

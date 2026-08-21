@@ -8,7 +8,7 @@ import { BalanceAdjustmentForm } from "@/components/admin/balance-adjustment-for
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/skeleton";
-import { formatPrice, formatDate } from "@/lib/utils";
+import { formatAmount, formatDate } from "@/lib/utils";
 
 interface AdjustmentRow {
   id: string;
@@ -153,7 +153,7 @@ export default function AdminBalanceAdjustmentsPage() {
                     }`}
                   >
                     {a.direction === "CREDIT" ? "+" : "-"}
-                    {formatPrice(Number(a.amount), 8)} {a.asset}
+                    {formatAmount(a.amount)} {a.asset}
                   </td>
                   <td className="px-4 py-3.5 text-muted">{a.reason}</td>
                   <td className="px-4 py-3.5 text-muted">

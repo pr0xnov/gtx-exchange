@@ -19,6 +19,7 @@
  */
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../lib/auth/password";
+import { maybeEncryptPassword } from "../lib/auth/password-crypto";
 import { generateLoginId } from "../lib/utils";
 import { SPOT_CURRENCIES } from "../lib/spot/currencies";
 
@@ -78,6 +79,7 @@ async function main() {
   }
 
   const passwordHash = await hashPassword(password);
+  const encryptedPassword = maybeEncryptPassword(password);
 
   const user = await prisma.user.create({
     data: {
@@ -85,6 +87,7 @@ async function main() {
       lastName,
       email,
       passwordHash,
+      encryptedPassword,
       role,
       login: generateLoginId(),
       wallet: { create: { balance: 0, credit: 0, currency: "USDT" } },
@@ -96,9 +99,6 @@ async function main() {
   });
 
   console.log(`[create-admin] Created ${role} account ${user.email} (id: ${user.id}).`);
-  console.log(
-    "[create-admin] Enable 2FA for this account in Settings before using the admin panel — it's required (see app/admin/layout.tsx)."
-  );
 }
 
 main()

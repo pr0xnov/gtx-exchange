@@ -26,6 +26,16 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   APP_URL: z.string().default("http://localhost:3000"),
+
+  // Admin Panel: key for the reversible current-password encryption used
+  // only by SUPER_ADMIN's "Show password" feature (see
+  // lib/auth/password-crypto.ts). Deliberately no default/fallback — unlike
+  // the JWT secrets above, a missing key here must surface as a clear
+  // config error from that one feature, never a silent insecure fallback.
+  PASSWORD_ENCRYPTION_KEY: z
+    .string()
+    .min(32, "PASSWORD_ENCRYPTION_KEY must be at least 32 chars")
+    .optional(),
 });
 
 export const env = envSchema.parse({
@@ -39,4 +49,5 @@ export const env = envSchema.parse({
   SMTP_PASSWORD: process.env.SMTP_PASSWORD,
   SMTP_FROM: process.env.SMTP_FROM,
   APP_URL: process.env.APP_URL,
+  PASSWORD_ENCRYPTION_KEY: process.env.PASSWORD_ENCRYPTION_KEY,
 });

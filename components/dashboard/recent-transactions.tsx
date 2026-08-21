@@ -22,6 +22,21 @@ const TYPE_LABEL_KEY: Record<string, DictionaryKey> = {
   TRADE_SETTLEMENT: "account.transactionType.trade",
 };
 
+// Same rule as the History page: ADMIN_BALANCE_ADJUSTMENT is still the
+// real TransactionType, but a CREDIT reads as an ordinary Deposit and a
+// DEBIT as an ordinary Withdrawal to the user — symmetric with each other.
+function typeLabelKey(tx: {
+  type: string;
+  direction: string | null;
+}): DictionaryKey | undefined {
+  if (tx.type === "ADMIN_BALANCE_ADJUSTMENT") {
+    return tx.direction === "DEBIT"
+      ? "account.transactionType.withdrawal"
+      : "account.transactionType.deposit";
+  }
+  return TYPE_LABEL_KEY[tx.type];
+}
+
 export function RecentTransactions() {
   const { data, isLoading } = useHistory("all");
   const { t } = useLocale();
@@ -54,8 +69,13 @@ export function RecentTransactions() {
 
       <div className="space-y-1">
         {recent?.map((tx) => {
-          const sign = TYPE_SIGN[tx.type] ?? 1;
-          const labelKey = TYPE_LABEL_KEY[tx.type];
+          const sign =
+            tx.type === "ADMIN_BALANCE_ADJUSTMENT"
+              ? tx.direction === "DEBIT"
+                ? -1
+                : 1
+              : (TYPE_SIGN[tx.type] ?? 1);
+          const labelKey = typeLabelKey(tx);
           return (
             <div
               key={tx.id}

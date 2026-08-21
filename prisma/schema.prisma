@@ -24,16 +24,25 @@ enum UserStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  firstName    String
-  lastName     String
-  email        String   @unique
-  passwordHash String
-  accountType  String   @default("Standard")
-  leverageMax  Int      @default(100)
-  login        String   @unique @default(cuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String   @unique
+  passwordHash      String
+  // AES-256-GCM-encrypted copy of the current plaintext password (see
+  // lib/auth/password-crypto.ts) — used ONLY by SUPER_ADMIN's "Show
+  // password" feature in the Admin Panel. Never read by login/auth, which
+  // exclusively checks passwordHash above. Null for any account created or
+  // last password-changed before this feature existed (a bcrypt hash can't
+  // be reversed into this) or while PASSWORD_ENCRYPTION_KEY isn't
+  // configured — the UI shows "Not available" for those until the next
+  // password change/reset backfills it.
+  encryptedPassword String?
+  accountType       String   @default("Standard")
+  leverageMax       Int      @default(100)
+  login             String   @unique @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Admin Panel: role is the sole gate for /admin and /api/admin/** (every
   // admin route re-checks this fresh from the DB via requireAdmin() —

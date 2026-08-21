@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { useAdminUsers } from "@/hooks/use-admin-api";
+import { useCurrentUser } from "@/hooks/use-api";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/shared/skeleton";
+import { UserPasswordCell } from "@/components/admin/user-password-cell";
 import { formatPrice, formatDate } from "@/lib/utils";
 
 const STATUS_VARIANT: Record<string, "success" | "danger" | "pending"> = {
@@ -24,9 +26,12 @@ const VERIFICATION_VARIANT: Record<string, "success" | "danger" | "pending" | "d
   };
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const { data, isLoading } = useAdminUsers({ search, page });
+  const { data: currentUser } = useCurrentUser();
+  const canRevealPasswords = currentUser?.role === "SUPER_ADMIN";
 
   return (
     <div className="space-y-6">
@@ -54,12 +59,12 @@ export default function AdminUsersPage() {
             <tr className="border-b border-border text-left text-xs text-muted">
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Email</th>
+              <th className="px-4 py-3 font-medium">Password</th>
               <th className="px-4 py-3 text-right font-medium">Balance</th>
               <th className="px-4 py-3 text-right font-medium">Equity</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Verification</th>
               <th className="px-4 py-3 font-medium">Created</th>
-              <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -84,7 +89,8 @@ export default function AdminUsersPage() {
               data?.users.map((u) => (
                 <tr
                   key={u.id}
-                  className="border-b border-border/50 transition-colors last:border-0 hover:bg-foreground/[0.02]"
+                  onClick={() => router.push(`/admin/users/${u.id}`)}
+                  className="cursor-pointer border-b border-border/50 transition-colors last:border-0 hover:bg-foreground/[0.04]"
                 >
                   <td className="px-4 py-3.5 text-foreground">
                     {u.firstName} {u.lastName}
@@ -95,6 +101,13 @@ export default function AdminUsersPage() {
                     )}
                   </td>
                   <td className="px-4 py-3.5 text-muted">{u.email}</td>
+                  <td className="px-4 py-3.5">
+                    <UserPasswordCell
+                      userId={u.id}
+                      userLabel={`${u.firstName} ${u.lastName}`}
+                      canReveal={canRevealPasswords}
+                    />
+                  </td>
                   <td className="font-tabular px-4 py-3.5 text-right text-foreground">
                     ${formatPrice(u.balance)}
                   </td>
@@ -112,14 +125,6 @@ export default function AdminUsersPage() {
                     </Badge>
                   </td>
                   <td className="px-4 py-3.5 text-muted">{formatDate(u.createdAt)}</td>
-                  <td className="px-4 py-3.5">
-                    <Link
-                      href={`/admin/users/${u.id}`}
-                      className="text-primary hover:underline"
-                    >
-                      View
-                    </Link>
-                  </td>
                 </tr>
               ))}
           </tbody>

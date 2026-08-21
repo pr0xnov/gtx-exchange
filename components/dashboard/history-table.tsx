@@ -21,8 +21,23 @@ const TYPE_LABEL_KEY: Record<string, DictionaryKey> = {
   WITHDRAWAL: "history.typeWithdrawal",
   BONUS: "history.typeBonus",
   TRADE_SETTLEMENT: "history.typeTrade",
-  ADMIN_BALANCE_ADJUSTMENT: "history.typeAdjustment",
 };
+
+// ADMIN_BALANCE_ADJUSTMENT stays the real TransactionType in the DB (the
+// admin/audit-log logic depends on it), but a user shouldn't see internal
+// admin terminology in their own history: a CREDIT adjustment reads as an
+// ordinary Deposit and a DEBIT reads as an ordinary Withdrawal — symmetric
+// with each other, and indistinguishable from the real DEPOSIT/WITHDRAWAL
+// transaction types to the end user.
+function typeLabelKey(tx: {
+  type: string;
+  direction: string | null;
+}): DictionaryKey | undefined {
+  if (tx.type === "ADMIN_BALANCE_ADJUSTMENT") {
+    return tx.direction === "DEBIT" ? "history.typeWithdrawal" : "history.typeDeposit";
+  }
+  return TYPE_LABEL_KEY[tx.type];
+}
 
 // Every other type has one fixed, implied sign — only
 // ADMIN_BALANCE_ADJUSTMENT can go either way (Add Balance vs Remove
@@ -108,7 +123,7 @@ export function HistoryTable() {
                     ? -1
                     : 1
                   : (TYPE_SIGN[tx.type] ?? 1);
-              const typeKey = TYPE_LABEL_KEY[tx.type];
+              const typeKey = typeLabelKey(tx);
               const statusKey = STATUS_LABEL_KEY[tx.status];
 
               return (

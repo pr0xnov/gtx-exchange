@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
+import { maybeEncryptPassword } from "@/lib/auth/password-crypto";
 import {
   signAccessToken,
   signRefreshToken,
@@ -30,6 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     const passwordHash = await hashPassword(input.password);
+    const encryptedPassword = maybeEncryptPassword(input.password);
 
     const user = await prisma.user.create({
       data: {
@@ -37,6 +39,7 @@ export async function POST(req: NextRequest) {
         lastName: input.lastName,
         email: input.email,
         passwordHash,
+        encryptedPassword,
         login: generateLoginId(),
         wallet: { create: { balance: 10_000, credit: 0, currency: "USDT" } },
         settings: { create: {} },

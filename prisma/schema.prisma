@@ -61,6 +61,17 @@ model User {
   emailChangeTokenHash String?   @unique
   emailChangeExpiresAt DateTime?
 
+  // KYC personal info (Account verification): filled in once, at
+  // submission time (see app/api/verification/route.ts) — nothing else in
+  // the schema captured these before. Full name/email are NOT duplicated
+  // here; the verification UI reads those straight off firstName/
+  // lastName/email above, per the "don't invent data, reuse what exists"
+  // rule this feature was built under. Null until the user's first
+  // verification submission.
+  country     String?
+  dateOfBirth DateTime?
+  address     String?
+
   wallet        Wallet?
   orders        Order[]
   positions     Position[]
@@ -429,13 +440,31 @@ enum DocumentStatus {
 }
 
 model VerificationDocument {
-  id         String         @id @default(cuid())
-  userId     String
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type       DocumentType
-  fileName   String
-  status     DocumentStatus @default(PENDING)
-  uploadedAt DateTime       @default(now())
+  id       String       @id @default(cuid())
+  userId   String
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type     DocumentType
+  fileName String
+  // The actual uploaded file — previously this model only ever stored a
+  // filename string (the browser's File.name), with the real bytes never
+  // leaving the client at all, so there was nothing an admin (or the user)
+  // could actually open. Stored directly in Postgres rather than adding
+  // new infrastructure (no object storage/S3/Docker volume exists
+  // anywhere else in this project) — validated server-side to image/* or
+  // application/pdf, capped at 5MB (see app/api/verification/route.ts).
+  // Nullable so pre-existing rows (filename-only, from before this field
+  // existed) don't need a backfill.
+  fileData Bytes?
+  mimeType String?
+
+  status          DocumentStatus @default(PENDING)
+  // Set only on REJECTED, by the reviewing admin (see
+  // app/api/admin/verification/[userId]/route.ts) — the free-text reason
+  // shown back to the user on /verification and /account. A fresh
+  // resubmission clears it (the whole row is replaced, not patched).
+  rejectionReason String?
+
+  uploadedAt DateTime @default(now())
 }
 
 model Notification {

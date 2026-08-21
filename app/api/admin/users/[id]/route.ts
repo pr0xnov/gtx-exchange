@@ -16,7 +16,26 @@ export async function GET(
 
     const user = await prisma.user.findUnique({
       where: { id },
-      include: { documents: { orderBy: { uploadedAt: "desc" } }, settings: true },
+      include: {
+        // Explicit select, never a blanket include: VerificationDocument
+        // now also carries the raw file bytes (fileData) — those must
+        // only ever leave the server through the protected
+        // GET /api/verification/documents/[id]/file route, never bundled
+        // into a general JSON response like this one.
+        documents: {
+          orderBy: { uploadedAt: "desc" },
+          select: {
+            id: true,
+            type: true,
+            fileName: true,
+            mimeType: true,
+            status: true,
+            rejectionReason: true,
+            uploadedAt: true,
+          },
+        },
+        settings: true,
+      },
     });
     if (!user) return apiError("User not found", 404);
 

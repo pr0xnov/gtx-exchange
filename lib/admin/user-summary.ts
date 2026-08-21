@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { calculateAccountSummary } from "@/lib/account/derive";
-import type { SpotWallet, VerificationDocument } from "@prisma/client";
+import type { SpotWallet, DocumentStatus, DocumentType } from "@prisma/client";
 
 const QUOTE_CURRENCY = "USDT";
 
@@ -8,9 +8,13 @@ export type VerificationStatus = "VERIFIED" | "PENDING" | "REJECTED" | "UNVERIFI
 
 /** Same "both document types must be approved" bar Settings/Withdrawal
  *  already implies (see lib/verification-gating in tests) — reused here
- *  rather than a second, looser admin-only definition of "verified". */
+ *  rather than a second, looser admin-only definition of "verified".
+ *  Narrowed to only the two fields this actually reads (rather than the
+ *  full VerificationDocument shape) so callers that select a subset of
+ *  columns — e.g. the user-facing GET /api/verification, which never
+ *  needs to pull fileData — can pass their result straight through. */
 export function deriveVerificationStatus(
-  docs: VerificationDocument[]
+  docs: { status: DocumentStatus; type: DocumentType }[]
 ): VerificationStatus {
   if (docs.length === 0) return "UNVERIFIED";
   if (docs.some((d) => d.status === "REJECTED")) return "REJECTED";

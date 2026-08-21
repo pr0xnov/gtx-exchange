@@ -43,9 +43,16 @@ export const withdrawSchema = z.object({
   method: z.enum(["VISA_MASTERCARD", "BANK_TRANSFER", "BITCOIN", "TETHER_USDT"]),
 });
 
+// Personal info fields collected on submission (multipart form — see
+// app/api/verification/route.ts). The two document files themselves are
+// validated separately in the route (size/MIME type checks don't fit zod's
+// string-based validators cleanly).
 export const verificationSchema = z.object({
-  identityFileName: z.string().min(1, "Identity document is required"),
-  addressFileName: z.string().min(1, "Proof of address is required"),
+  country: z.string().trim().min(1, "Country is required").max(100),
+  dateOfBirth: z
+    .string()
+    .refine((s) => !Number.isNaN(Date.parse(s)), "Enter a valid date of birth"),
+  address: z.string().trim().min(1, "Address is required").max(300),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;

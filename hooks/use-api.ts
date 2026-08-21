@@ -43,6 +43,7 @@ export interface CurrentUser {
   leverageMax: number;
   wallet: { balance: string; credit: string; currency: string } | null;
   createdAt: string;
+  verification: "VERIFIED" | "PENDING" | "REJECTED" | "UNVERIFIED";
 }
 
 export function useCurrentUser() {
@@ -356,6 +357,36 @@ export function useAccountSummary() {
     queryKey: ["account-summary"],
     queryFn: () => fetchJson<AccountSummaryDto>("/api/account/summary"),
     refetchInterval: 5000,
+  });
+}
+
+export interface VerificationDocumentDto {
+  id: string;
+  type: "IDENTITY" | "PROOF_OF_ADDRESS";
+  fileName: string;
+  mimeType: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason: string | null;
+  uploadedAt: string;
+}
+
+export interface VerificationStatusDto {
+  status: "VERIFIED" | "PENDING" | "REJECTED" | "UNVERIFIED";
+  rejectionReason: string | null;
+  profile: {
+    fullName: string;
+    email: string;
+    country: string | null;
+    dateOfBirth: string | null;
+    address: string | null;
+  };
+  documents: VerificationDocumentDto[];
+}
+
+export function useVerificationStatus() {
+  return useQuery({
+    queryKey: ["verification"],
+    queryFn: () => fetchJson<VerificationStatusDto>("/api/verification"),
   });
 }
 

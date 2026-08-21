@@ -1,39 +1,30 @@
 "use client";
 
-import { toast } from "sonner";
-import { useAdminVerificationQueue, useDecideVerification } from "@/hooks/use-admin-api";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useAdminVerificationUsers } from "@/hooks/use-admin-api";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/shared/skeleton";
 import { formatDate } from "@/lib/utils";
 
-interface DocumentRow {
-  id: string;
-  type: string;
-  fileName: string;
-  status: string;
-  uploadedAt: string;
-  user: { firstName: string; lastName: string; email: string };
-}
+const STATUS_VARIANT: Record<string, "success" | "danger" | "pending" | "default"> = {
+  VERIFIED: "success",
+  PENDING: "pending",
+  REJECTED: "danger",
+  UNVERIFIED: "default",
+};
 
 export default function AdminVerificationPage() {
-  const { data, isLoading } = useAdminVerificationQueue();
-  const decide = useDecideVerification();
-  const documents = (data as DocumentRow[] | undefined) ?? [];
-
-  async function handleDecision(documentId: string, decision: "APPROVED" | "REJECTED") {
-    try {
-      await decide.mutateAsync({ documentId, decision });
-      toast.success(decision === "APPROVED" ? "Document approved" : "Document rejected");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update document");
-    }
-  }
+  const router = useRouter();
+  const { data, isLoading } = useAdminVerificationUsers();
+  const users = data ?? [];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Verification</h1>
-        <p className="mt-1 text-sm text-muted">{documents.length} pending documents</p>
+        <p className="mt-1 text-sm text-muted">
+          {users.length} users with submitted documents
+        </p>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
@@ -41,58 +32,46 @@ export default function AdminVerificationPage() {
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted">
               <th className="px-4 py-3 font-medium">User</th>
-              <th className="px-4 py-3 font-medium">Type</th>
-              <th className="px-4 py-3 font-medium">File</th>
-              <th className="px-4 py-3 font-medium">Uploaded</th>
-              <th className="px-4 py-3 font-medium">Actions</th>
+              <th className="px-4 py-3 font-medium">Email</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Documents</th>
+              <th className="px-4 py-3 font-medium">Updated</th>
             </tr>
           </thead>
           <tbody>
             {isLoading &&
-              Array.from({ length: 4 }).map((_, i) => (
+              Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i}>
                   <td className="px-4 py-3.5" colSpan={5}>
                     <Skeleton className="h-5 w-full" />
                   </td>
                 </tr>
               ))}
-            {!isLoading && documents.length === 0 && (
+            {!isLoading && users.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-muted">
-                  Nothing pending review.
+                  No verification submissions yet.
                 </td>
               </tr>
             )}
             {!isLoading &&
-              documents.map((d) => (
-                <tr key={d.id} className="border-b border-border/50 last:border-0">
+              users.map((u) => (
+                <tr
+                  key={u.id}
+                  onClick={() => router.push(`/admin/verification/${u.id}`)}
+                  className="cursor-pointer border-b border-border/50 transition-colors last:border-0 hover:bg-foreground/[0.04]"
+                >
                   <td className="px-4 py-3.5 text-foreground">
-                    {d.user.firstName} {d.user.lastName}
-                    <div className="text-xs text-muted">{d.user.email}</div>
+                    {u.firstName} {u.lastName}
                   </td>
-                  <td className="px-4 py-3.5 text-muted">{d.type.replace("_", " ")}</td>
-                  <td className="px-4 py-3.5 text-muted">{d.fileName}</td>
-                  <td className="px-4 py-3.5 text-muted">{formatDate(d.uploadedAt)}</td>
+                  <td className="px-4 py-3.5 text-muted">{u.email}</td>
                   <td className="px-4 py-3.5">
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        disabled={decide.isPending}
-                        onClick={() => handleDecision(d.id, "APPROVED")}
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        disabled={decide.isPending}
-                        onClick={() => handleDecision(d.id, "REJECTED")}
-                      >
-                        Reject
-                      </Button>
-                    </div>
+                    <Badge variant={STATUS_VARIANT[u.status] ?? "default"}>
+                      {u.status}
+                    </Badge>
                   </td>
+                  <td className="px-4 py-3.5 text-muted">{u.documentCount}</td>
+                  <td className="px-4 py-3.5 text-muted">{formatDate(u.updatedAt)}</td>
                 </tr>
               ))}
           </tbody>

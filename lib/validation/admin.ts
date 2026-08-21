@@ -32,7 +32,30 @@ export const roleUpdateSchema = z.object({
   role: z.enum(["USER", "ADMIN"]),
 });
 
-export const verificationDecisionSchema = z.object({
-  decision: z.enum(["APPROVED", "REJECTED"]),
-  note: z.string().trim().max(500).optional(),
-});
+export const verificationDecisionSchema = z
+  .object({
+    decision: z.enum(["APPROVED", "REJECTED"]),
+    reason: z.string().trim().max(500).optional(),
+  })
+  .refine((data) => data.decision !== "REJECTED" || (data.reason?.length ?? 0) >= 3, {
+    message: "A reason is required when rejecting verification",
+    path: ["reason"],
+  });
+
+// SUPER_ADMIN editing a user's KYC personal info from the verification
+// review screen — every field optional so the frontend's per-field
+// Edit/Save can PATCH just the one field it changed, but at least one
+// must be present (see the .refine below).
+export const adminUpdateVerificationProfileSchema = z
+  .object({
+    country: z.string().trim().min(1, "Country is required").max(100).optional(),
+    firstName: z.string().trim().min(1, "First name is required").max(100).optional(),
+    lastName: z.string().trim().min(1, "Last name is required").max(100).optional(),
+    dateOfBirth: z
+      .string()
+      .refine((s) => !Number.isNaN(Date.parse(s)), "Enter a valid date of birth")
+      .optional(),
+    address: z.string().trim().min(1, "Address is required").max(300).optional(),
+    email: z.string().trim().email("Enter a valid email").max(200).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, { message: "No fields to update" });

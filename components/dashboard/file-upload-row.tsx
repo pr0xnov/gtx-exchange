@@ -10,7 +10,7 @@ export function FileUploadRow({
   onFileSelected,
 }: {
   label: string;
-  onFileSelected: (fileName: string) => void;
+  onFileSelected: (file: File) => void;
 }) {
   const { t } = useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -20,7 +20,7 @@ export function FileUploadRow({
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
-    onFileSelected(file.name);
+    onFileSelected(file);
   }
 
   return (

@@ -1,8 +1,16 @@
 "use client";
 
-import { useCurrentUser } from "@/hooks/use-api";
+import { useCurrentUser, type CurrentUser } from "@/hooks/use-api";
 import { Skeleton } from "@/components/shared/skeleton";
 import { useLocale } from "@/lib/i18n/locale-context";
+import type { DictionaryKey } from "@/lib/i18n/dictionaries";
+
+const VERIFICATION_STATUS_KEY: Record<CurrentUser["verification"], DictionaryKey> = {
+  VERIFIED: "verification.statusVerified",
+  PENDING: "verification.statusPending",
+  REJECTED: "verification.statusRejected",
+  UNVERIFIED: "verification.statusUnverified",
+};
 
 export function AccountInfoPanel() {
   const { data: user, isLoading } = useCurrentUser();
@@ -13,6 +21,10 @@ export function AccountInfoPanel() {
     { label: t("account.email"), value: user?.email },
     { label: t("account.accountType"), value: user?.accountType },
     { label: t("account.leverage"), value: user ? `1:${user.leverageMax}` : undefined },
+    {
+      label: t("account.verification"),
+      value: user ? t(VERIFICATION_STATUS_KEY[user.verification]) : undefined,
+    },
   ];
 
   return (

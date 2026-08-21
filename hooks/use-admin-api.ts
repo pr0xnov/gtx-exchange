@@ -161,10 +161,51 @@ export function useAdminList(
   });
 }
 
-export function useAdminVerificationQueue() {
+export interface AdminVerificationUserRow {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: "VERIFIED" | "PENDING" | "REJECTED" | "UNVERIFIED";
+  documentCount: number;
+  updatedAt: string;
+}
+
+export function useAdminVerificationUsers() {
   return useQuery({
     queryKey: ["admin", "verification"],
-    queryFn: () => fetchJson("/api/admin/verification"),
+    queryFn: () => fetchJson<AdminVerificationUserRow[]>("/api/admin/verification"),
+  });
+}
+
+export interface AdminVerificationDetail {
+  profile: {
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    email: string;
+    country: string | null;
+    dateOfBirth: string | null;
+    address: string | null;
+  };
+  status: "VERIFIED" | "PENDING" | "REJECTED" | "UNVERIFIED";
+  documents: {
+    id: string;
+    type: "IDENTITY" | "PROOF_OF_ADDRESS";
+    fileName: string;
+    mimeType: string | null;
+    status: "PENDING" | "APPROVED" | "REJECTED";
+    rejectionReason: string | null;
+    uploadedAt: string;
+  }[];
+}
+
+export function useAdminVerificationDetail(userId: string) {
+  return useQuery({
+    queryKey: ["admin", "verification", userId],
+    queryFn: () =>
+      fetchJson<AdminVerificationDetail>(`/api/admin/verification/${userId}`),
+    enabled: Boolean(userId),
   });
 }
 
@@ -172,19 +213,60 @@ export function useDecideVerification() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      documentId,
+      userId,
       decision,
-      note,
+      reason,
     }: {
-      documentId: string;
+      userId: string;
       decision: "APPROVED" | "REJECTED";
-      note?: string;
+      reason?: string;
     }) =>
-      fetchJson(`/api/admin/verification/${documentId}`, {
+      fetchJson(`/api/admin/verification/${userId}`, {
         method: "PATCH",
-        body: JSON.stringify({ decision, note }),
+        body: JSON.stringify({ decision, reason }),
+      }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "verification"] });
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "verification", variables.userId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin", "user", variables.userId] });
+    },
+  });
+}
+
+export interface VerificationProfileFields {
+  country?: string;
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  address?: string;
+  email?: string;
+}
+
+export function useUpdateVerificationProfile(userId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (fields: VerificationProfileFields) =>
+      fetchJson(`/api/admin/verification/${userId}/profile`, {
+        method: "PATCH",
+        body: JSON.stringify(fields),
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "verification", userId] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "verification"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "user", userId] });
+    },
+  });
+}
+
+export function useDeleteVerificationDocument(userId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (documentId: string) =>
+      fetchJson(`/api/verification/documents/${documentId}/file`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "verification", userId] });
       queryClient.invalidateQueries({ queryKey: ["admin", "verification"] });
     },
   });

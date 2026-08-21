@@ -5,13 +5,8 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  ListOrdered,
-  Repeat,
   Receipt,
   ShieldCheck,
-  LifeBuoy,
   ScrollText,
   Settings,
   Wallet,
@@ -21,17 +16,16 @@ import {
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/logo";
 
+// Orders/Trades/Deposits/Withdrawals/Support were removed from this nav by
+// request — their pages/API routes still exist and still work (reachable
+// directly by URL, e.g. from a user detail page's own tabs), this only
+// drops them from the Admin Panel's left-hand navigation.
 const NAV_LINKS = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Balance Adjustments", href: "/admin/balance-adjustments", icon: Wallet },
-  { label: "Deposits", href: "/admin/deposits", icon: ArrowDownToLine },
-  { label: "Withdrawals", href: "/admin/withdrawals", icon: ArrowUpFromLine },
-  { label: "Orders", href: "/admin/orders", icon: ListOrdered },
-  { label: "Trades", href: "/admin/trades", icon: Repeat },
   { label: "Transactions", href: "/admin/transactions", icon: Receipt },
   { label: "Verification", href: "/admin/verification", icon: ShieldCheck },
-  { label: "Support", href: "/admin/support", icon: LifeBuoy },
   { label: "Audit Log", href: "/admin/audit-log", icon: ScrollText },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ] as const;

@@ -52,6 +52,22 @@ export function formatDate(date: Date | string): string {
   }).format(d);
 }
 
+/** For calendar-only dates (currently just date of birth) — deliberately
+ *  does NOT go through Intl.DateTimeFormat with the viewer's local
+ *  timezone the way formatDate() does. A date of birth is stored as a
+ *  UTC midnight timestamp (e.g. "1988-07-22T00:00:00.000Z"); formatting
+ *  that through the browser's local timezone can roll it back/forward a
+ *  day (and, since formatDate() also renders hour/minute, show a
+ *  misleading time-of-day on what's actually just a date). Extracting
+ *  Y-M-D straight from the ISO string sidesteps timezone conversion
+ *  entirely, so the calendar date never shifts no matter where it's
+ *  viewed from. */
+export function formatDateOnly(date: Date | string): string {
+  const iso = typeof date === "string" ? date : date.toISOString();
+  const [year, month, day] = iso.slice(0, 10).split("-");
+  return `${day}/${month}/${year}`;
+}
+
 export function generateLoginId(): string {
   return String(Math.floor(10_000_000 + Math.random() * 89_999_999));
 }

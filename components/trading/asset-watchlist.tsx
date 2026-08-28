@@ -48,10 +48,27 @@ export function AssetWatchlist({
   // favorited on /markets too, and vice versa — one shared list.
   const { favorites, toggleFavorite } = useFavorites(true);
 
+  // Stable partition, not a re-sort: favorites first, then the rest —
+  // each group keeps TRACKED_SYMBOLS' own original relative order
+  // (Array.filter preserves source order, so two filter passes over the
+  // same array is enough; nothing here is compared/sorted against
+  // anything else). Recomputes automatically whenever `favorites`
+  // changes — toggling a star updates this on the very next render, no
+  // reload needed. One single unified list, no All/Favorites tab — a
+  // star just moves a row between the two halves of this same list.
+  const sortedSymbols = useMemo(() => {
+    const favs = TRACKED_SYMBOLS.filter((s) => favorites.has(s));
+    const rest = TRACKED_SYMBOLS.filter((s) => !favorites.has(s));
+    return [...favs, ...rest];
+  }, [favorites]);
+
+  // Search filters this same favorites-first list — never a separate
+  // mode/view — so the favorites-first grouping (and its divider below)
+  // is automatically preserved within search results too.
   const symbols = useMemo(() => {
     const q = search.toLowerCase();
-    if (!q) return TRACKED_SYMBOLS;
-    return TRACKED_SYMBOLS.filter((s) => {
+    if (!q) return sortedSymbols;
+    return sortedSymbols.filter((s) => {
       const entry = REGISTRY_BY_SYMBOL.get(s);
       return (
         (DISPLAY_NAMES[s] ?? s).toLowerCase().includes(q) ||
@@ -59,7 +76,10 @@ export function AssetWatchlist({
         s.toLowerCase().includes(q)
       );
     });
-  }, [search]);
+  }, [sortedSymbols, search]);
+
+  // Where to draw the divider between the favorited group and the rest.
+  const dividerIndex = symbols.findIndex((s) => !favorites.has(s));
 
   return (
     <div className="flex h-full w-64 shrink-0 flex-col border-r border-border">
@@ -74,6 +94,7 @@ export function AssetWatchlist({
           />
         </div>
       </div>
+
       {/* min-h-0 is required here: a flex child's default min-height is
           "auto" (its content's natural height), which lets this list grow
           to fit every row instead of being capped at the space actually
@@ -81,75 +102,81 @@ export function AssetWatchlist({
           rows past the bottom edge become unreachable, clipped by an
           ancestor's own overflow-hidden instead of scrolling. */}
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {symbols.map((symbol) => {
+        {symbols.map((symbol, index) => {
           const ticker = prices[symbol];
           const up = (ticker?.changePercent24h ?? 0) >= 0;
           const active = selected === symbol;
           const entry = REGISTRY_BY_SYMBOL.get(symbol);
           const isFavorite = favorites.has(symbol);
           return (
-            <div
-              key={symbol}
-              role="button"
-              tabIndex={0}
-              onClick={() => onSelect(symbol)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSelect(symbol);
-                }
-              }}
-              className={cn(
-                "flex w-full cursor-pointer items-center justify-between gap-2 border-b border-border/50 px-3 py-3 text-left outline-none transition-colors",
-                active ? "bg-primary/10" : "hover:bg-white/[0.02]"
+            <div key={symbol}>
+              {index === dividerIndex && index > 0 && (
+                <div className="border-t border-border" />
               )}
-            >
-              <div className="flex min-w-0 items-center gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(symbol);
-                  }}
-                  className="flex shrink-0 items-center justify-center rounded-lg p-1 text-muted hover:text-foreground"
-                  aria-label={
-                    isFavorite
-                      ? t("trading.watchlist.removeFavorite")
-                      : t("trading.watchlist.addFavorite")
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelect(symbol)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelect(symbol);
                   }
-                >
-                  <Star
-                    className={cn(
-                      "h-3.5 w-3.5",
-                      isFavorite && "fill-primary text-primary"
-                    )}
-                  />
-                </button>
-                <CoinIcon symbol={entry?.baseAsset ?? symbol} />
-                <div className="min-w-0">
+                }}
+                className={cn(
+                  "flex w-full cursor-pointer items-center justify-between gap-2 border-b border-border/50 px-3 py-3 text-left outline-none transition-colors",
+                  active ? "bg-primary/10" : "hover:bg-white/[0.02]"
+                )}
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(symbol);
+                    }}
+                    className="flex shrink-0 items-center justify-center rounded-lg p-1 text-muted hover:text-foreground"
+                    aria-label={
+                      isFavorite
+                        ? t("trading.watchlist.removeFavorite")
+                        : t("trading.watchlist.addFavorite")
+                    }
+                  >
+                    <Star
+                      className={cn(
+                        "h-3.5 w-3.5",
+                        isFavorite && "fill-primary text-primary"
+                      )}
+                    />
+                  </button>
+                  <CoinIcon symbol={entry?.baseAsset ?? symbol} />
+                  <div className="min-w-0">
+                    <div
+                      className={cn(
+                        "truncate text-sm font-medium",
+                        active ? "text-primary" : "text-foreground"
+                      )}
+                    >
+                      {DISPLAY_NAMES[symbol] ?? symbol}
+                    </div>
+                    <div className="truncate text-xs text-muted">
+                      {entry?.name ?? symbol}
+                    </div>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="font-tabular text-xs text-foreground">
+                    {ticker ? formatPrice(ticker.price, ticker.price < 10 ? 4 : 2) : "—"}
+                  </div>
                   <div
                     className={cn(
-                      "truncate text-sm font-medium",
-                      active ? "text-primary" : "text-foreground"
+                      "font-tabular text-[11px]",
+                      up ? "text-primary" : "text-danger"
                     )}
                   >
-                    {DISPLAY_NAMES[symbol] ?? symbol}
+                    {ticker
+                      ? `${up ? "+" : ""}${ticker.changePercent24h.toFixed(2)}%`
+                      : ""}
                   </div>
-                  <div className="truncate text-xs text-muted">
-                    {entry?.name ?? symbol}
-                  </div>
-                </div>
-              </div>
-              <div className="shrink-0 text-right">
-                <div className="font-tabular text-xs text-foreground">
-                  {ticker ? formatPrice(ticker.price, ticker.price < 10 ? 4 : 2) : "—"}
-                </div>
-                <div
-                  className={cn(
-                    "font-tabular text-[11px]",
-                    up ? "text-primary" : "text-danger"
-                  )}
-                >
-                  {ticker ? `${up ? "+" : ""}${ticker.changePercent24h.toFixed(2)}%` : ""}
                 </div>
               </div>
             </div>

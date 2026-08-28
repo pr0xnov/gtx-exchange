@@ -958,7 +958,7 @@ const ru: Dictionary = {
   "trading.orders.openTab": "Открытые ордера",
   "trading.orders.historyTab": "История ордеров",
   "trading.topbar.balance": "Баланс",
-  "trading.topbar.equity": "Эквити",
+  "trading.topbar.equity": "Средства",
   "trading.topbar.profit": "Прибыль",
 
   "marketing.home.hero.titleLine1": "Зарабатывайте на лучших",
@@ -1538,7 +1538,7 @@ const uk: Dictionary = {
   "trading.orders.openTab": "Відкриті ордери",
   "trading.orders.historyTab": "Історія ордерів",
   "trading.topbar.balance": "Баланс",
-  "trading.topbar.equity": "Еквіті",
+  "trading.topbar.equity": "Кошти",
   "trading.topbar.profit": "Прибуток",
 
   "marketing.home.hero.titleLine1": "Заробляйте на найкращих",

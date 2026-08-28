@@ -31,8 +31,11 @@ import { MARKET_REGISTRY } from "@/lib/binance/client";
 import type { LiveTicker } from "@/hooks/use-live-prices";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 
+// LocaleProvider itself calls useRouter() (for router.refresh() on locale
+// change) regardless of what AssetWatchlist uses — needed for every render
+// in this file even though AssetWatchlist no longer touches next/navigation.
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn(), replace: vi.fn() }),
 }));
 
 const PRICES: Record<string, LiveTicker> = {
@@ -251,16 +254,88 @@ describe("AssetWatchlist — favorites star", () => {
   });
 });
 
+function rowTexts(): string[] {
+  return Array.from(container.querySelectorAll('[role="button"]')).map(
+    (r) => r.textContent ?? ""
+  );
+}
+
+function setInputValue(input: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value"
+  )!.set!;
+  setter.call(input, value);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+describe("AssetWatchlist — favorites-first sort", () => {
+  it("a favorited coin moves to the top; everything else keeps its original relative order", () => {
+    render();
+    // AVAX is 15th in MARKET_REGISTRY, BTC is 1st — favoriting AVAX alone
+    // must not reorder anything else relative to each other.
+    const avaxStar = findRow("Avalanche")!.querySelector(
+      'button[aria-label="Add to favorites"]'
+    )!;
+    act(() => avaxStar.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+
+    const texts = rowTexts();
+    expect(texts[0]).toContain("Avalanche");
+    expect(texts[1]).toContain("Bitcoin"); // first non-favorite, unchanged position
+  });
+
+  it("un-favoriting drops a coin back out of the top group", () => {
+    render();
+    const avaxStar = findRow("Avalanche")!.querySelector(
+      'button[aria-label="Add to favorites"]'
+    )!;
+    act(() => avaxStar.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    expect(rowTexts()[0]).toContain("Avalanche");
+
+    const avaxStarAgain = findRow("Avalanche")!.querySelector(
+      'button[aria-label="Remove from favorites"]'
+    )!;
+    act(() => avaxStarAgain.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+
+    expect(rowTexts()[0]).toContain("Bitcoin");
+  });
+});
+
+describe("AssetWatchlist — search preserves favorites-first order", () => {
+  it("favorites-first order survives a search-then-clear cycle", () => {
+    render();
+    // Favorite AVAX (15th in MARKET_REGISTRY) so it's out of its natural
+    // position — a real test of "restore order", not just "restore list".
+    const avaxStar = findRow("Avalanche")!.querySelector(
+      'button[aria-label="Add to favorites"]'
+    )!;
+    act(() => avaxStar.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    expect(rowTexts()[0]).toContain("Avalanche");
+
+    const input = container.querySelector("input") as HTMLInputElement;
+    setInputValue(input, "Ethereum");
+    expect(container.textContent).toContain("Ethereum");
+    expect(container.textContent).not.toContain("Avalanche");
+
+    setInputValue(input, "");
+    const texts = rowTexts();
+    expect(texts[0]).toContain("Avalanche"); // favorite still first
+    expect(texts[1]).toContain("Bitcoin"); // rest still in original order
+  });
+});
+
 describe("AssetWatchlist — scrollable list container", () => {
   it("the list container has min-h-0 alongside flex-1/overflow-y-auto, so it can actually scroll instead of growing to fit every row", () => {
     render();
-    const searchInput = container.querySelector("input")!;
-    // The scrollable list is the element right after the fixed search
-    // block, inside the AssetWatchlist root.
-    const root2 = searchInput.closest(".border-b")!.parentElement!;
-    const list = root2.children[1] as HTMLElement;
-    expect(list.className).toContain("min-h-0");
-    expect(list.className).toContain("flex-1");
-    expect(list.className).toContain("overflow-y-auto");
+    // Found by its own distinguishing classes rather than a fixed child
+    // index — the tab bar/search block above it are siblings whose count
+    // can change independently of this element's own scroll behavior.
+    const list = Array.from(container.querySelectorAll("div")).find(
+      (el) =>
+        el.className.includes("min-h-0") &&
+        el.className.includes("flex-1") &&
+        el.className.includes("overflow-y-auto")
+    ) as HTMLElement;
+    expect(list).toBeDefined();
   });
 });

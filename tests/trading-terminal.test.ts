@@ -20,7 +20,7 @@ import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { ThemeProvider } from "@/lib/theme/theme-context";
 
 vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({ get: () => null }),
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 

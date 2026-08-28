@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -178,6 +179,11 @@ export function LoginForm() {
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
+        </div>
+        <div className="mt-2 text-right">
+          <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+            {t("auth.login.forgotPasswordLink")}
+          </Link>
         </div>
       </div>
 

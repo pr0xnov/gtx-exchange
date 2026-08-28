@@ -10,12 +10,28 @@ export interface MailMessage {
 
 let transporter: Transporter | null | undefined;
 
+function missingSmtpVars(): string[] {
+  const missing: string[] = [];
+  if (!env.SMTP_HOST) missing.push("SMTP_HOST");
+  if (!env.SMTP_PORT) missing.push("SMTP_PORT");
+  if (!env.SMTP_USER) missing.push("SMTP_USER");
+  if (!env.SMTP_PASSWORD) missing.push("SMTP_PASSWORD");
+  return missing;
+}
+
 /** Lazily built, memoized — undefined until first checked, then either a
  *  real transporter or null (no SMTP configured) for the life of the process. */
 function getTransporter(): Transporter | null {
   if (transporter !== undefined) return transporter;
 
-  if (!env.SMTP_HOST || !env.SMTP_PORT || !env.SMTP_USER || !env.SMTP_PASSWORD) {
+  const missing = missingSmtpVars();
+  if (missing.length > 0) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `[email:not-configured] Missing environment variable(s): ${missing.join(", ")}. ` +
+        "Set them (and rebuild/restart the web container if running under Docker — " +
+        "see docker-compose.yml's web.environment block) to actually send email."
+    );
     transporter = null;
     return transporter;
   }
@@ -27,6 +43,56 @@ function getTransporter(): Transporter | null {
     auth: { user: env.SMTP_USER, pass: env.SMTP_PASSWORD },
   });
   return transporter;
+}
+
+/** True SMTP-error codes nodemailer/Node's net & tls modules actually set
+ *  (EAUTH, ECONNECTION, ETIMEDOUT, ESOCKET, ...) — logging this alongside
+ *  the message turns "something failed" into "auth failed" / "connection
+ *  timed out" / "TLS handshake failed", which is the whole point of this
+ *  diagnostic path (see the investigation this was added for). */
+function describeError(error: unknown): string {
+  if (error && typeof error === "object") {
+    const code = "code" in error ? String((error as { code: unknown }).code) : undefined;
+    const responseCode =
+      "responseCode" in error
+        ? String((error as { responseCode: unknown }).responseCode)
+        : undefined;
+    const message = error instanceof Error ? error.message : String(error);
+    return [
+      code && `code=${code}`,
+      responseCode && `responseCode=${responseCode}`,
+      message,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+  return String(error);
+}
+
+/**
+ * Opens a real connection to the configured SMTP server (auth included)
+ * without sending a message — nodemailer's own verify() call. Use this to
+ * find out *why* email isn't arriving (bad host/port, wrong credentials,
+ * TLS mismatch, server unreachable from inside the container) without
+ * needing a real inbox to check. Returns a clear, specific reason on
+ * failure rather than a generic boolean.
+ */
+export async function verifySmtpConnection(): Promise<
+  { ok: true } | { ok: false; reason: string }
+> {
+  const missing = missingSmtpVars();
+  if (missing.length > 0) {
+    return { ok: false, reason: `Not configured — missing ${missing.join(", ")}` };
+  }
+  const t = getTransporter();
+  if (!t) return { ok: false, reason: "Transporter unavailable" };
+
+  try {
+    await t.verify();
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, reason: describeError(error) };
+  }
 }
 
 /**
@@ -62,7 +128,7 @@ export async function sendMail(message: MailMessage): Promise<boolean> {
     return true;
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("[email:send-failed]", error instanceof Error ? error.message : error);
+    console.error("[email:send-failed]", describeError(error));
     return false;
   }
 }

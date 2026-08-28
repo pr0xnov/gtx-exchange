@@ -61,6 +61,14 @@ model User {
   emailChangeTokenHash String?   @unique
   emailChangeExpiresAt DateTime?
 
+  // Forgot-password ("/login" -> "Forgot password?"): same shape/reasoning
+  // as the email-change token above — only a SHA-256 hash is ever stored,
+  // never the raw token, so a DB read alone can't be turned into a working
+  // reset link. One-time use (cleared the moment it's redeemed) and
+  // short-lived (see TOKEN_TTL_MS in app/api/auth/forgot-password/route.ts).
+  passwordResetTokenHash String?   @unique
+  passwordResetExpiresAt DateTime?
+
   // KYC personal info (Account verification): filled in once, at
   // submission time (see app/api/verification/route.ts) — nothing else in
   // the schema captured these before. Full name/email are NOT duplicated

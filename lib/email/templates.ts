@@ -69,6 +69,31 @@ export function emailChangeConfirmEmail(
   };
 }
 
+export function passwordResetRequestEmail(
+  locale: Locale,
+  to: string,
+  resetUrl: string
+): MailMessage {
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  const body = t("email.passwordResetRequest.body");
+  const button = t("email.passwordResetRequest.button");
+  const expiry = t("email.passwordResetRequest.expiryNotice");
+  const notice = t("email.passwordResetRequest.notYouNotice");
+
+  return {
+    to,
+    subject: t("email.passwordResetRequest.subject"),
+    text: `${body}\n\n${resetUrl}\n\n${expiry}\n\n${notice}`,
+    html: wrapHtml(
+      t("email.passwordResetRequest.heading"),
+      `<p style="color:#D1D5DB;font-size:14px;line-height:1.6;">${body}</p>
+       <a href="${resetUrl}" style="display:inline-block;margin:20px 0;padding:12px 24px;background:#22C55E;color:#0B0F17;font-weight:600;font-size:14px;border-radius:12px;text-decoration:none;">${button}</a>
+       <p style="color:#9CA3AF;font-size:13px;line-height:1.6;">${expiry}</p>
+       <p style="color:#9CA3AF;font-size:13px;line-height:1.6;margin-top:16px;">${notice}</p>`
+    ),
+  };
+}
+
 /**
  * Sent after an admin's Balance Adjustment (see
  * app/api/admin/balance-adjustments/route.ts) — deliberately carries only

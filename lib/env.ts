@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+/** A blank `KEY=` line in .env (very common for an optional var someone
+ *  hasn't filled in yet — see SMTP_* below) parses as an empty string,
+ *  not undefined, so it doesn't hit zod's .optional() default path.
+ *  Without this, an empty SMTP_PORT would coerce to 0 and fail
+ *  .positive() at import time, crashing the whole app over an unrelated,
+ *  genuinely-optional setting nobody configured. */
+function blankToUndefined(value: string | undefined): string | undefined {
+  return value === "" ? undefined : value;
+}
+
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
 
@@ -43,11 +53,11 @@ export const env = envSchema.parse({
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   NODE_ENV: process.env.NODE_ENV,
-  SMTP_HOST: process.env.SMTP_HOST,
-  SMTP_PORT: process.env.SMTP_PORT,
-  SMTP_USER: process.env.SMTP_USER,
-  SMTP_PASSWORD: process.env.SMTP_PASSWORD,
-  SMTP_FROM: process.env.SMTP_FROM,
-  APP_URL: process.env.APP_URL,
-  PASSWORD_ENCRYPTION_KEY: process.env.PASSWORD_ENCRYPTION_KEY,
+  SMTP_HOST: blankToUndefined(process.env.SMTP_HOST),
+  SMTP_PORT: blankToUndefined(process.env.SMTP_PORT),
+  SMTP_USER: blankToUndefined(process.env.SMTP_USER),
+  SMTP_PASSWORD: blankToUndefined(process.env.SMTP_PASSWORD),
+  SMTP_FROM: blankToUndefined(process.env.SMTP_FROM),
+  APP_URL: blankToUndefined(process.env.APP_URL),
+  PASSWORD_ENCRYPTION_KEY: blankToUndefined(process.env.PASSWORD_ENCRYPTION_KEY),
 });

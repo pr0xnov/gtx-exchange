@@ -524,6 +524,26 @@ const en = {
   "auth.register.agreeToTermsPrefix": "I agree to the",
   "auth.register.privacyPolicy": "Privacy Policy",
   "auth.register.submitButton": "Sign up",
+  "auth.login.forgotPasswordLink": "Forgot password?",
+  "auth.forgotPassword.title": "Reset your password",
+  "auth.forgotPassword.description":
+    "Enter your email and we'll send you a link to reset your password.",
+  "auth.forgotPassword.submitButton": "Send reset link",
+  "auth.forgotPassword.successMessage":
+    "If an account exists for that email, we've sent a password reset link.",
+  "auth.forgotPassword.backToLogin": "Back to login",
+  "auth.forgotPassword.failedFallback": "Something went wrong. Please try again.",
+  "auth.resetPassword.title": "Set a new password",
+  "auth.resetPassword.newPasswordLabel": "New password",
+  "auth.resetPassword.confirmPasswordLabel": "Confirm password",
+  "auth.resetPassword.submitButton": "Reset password",
+  "auth.resetPassword.successMessage":
+    "Your password has been reset. You can now log in with your new password.",
+  "auth.resetPassword.goToLogin": "Go to login",
+  "auth.resetPassword.invalidTokenMessage": "This reset link is invalid or has expired.",
+  "auth.resetPassword.requestNewLink": "Request a new link",
+  "auth.resetPassword.failedFallback": "Something went wrong. Please try again.",
+  "auth.resetPassword.missingTokenMessage": "This link is missing a reset token.",
 
   // Markets
   "markets.title": "Markets",
@@ -563,6 +583,14 @@ const en = {
   "email.emailChangeConfirm.button": "Confirm new email",
   "email.emailChangeConfirm.expiryNotice":
     "This link expires in 1 hour. If you didn't request this change, you can safely ignore this email.",
+  "email.passwordResetRequest.subject": "Reset your GTX password",
+  "email.passwordResetRequest.heading": "Reset your password",
+  "email.passwordResetRequest.body":
+    "We received a request to reset the password on your GTX account. Click the button below to choose a new password.",
+  "email.passwordResetRequest.button": "Reset password",
+  "email.passwordResetRequest.expiryNotice": "This link expires in 30 minutes.",
+  "email.passwordResetRequest.notYouNotice":
+    "If you didn't request this, you can safely ignore this email — your password will not be changed.",
   "email.emailChanged.subject": "Your GTX account email was changed",
   "email.emailChanged.heading": "Your account email was changed",
   "email.emailChanged.body":
@@ -1082,6 +1110,26 @@ const ru: Dictionary = {
   "auth.register.agreeToTermsPrefix": "Я принимаю",
   "auth.register.privacyPolicy": "Политику конфиденциальности",
   "auth.register.submitButton": "Зарегистрироваться",
+  "auth.login.forgotPasswordLink": "Забыли пароль?",
+  "auth.forgotPassword.title": "Восстановление пароля",
+  "auth.forgotPassword.description":
+    "Введите свой email, и мы отправим вам ссылку для сброса пароля.",
+  "auth.forgotPassword.submitButton": "Отправить ссылку",
+  "auth.forgotPassword.successMessage":
+    "Если аккаунт с таким email существует, мы отправили на него ссылку для сброса пароля.",
+  "auth.forgotPassword.backToLogin": "Назад ко входу",
+  "auth.forgotPassword.failedFallback": "Что-то пошло не так. Попробуйте ещё раз.",
+  "auth.resetPassword.title": "Новый пароль",
+  "auth.resetPassword.newPasswordLabel": "Новый пароль",
+  "auth.resetPassword.confirmPasswordLabel": "Подтвердите пароль",
+  "auth.resetPassword.submitButton": "Сбросить пароль",
+  "auth.resetPassword.successMessage":
+    "Пароль успешно изменён. Теперь вы можете войти с новым паролем.",
+  "auth.resetPassword.goToLogin": "Перейти ко входу",
+  "auth.resetPassword.invalidTokenMessage": "Эта ссылка недействительна или истекла.",
+  "auth.resetPassword.requestNewLink": "Запросить новую ссылку",
+  "auth.resetPassword.failedFallback": "Что-то пошло не так. Попробуйте ещё раз.",
+  "auth.resetPassword.missingTokenMessage": "В этой ссылке отсутствует токен сброса.",
 
   "markets.title": "Рынки",
   "markets.tabs.all": "Все криптовалюты",
@@ -1119,6 +1167,14 @@ const ru: Dictionary = {
   "email.emailChangeConfirm.button": "Подтвердить новый email",
   "email.emailChangeConfirm.expiryNotice":
     "Ссылка действительна в течение 1 часа. Если вы не запрашивали это изменение, просто проигнорируйте это письмо.",
+  "email.passwordResetRequest.subject": "Сброс пароля GTX",
+  "email.passwordResetRequest.heading": "Сброс пароля",
+  "email.passwordResetRequest.body":
+    "Мы получили запрос на сброс пароля вашего аккаунта GTX. Нажмите на кнопку ниже, чтобы задать новый пароль.",
+  "email.passwordResetRequest.button": "Сбросить пароль",
+  "email.passwordResetRequest.expiryNotice": "Ссылка действительна в течение 30 минут.",
+  "email.passwordResetRequest.notYouNotice":
+    "Если вы не запрашивали это, просто проигнорируйте это письмо — ваш пароль не будет изменён.",
   "email.emailChanged.subject": "Email вашего аккаунта GTX изменён",
   "email.emailChanged.heading": "Email вашего аккаунта был изменён",
   "email.emailChanged.body":
@@ -1633,6 +1689,26 @@ const uk: Dictionary = {
   "auth.register.agreeToTermsPrefix": "Я приймаю",
   "auth.register.privacyPolicy": "Політику конфіденційності",
   "auth.register.submitButton": "Зареєструватися",
+  "auth.login.forgotPasswordLink": "Забули пароль?",
+  "auth.forgotPassword.title": "Відновлення пароля",
+  "auth.forgotPassword.description":
+    "Введіть свій email, і ми надішлемо вам посилання для скидання пароля.",
+  "auth.forgotPassword.submitButton": "Надіслати посилання",
+  "auth.forgotPassword.successMessage":
+    "Якщо акаунт із такою поштою існує, ми надіслали на нього посилання для скидання пароля.",
+  "auth.forgotPassword.backToLogin": "Назад до входу",
+  "auth.forgotPassword.failedFallback": "Щось пішло не так. Спробуйте ще раз.",
+  "auth.resetPassword.title": "Новий пароль",
+  "auth.resetPassword.newPasswordLabel": "Новий пароль",
+  "auth.resetPassword.confirmPasswordLabel": "Підтвердіть пароль",
+  "auth.resetPassword.submitButton": "Скинути пароль",
+  "auth.resetPassword.successMessage":
+    "Пароль успішно змінено. Тепер ви можете увійти з новим паролем.",
+  "auth.resetPassword.goToLogin": "Перейти до входу",
+  "auth.resetPassword.invalidTokenMessage": "Це посилання недійсне або застаріло.",
+  "auth.resetPassword.requestNewLink": "Запросити нове посилання",
+  "auth.resetPassword.failedFallback": "Щось пішло не так. Спробуйте ще раз.",
+  "auth.resetPassword.missingTokenMessage": "У цьому посиланні відсутній токен скидання.",
 
   "markets.title": "Ринки",
   "markets.tabs.all": "Всі криптовалюти",
@@ -1669,6 +1745,14 @@ const uk: Dictionary = {
   "email.emailChangeConfirm.button": "Підтвердити новий email",
   "email.emailChangeConfirm.expiryNotice":
     "Посилання дійсне протягом 1 години. Якщо ви не запитували цю зміну, просто проігноруйте цей лист.",
+  "email.passwordResetRequest.subject": "Скидання пароля GTX",
+  "email.passwordResetRequest.heading": "Скидання пароля",
+  "email.passwordResetRequest.body":
+    "Ми отримали запит на скидання пароля вашого акаунта GTX. Натисніть кнопку нижче, щоб встановити новий пароль.",
+  "email.passwordResetRequest.button": "Скинути пароль",
+  "email.passwordResetRequest.expiryNotice": "Посилання дійсне протягом 30 хвилин.",
+  "email.passwordResetRequest.notYouNotice":
+    "Якщо ви не запитували це, просто проігноруйте цей лист — ваш пароль не буде змінено.",
   "email.emailChanged.subject": "Email вашого акаунта GTX змінено",
   "email.emailChanged.heading": "Email вашого акаунта було змінено",
   "email.emailChanged.body":

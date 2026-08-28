@@ -44,6 +44,24 @@ services:
       PASSWORD_ENCRYPTION_KEY: ${PASSWORD_ENCRYPTION_KEY}
       NODE_ENV: production
       NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8080}
+      # Outbound email (password reset / password-changed / email-change
+      # notices — see lib/email/mailer.ts). All optional and deliberately
+      # WITHOUT a fallback: previously these weren't listed here at all, so
+      # even a fully-configured .env could never actually reach the app —
+      # docker-compose only forwards variables that are explicitly named
+      # under a service's `environment:`, .env alone isn't enough. Leaving
+      # any of these unset is fine (mailer.ts falls back to logging the
+      # message instead of sending), but they must be listed to have any
+      # chance of being forwarded at all.
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM}
+      # The domain used to build links inside outgoing emails (password
+      # reset, email-change confirmation) — must be the real public
+      # domain in production, never left as the localhost default.
+      APP_URL: ${APP_URL:-http://localhost:3000}
     ports:
       - "3000:3000"
     depends_on:

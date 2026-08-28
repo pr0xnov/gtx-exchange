@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAdminList } from "@/hooks/use-admin-api";
 import { PaginationFooter } from "@/components/admin/pagination-footer";
 import { Skeleton } from "@/components/shared/skeleton";
-import { formatPrice, formatDate } from "@/lib/utils";
+import { formatAmount, formatDate } from "@/lib/utils";
 
 interface TransactionRow {
   id: string;
@@ -75,7 +75,7 @@ export default function AdminTransactionsPage() {
                       className={`font-tabular px-4 py-3.5 text-right ${negative ? "text-danger" : "text-primary"}`}
                     >
                       {negative ? "-" : "+"}
-                      {formatPrice(Number(t.amount), 8)} {t.asset}
+                      {formatAmount(t.amount)} {t.asset}
                     </td>
                     <td className="px-4 py-3.5 text-muted">{t.status}</td>
                     <td className="px-4 py-3.5 text-muted">{formatDate(t.createdAt)}</td>

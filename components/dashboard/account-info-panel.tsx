@@ -20,7 +20,6 @@ export function AccountInfoPanel() {
     { label: t("account.login"), value: user?.login },
     { label: t("account.email"), value: user?.email },
     { label: t("account.accountType"), value: user?.accountType },
-    { label: t("account.leverage"), value: user ? `1:${user.leverageMax}` : undefined },
     {
       label: t("account.verification"),
       value: user ? t(VERIFICATION_STATUS_KEY[user.verification]) : undefined,

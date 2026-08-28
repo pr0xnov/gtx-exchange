@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { useMarkets, useSparklines } from "@/hooks/use-api";
 import { useLivePrices } from "@/hooks/use-live-prices";
@@ -70,16 +71,37 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
   const sparklines = useSparklines(TRACKED_SYMBOLS);
   const { favorites, toggleFavorite } = useFavorites(isAuthenticated);
 
-  const [activeTab, setActiveTab] = useState<TabId>("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const visibleTabs = getVisibleTabs(isAuthenticated);
+
+  // The active tab lives in the URL (?tab=...), not just component state —
+  // that's what makes it survive a refresh, a full navigation away and
+  // back, and the browser's own Back button, all for free, without a
+  // separate persistence mechanism to keep in sync. Falls back to "all"
+  // for a missing/invalid/not-visible-to-this-viewer value (e.g. a guest
+  // hitting a stale ?tab=favorites link).
+  const tabParam = searchParams.get("tab");
+  const initialTab: TabId = visibleTabs.some((vt) => vt.id === tabParam)
+    ? (tabParam as TabId)
+    : "all";
+
+  const [activeTab, setActiveTabState] = useState<TabId>(initialTab);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  function setActiveTab(tab: TabId) {
+    setActiveTabState(tab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchInput), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(t);
   }, [searchInput]);
-
-  const visibleTabs = getVisibleTabs(isAuthenticated);
 
   const rows = useMemo(() => mergeMarketData(data ?? [], prices), [data, prices]);
   const favoriteRows = useMemo(
@@ -94,6 +116,11 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
   const biggestMovers = useMemo(() => getBiggestMovers(rows), [rows]);
 
   const showSearch = SEARCHABLE_TABS.includes(activeTab);
+  // Search is scoped to whichever tab actually shows the search box — a
+  // debounced value typed while on "Все криптовалюты" must never leak
+  // into "Обране" (or any other tab) after switching, even though the
+  // debounce state itself isn't reset on tab change.
+  const effectiveSearch = showSearch ? debouncedSearch : "";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -135,7 +162,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
           title={t("markets.tabs.all")}
           rows={rows}
           isLoading={isLoading}
-          search={debouncedSearch}
+          search={effectiveSearch}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           sparklines={sparklines}
@@ -148,7 +175,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
           title={t("markets.tabs.favorites")}
           rows={favoriteRows}
           isLoading={isLoading}
-          search={debouncedSearch}
+          search={effectiveSearch}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           sparklines={sparklines}

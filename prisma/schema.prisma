@@ -153,7 +153,7 @@ model Wallet {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  balance   Decimal  @default(10000) @db.Decimal(20, 8)
+  balance   Decimal  @default(0) @db.Decimal(20, 8)
   credit    Decimal  @default(0) @db.Decimal(20, 8)
   currency  String   @default("USDT")
   updatedAt DateTime @updatedAt

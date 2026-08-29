@@ -41,29 +41,19 @@ export async function POST(req: NextRequest) {
         passwordHash,
         encryptedPassword,
         login: generateLoginId(),
-        wallet: { create: { balance: 10_000, credit: 0, currency: "USDT" } },
+        wallet: { create: { balance: 0, credit: 0, currency: "USDT" } },
         settings: { create: {} },
         // Spot wallet is a separate ledger from the futures margin wallet
-        // above — same $10,000 virtual USDT starting bonus, but it can
-        // never be spent or margined by futures trades and vice versa.
+        // above — it can never be spent or margined by futures trades and
+        // vice versa. New accounts start at 0 in both.
         spotWallets: {
           create: SPOT_CURRENCIES.map((currency) => ({
             currency,
-            balance: currency === "USDT" ? 10_000 : 0,
+            balance: 0,
           })),
         },
       },
       include: { wallet: true },
-    });
-
-    await prisma.transaction.create({
-      data: {
-        userId: user.id,
-        type: "BONUS",
-        method: "Welcome bonus",
-        amount: 10_000,
-        status: "COMPLETED",
-      },
     });
 
     const accessToken = signAccessToken({ sub: user.id, email: user.email });

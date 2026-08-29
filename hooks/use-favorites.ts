@@ -26,6 +26,20 @@ export function useFavorites(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     setFavorites(parseFavorites(window.localStorage.getItem(FAVORITES_STORAGE_KEY)));
+
+    // Keeps this instance in sync with localStorage writes made by ANOTHER
+    // tab/window (e.g. /trading open in one tab, /markets in another) —
+    // without this, a stale in-memory Set captured before the other tab's
+    // change gets written straight back on the next toggleFavorite call
+    // here, silently discarding whatever the other tab just added/removed.
+    // The native `storage` event only ever fires in other browsing
+    // contexts, never the one that made the write, so this can't loop.
+    function onStorage(event: StorageEvent) {
+      if (event.key !== FAVORITES_STORAGE_KEY) return;
+      setFavorites(parseFavorites(event.newValue));
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [enabled]);
 
   const toggleFavorite = useCallback(

@@ -5,9 +5,6 @@ import { depositSchema } from "@/lib/validation/trading";
 import { apiSuccess, handleApiError } from "@/lib/api-response";
 
 const METHOD_LABELS: Record<string, string> = {
-  VISA_MASTERCARD: "Visa / Mastercard",
-  BANK_TRANSFER: "Bank Transfer",
-  BITCOIN: "Bitcoin",
   TETHER_USDT: "Tether (USDT)",
 };
 
@@ -17,27 +14,28 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const input = depositSchema.parse(body);
 
+    // Deposits no longer credit the balance on creation — an admin must
+    // approve the request first (see PATCH /api/admin/transactions/[id]),
+    // same admin-decision step Withdrawal already has. Balance (the Spot
+    // USDT wallet — see app/api/account/summary/route.ts) is untouched
+    // here.
     const result = await prisma.$transaction(async (tx) => {
-      await tx.wallet.update({
-        where: { userId: user.id },
-        data: { balance: { increment: input.amount } },
-      });
-
       const transaction = await tx.transaction.create({
         data: {
           userId: user.id,
           type: "DEPOSIT",
           method: METHOD_LABELS[input.method],
           amount: input.amount,
-          status: "COMPLETED",
+          asset: "USDT",
+          status: "PENDING",
         },
       });
 
       await tx.notification.create({
         data: {
           userId: user.id,
-          title: "Deposit successful",
-          message: `Your deposit of ${input.amount} USDT has been credited.`,
+          title: "Deposit request received",
+          message: `Your deposit of ${input.amount} USDT is pending approval.`,
         },
       });
 

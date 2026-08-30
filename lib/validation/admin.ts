@@ -19,6 +19,11 @@ export const balanceAdjustmentSchema = z.object({
   reason: z.string().trim().min(3, "A reason is required").max(500),
 });
 
+// Deposit/Withdrawal Approve/Reject (app/api/admin/transactions/[id]).
+export const transactionDecisionSchema = z.object({
+  decision: z.enum(["APPROVE", "REJECT"]),
+});
+
 export const userStatusUpdateSchema = z.object({
   status: z.enum(["ACTIVE", "BLOCKED", "SUSPENDED"]),
   reason: z.string().trim().max(500).optional(),

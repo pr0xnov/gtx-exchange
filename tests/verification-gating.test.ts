@@ -80,22 +80,26 @@ describe("Spot Trading requires no verification", () => {
 
 describe("Withdrawal requires verification", () => {
   it("rejects an unverified user's withdrawal with a clear error, balance untouched", async () => {
-    const user = await seedUserWithWallet(500);
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 500 });
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "BITCOIN" })
+      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
     );
     const json = await readJson(res);
     expect(res.status).toBe(403);
     expect(json.error).toBe("Please complete verification before withdrawing funds");
 
-    const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } });
-    expect(Number(wallet!.balance)).toBe(500);
+    const spotWallet = await prisma.spotWallet.findUnique({
+      where: { userId_currency: { userId: user.id, currency: "USDT" } },
+    });
+    expect(Number(spotWallet!.balance)).toBe(500);
   });
 
   it("allows a verified user's withdrawal to proceed exactly as before", async () => {
-    const user = await seedUserWithWallet(500);
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 500 });
     await prisma.verificationDocument.createMany({
       data: [
         { userId: user.id, type: "IDENTITY", fileName: "id.png", status: "APPROVED" },
@@ -110,16 +114,19 @@ describe("Withdrawal requires verification", () => {
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "BITCOIN" })
+      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
     );
     expect(res.status).toBe(201);
 
-    const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } });
-    expect(Number(wallet!.balance)).toBe(400);
+    const spotWallet = await prisma.spotWallet.findUnique({
+      where: { userId_currency: { userId: user.id, currency: "USDT" } },
+    });
+    expect(Number(spotWallet!.balance)).toBe(400);
   });
 
   it("also counts submitted-but-still-PENDING documents as verified (no reviewer/approval flow exists anywhere in this app)", async () => {
-    const user = await seedUserWithWallet(500);
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 500 });
     await prisma.verificationDocument.createMany({
       data: [
         { userId: user.id, type: "IDENTITY", fileName: "id.png" },
@@ -129,26 +136,28 @@ describe("Withdrawal requires verification", () => {
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "BITCOIN" })
+      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
     );
     expect(res.status).toBe(201);
   });
 
   it("still blocks withdrawal if only one of the two required documents was submitted", async () => {
-    const user = await seedUserWithWallet(500);
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 500 });
     await prisma.verificationDocument.create({
       data: { userId: user.id, type: "IDENTITY", fileName: "id.png", status: "APPROVED" },
     });
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "BITCOIN" })
+      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
     );
     expect(res.status).toBe(403);
   });
 
   it("still blocks withdrawal if a required document was rejected", async () => {
-    const user = await seedUserWithWallet(500);
+    const user = await seedUserWithWallet(0);
+    await seedSpotWallet({ userId: user.id, currency: "USDT", balance: 500 });
     await prisma.verificationDocument.createMany({
       data: [
         { userId: user.id, type: "IDENTITY", fileName: "id.png", status: "REJECTED" },
@@ -163,7 +172,7 @@ describe("Withdrawal requires verification", () => {
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "BITCOIN" })
+      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
     );
     expect(res.status).toBe(403);
   });

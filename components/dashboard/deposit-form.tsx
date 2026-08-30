@@ -12,7 +12,7 @@ import { useLocale } from "@/lib/i18n/locale-context";
 
 export function DepositForm() {
   const { t } = useLocale();
-  const [method, setMethod] = useState("VISA_MASTERCARD");
+  const [method, setMethod] = useState("TETHER_USDT");
   const [amount, setAmount] = useState("1000");
   const deposit = useDeposit();
 

@@ -1,7 +1,12 @@
 "use client";
 
 import { use, useState } from "react";
-import { useAdminUserDetail, useUpdateUserStatus } from "@/hooks/use-admin-api";
+import type { ReactNode } from "react";
+import {
+  useAdminUserDetail,
+  useUpdateUserStatus,
+  useDecideTransaction,
+} from "@/hooks/use-admin-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/skeleton";
@@ -282,12 +287,17 @@ export default function AdminUserDetailPage({
 
       {tab === "Deposits" && (
         <SimpleTable
-          columns={["Asset", "Amount", "Status", "Date"]}
+          columns={["Asset", "Amount", "Status", "Date", "Actions"]}
           rows={deposits.map((t) => [
             t.asset,
             formatPrice(Number(t.amount), 8),
             t.status,
             formatDate(t.createdAt),
+            t.status === "PENDING" ? (
+              <TransactionDecisionButtons key={t.id} transactionId={t.id} userId={id} />
+            ) : (
+              "—"
+            ),
           ])}
           empty="No deposits."
         />
@@ -295,12 +305,17 @@ export default function AdminUserDetailPage({
 
       {tab === "Withdrawals" && (
         <SimpleTable
-          columns={["Asset", "Amount", "Status", "Date"]}
+          columns={["Asset", "Amount", "Status", "Date", "Actions"]}
           rows={withdrawals.map((t) => [
             t.asset,
             formatPrice(Number(t.amount), 8),
             t.status,
             formatDate(t.createdAt),
+            t.status === "PENDING" ? (
+              <TransactionDecisionButtons key={t.id} transactionId={t.id} userId={id} />
+            ) : (
+              "—"
+            ),
           ])}
           empty="No withdrawals."
         />
@@ -367,6 +382,46 @@ export default function AdminUserDetailPage({
   );
 }
 
+function TransactionDecisionButtons({
+  transactionId,
+  userId,
+}: {
+  transactionId: string;
+  userId: string;
+}) {
+  const decide = useDecideTransaction();
+
+  async function handleDecide(decision: "APPROVE" | "REJECT") {
+    try {
+      await decide.mutateAsync({ transactionId, userId, decision });
+      toast.success(decision === "APPROVE" ? "Approved" : "Rejected");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update transaction");
+    }
+  }
+
+  return (
+    <div className="flex gap-2">
+      <Button
+        size="sm"
+        variant="primary"
+        disabled={decide.isPending}
+        onClick={() => handleDecide("APPROVE")}
+      >
+        Approve
+      </Button>
+      <Button
+        size="sm"
+        variant="danger"
+        disabled={decide.isPending}
+        onClick={() => handleDecide("REJECT")}
+      >
+        Reject
+      </Button>
+    </div>
+  );
+}
+
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -382,7 +437,7 @@ function SimpleTable({
   empty,
 }: {
   columns: string[];
-  rows: string[][];
+  rows: ReactNode[][];
   empty: string;
 }) {
   return (

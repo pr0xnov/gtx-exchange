@@ -33,14 +33,16 @@ export const createSpotOrderSchema = z
     path: ["price"],
   });
 
+// Only Tether (USDT) is offered for now — see components/dashboard/
+// payment-method-selector.tsx.
 export const depositSchema = z.object({
   amount: z.number().positive("Amount must be greater than 0").max(10_000_000),
-  method: z.enum(["VISA_MASTERCARD", "BANK_TRANSFER", "BITCOIN", "TETHER_USDT"]),
+  method: z.enum(["TETHER_USDT"]),
 });
 
 export const withdrawSchema = z.object({
   amount: z.number().min(50, "Minimum withdrawal amount is 50 USD"),
-  method: z.enum(["VISA_MASTERCARD", "BANK_TRANSFER", "BITCOIN", "TETHER_USDT"]),
+  method: z.enum(["TETHER_USDT"]),
 });
 
 // Personal info fields collected on submission (multipart form — see

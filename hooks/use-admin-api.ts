@@ -142,6 +142,30 @@ export function useAdminBalanceAdjustments(userId?: string) {
   });
 }
 
+export function useDecideTransaction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      transactionId,
+      decision,
+    }: {
+      transactionId: string;
+      userId: string;
+      decision: "APPROVE" | "REJECT";
+    }) =>
+      fetchJson(`/api/admin/transactions/${transactionId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ decision }),
+      }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "user", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
+    },
+  });
+}
+
 export function useUpdateUserStatus() {
   const queryClient = useQueryClient();
   return useMutation({

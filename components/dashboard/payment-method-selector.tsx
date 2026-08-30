@@ -1,29 +1,15 @@
 "use client";
 
-import { CreditCard, Landmark, Bitcoin, DollarSign } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { DictionaryKey } from "@/lib/i18n/dictionaries";
 
+// Only Tether (USDT) is offered on Deposit/Withdrawal for now — card/bank/
+// Bitcoin removed. Kept as a (single-entry) list rather than inlining a
+// fixed method, so this component's rendering/selection logic doesn't
+// need to change at all.
 export const PAYMENT_METHODS = [
-  {
-    id: "VISA_MASTERCARD",
-    labelKey: "deposit.paymentMethodCard" as DictionaryKey,
-    subKey: "deposit.paymentMethodDaysEstimate" as DictionaryKey,
-    icon: CreditCard,
-  },
-  {
-    id: "BANK_TRANSFER",
-    labelKey: "deposit.paymentMethodBankTransfer" as DictionaryKey,
-    subKey: "deposit.paymentMethodDaysEstimate" as DictionaryKey,
-    icon: Landmark,
-  },
-  {
-    id: "BITCOIN",
-    labelKey: "deposit.paymentMethodBitcoin" as DictionaryKey,
-    subKey: "deposit.paymentMethodHoursEstimate" as DictionaryKey,
-    icon: Bitcoin,
-  },
   {
     id: "TETHER_USDT",
     labelKey: "deposit.paymentMethodTether" as DictionaryKey,

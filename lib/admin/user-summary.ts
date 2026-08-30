@@ -98,3 +98,81 @@ export async function batchUserFinancialSummaries(
 
   return result;
 }
+
+export interface UnreadRequestCounts {
+  deposits: number;
+  withdrawals: number;
+  /** Verification is reviewed as a single unit (both documents decided
+   *  together — see app/api/admin/verification/[userId]), never a count
+   *  of individual documents, so this is always 0 or 1. */
+  verification: 0 | 1;
+}
+
+/**
+ * Deposit/Withdrawal/Verification requests still awaiting an admin
+ * decision, for a batch of users — same "few fixed queries, not one per
+ * user" shape as batchUserFinancialSummaries. Badge meaning: "this
+ * request still requires Approve/Reject", so it's a pure `status ===
+ * "PENDING"` count — merely opening the page/tab a request lives on does
+ * NOT clear it; only an actual Approve/Reject decision (which flips
+ * status away from PENDING) does. Deliberately does NOT consult
+ * Transaction.adminViewedAt / VerificationDocument.adminViewedAt (an
+ * earlier "seen" tracker for a since-abandoned unread-messages framing of
+ * this badge) — those columns are left in the schema to avoid an
+ * unneeded migration, but nothing reads or writes them anymore.
+ */
+export async function batchUnreadRequestCounts(
+  userIds: string[]
+): Promise<Map<string, UnreadRequestCounts>> {
+  const result = new Map<string, UnreadRequestCounts>();
+  if (userIds.length === 0) return result;
+
+  for (const userId of userIds) {
+    result.set(userId, { deposits: 0, withdrawals: 0, verification: 0 });
+  }
+
+  const [txCounts, verificationUsers] = await Promise.all([
+    prisma.transaction.groupBy({
+      by: ["userId", "type"],
+      where: {
+        userId: { in: userIds },
+        type: { in: ["DEPOSIT", "WITHDRAWAL"] },
+        status: "PENDING",
+      },
+      _count: { _all: true },
+    }),
+    prisma.verificationDocument.groupBy({
+      by: ["userId"],
+      where: { userId: { in: userIds }, status: "PENDING" },
+    }),
+  ]);
+
+  for (const row of txCounts) {
+    const entry = result.get(row.userId);
+    if (!entry) continue;
+    if (row.type === "DEPOSIT") entry.deposits = row._count._all;
+    else if (row.type === "WITHDRAWAL") entry.withdrawals = row._count._all;
+  }
+  for (const v of verificationUsers) {
+    const entry = result.get(v.userId);
+    if (entry) entry.verification = 1;
+  }
+
+  return result;
+}
+
+/** Same definition as batchUnreadRequestCounts, totalled across every
+ *  user — powers the Admin sidebar's single "Users" badge. */
+export async function totalUnreadRequestCount(): Promise<number> {
+  const [txCount, verificationUsers] = await Promise.all([
+    prisma.transaction.count({
+      where: { type: { in: ["DEPOSIT", "WITHDRAWAL"] }, status: "PENDING" },
+    }),
+    prisma.verificationDocument.groupBy({
+      by: ["userId"],
+      where: { status: "PENDING" },
+    }),
+  ]);
+
+  return txCount + verificationUsers.length;
+}

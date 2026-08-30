@@ -41,6 +41,9 @@ export interface AdminUserRow {
   email: string;
   role: "USER" | "ADMIN" | "SUPER_ADMIN";
   status: "ACTIVE" | "BLOCKED" | "SUSPENDED";
+  /** Unread Verification/Deposit/Withdrawal requests for this user — see
+   *  lib/admin/user-summary.ts's batchUnreadRequestCounts. */
+  unreadCount: number;
   verification: "VERIFIED" | "PENDING" | "REJECTED" | "UNVERIFIED";
   createdAt: string;
   balance: number;
@@ -162,7 +165,24 @@ export function useDecideTransaction() {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "unread-count"] });
     },
+  });
+}
+
+/** Total unread Verification/Deposit/Withdrawal requests across every user
+ *  — the Admin sidebar's "Users" badge (see components/admin/admin-
+ *  sidebar.tsx). Counts requests still PENDING (i.e. still needing an
+ *  Approve/Reject decision) — merely viewing a page never changes this,
+ *  only a decision does. Polled the same way useAdminDashboard() is, so a
+ *  decision made by another admin still clears here within a few seconds
+ *  without a manual refresh. */
+export function useAdminUnreadCount() {
+  return useQuery({
+    queryKey: ["admin", "unread-count"],
+    queryFn: () =>
+      fetchJson<{ total: number }>("/api/admin/unread-count").then((d) => d.total),
+    refetchInterval: 15_000,
   });
 }
 
@@ -265,6 +285,8 @@ export function useDecideVerification() {
       }),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "verification"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "unread-count"] });
       queryClient.invalidateQueries({
         queryKey: ["admin", "verification", variables.userId],
       });

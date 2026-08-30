@@ -100,7 +100,19 @@ export default function AdminUsersPage() {
                       </Badge>
                     )}
                   </td>
-                  <td className="px-4 py-3.5 text-muted">{u.email}</td>
+                  <td className="px-4 py-3.5 text-muted">
+                    <span className="inline-flex items-center gap-2">
+                      {u.email}
+                      {u.unreadCount > 0 && (
+                        <Badge
+                          variant="count"
+                          className="rounded-full px-1.5 py-0.5 text-[10px] leading-none"
+                        >
+                          {u.unreadCount}
+                        </Badge>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-4 py-3.5">
                     <UserPasswordCell
                       userId={u.id}

@@ -180,16 +180,27 @@ export default function AdminVerificationDetailPage({
 
         {!rejecting ? (
           <div className="flex gap-3">
-            <Button variant="primary" disabled={decide.isPending} onClick={handleApprove}>
-              Approve
-            </Button>
-            <Button
-              variant="danger"
-              disabled={decide.isPending}
-              onClick={() => setRejecting(true)}
-            >
-              Reject
-            </Button>
+            {/* Never show the action matching the current decision —
+                VERIFIED hides Approve, REJECTED hides Reject. Both stay
+                visible for PENDING/UNVERIFIED, unchanged from before. */}
+            {data.status !== "VERIFIED" && (
+              <Button
+                variant="primary"
+                disabled={decide.isPending}
+                onClick={handleApprove}
+              >
+                Approve
+              </Button>
+            )}
+            {data.status !== "REJECTED" && (
+              <Button
+                variant="danger"
+                disabled={decide.isPending}
+                onClick={() => setRejecting(true)}
+              >
+                Reject
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">

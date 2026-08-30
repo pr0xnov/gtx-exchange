@@ -179,6 +179,13 @@ model Transaction {
   direction TransactionDirection?
   status    TransactionStatus     @default(COMPLETED)
   createdAt DateTime              @default(now())
+  // Unused. Was an admin-review "seen" marker for an earlier unread-
+  // messages framing of the Admin Panel's request badges; that framing
+  // was dropped (badges now mean "still PENDING", not "not yet opened" —
+  // see lib/admin/user-summary.ts) so nothing reads or writes this column
+  // anymore. Left in place rather than migrated out, since removing it
+  // isn't needed for anything currently broken.
+  adminViewedAt DateTime?
 
   balanceAdjustment BalanceAdjustment?
 
@@ -473,6 +480,8 @@ model VerificationDocument {
   rejectionReason String?
 
   uploadedAt DateTime @default(now())
+  // Unused — see Transaction.adminViewedAt's comment for why.
+  adminViewedAt DateTime?
 }
 
 model Notification {

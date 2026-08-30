@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/skeleton";
 import { BalanceAdjustmentForm } from "@/components/admin/balance-adjustment-form";
-import { cn, formatPrice, formatDate } from "@/lib/utils";
+import { cn, formatPrice, formatAmount, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 const TABS = [
@@ -57,6 +57,7 @@ export default function AdminUserDetailPage({
   const {
     profile,
     wallet,
+    unread,
     spotWallets,
     orders,
     trades,
@@ -79,6 +80,7 @@ export default function AdminUserDetailPage({
       createdAt: string;
     };
     wallet: { balance: number; equity: number };
+    unread: { deposits: number; withdrawals: number; verification: 0 | 1 };
     spotWallets: { currency: string; balance: string; locked: string }[];
     orders: {
       id: string;
@@ -160,20 +162,38 @@ export default function AdminUserDetailPage({
       </div>
 
       <div className="flex gap-6 overflow-x-auto border-b border-border">
-        {TABS.map((tabName) => (
-          <button
-            key={tabName}
-            onClick={() => setTab(tabName)}
-            className={cn(
-              "shrink-0 whitespace-nowrap border-b-2 py-3 text-sm font-medium transition-colors",
-              tab === tabName
-                ? "border-primary text-primary"
-                : "border-transparent text-muted hover:text-foreground"
-            )}
-          >
-            {tabName}
-          </button>
-        ))}
+        {TABS.map((tabName) => {
+          const tabUnreadCount =
+            tabName === "Deposits"
+              ? unread.deposits
+              : tabName === "Withdrawals"
+                ? unread.withdrawals
+                : tabName === "Verification"
+                  ? unread.verification
+                  : 0;
+          return (
+            <button
+              key={tabName}
+              onClick={() => setTab(tabName)}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 py-3 text-sm font-medium transition-colors",
+                tab === tabName
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted hover:text-foreground"
+              )}
+            >
+              {tabName}
+              {tabUnreadCount > 0 && (
+                <Badge
+                  variant="count"
+                  className="rounded-full px-1.5 py-0.5 text-[10px] leading-none"
+                >
+                  {tabUnreadCount}
+                </Badge>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {tab === "Profile" && (
@@ -238,8 +258,8 @@ export default function AdminUserDetailPage({
           columns={["Currency", "Balance", "Locked"]}
           rows={spotWallets.map((w) => [
             w.currency,
-            formatPrice(Number(w.balance), 8),
-            formatPrice(Number(w.locked), 8),
+            formatAmount(w.balance),
+            formatAmount(w.locked),
           ])}
           empty="No spot wallets."
         />
@@ -290,7 +310,7 @@ export default function AdminUserDetailPage({
           columns={["Asset", "Amount", "Status", "Date", "Actions"]}
           rows={deposits.map((t) => [
             t.asset,
-            formatPrice(Number(t.amount), 8),
+            formatAmount(t.amount),
             t.status,
             formatDate(t.createdAt),
             t.status === "PENDING" ? (
@@ -308,7 +328,7 @@ export default function AdminUserDetailPage({
           columns={["Asset", "Amount", "Status", "Date", "Actions"]}
           rows={withdrawals.map((t) => [
             t.asset,
-            formatPrice(Number(t.amount), 8),
+            formatAmount(t.amount),
             t.status,
             formatDate(t.createdAt),
             t.status === "PENDING" ? (

@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import {
   batchUserFinancialSummaries,
+  batchUnreadRequestCounts,
   deriveVerificationStatus,
 } from "@/lib/admin/user-summary";
 
@@ -39,26 +40,33 @@ export async function GET(
     });
     if (!user) return apiError("User not found", 404);
 
-    const [spotWallets, orders, transactions, activity, summaries] = await Promise.all([
-      prisma.spotWallet.findMany({ where: { userId: id }, orderBy: { currency: "asc" } }),
-      prisma.spotOrder.findMany({
-        where: { userId: id },
-        orderBy: { createdAt: "desc" },
-        take: 50,
-      }),
-      prisma.transaction.findMany({
-        where: { userId: id },
-        orderBy: { createdAt: "desc" },
-        take: 50,
-      }),
-      prisma.auditLog.findMany({
-        where: { targetUserId: id },
-        orderBy: { createdAt: "desc" },
-        take: 50,
-        include: { admin: { select: { firstName: true, lastName: true, email: true } } },
-      }),
-      batchUserFinancialSummaries([id]),
-    ]);
+    const [spotWallets, orders, transactions, activity, summaries, unreadCounts] =
+      await Promise.all([
+        prisma.spotWallet.findMany({
+          where: { userId: id },
+          orderBy: { currency: "asc" },
+        }),
+        prisma.spotOrder.findMany({
+          where: { userId: id },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+        }),
+        prisma.transaction.findMany({
+          where: { userId: id },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+        }),
+        prisma.auditLog.findMany({
+          where: { targetUserId: id },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+          include: {
+            admin: { select: { firstName: true, lastName: true, email: true } },
+          },
+        }),
+        batchUserFinancialSummaries([id]),
+        batchUnreadRequestCounts([id]),
+      ]);
 
     const trades = orders.filter((o) => Number(o.filledQuantity) > 0);
 
@@ -77,6 +85,7 @@ export async function GET(
         createdAt: user.createdAt,
       },
       wallet: summaries.get(id) ?? { balance: 0, equity: 0 },
+      unread: unreadCounts.get(id) ?? { deposits: 0, withdrawals: 0, verification: 0 },
       spotWallets,
       orders,
       trades,

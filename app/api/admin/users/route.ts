@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { apiSuccess, handleApiError } from "@/lib/api-response";
 import {
   batchUserFinancialSummaries,
+  batchUnreadRequestCounts,
   deriveVerificationStatus,
 } from "@/lib/admin/user-summary";
 
@@ -35,24 +36,51 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
-        include: { documents: true },
+        // Explicit select, never a blanket include: VerificationDocument
+        // also carries the raw file bytes (fileData) — those must only
+        // ever leave the server through the protected GET
+        // /api/verification/documents/[id]/file route, never bundled into
+        // a general list response like this one. Only status/type are
+        // actually needed here (for deriveVerificationStatus).
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          status: true,
+          createdAt: true,
+          documents: { select: { status: true, type: true } },
+        },
       }),
     ]);
 
-    const summaries = await batchUserFinancialSummaries(users.map((u) => u.id));
+    const userIds = users.map((u) => u.id);
+    const [summaries, unreadCounts] = await Promise.all([
+      batchUserFinancialSummaries(userIds),
+      batchUnreadRequestCounts(userIds),
+    ]);
 
-    const rows = users.map((u) => ({
-      id: u.id,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      email: u.email,
-      role: u.role,
-      status: u.status,
-      verification: deriveVerificationStatus(u.documents),
-      createdAt: u.createdAt,
-      balance: summaries.get(u.id)?.balance ?? 0,
-      equity: summaries.get(u.id)?.equity ?? 0,
-    }));
+    const rows = users.map((u) => {
+      const unread = unreadCounts.get(u.id) ?? {
+        deposits: 0,
+        withdrawals: 0,
+        verification: 0,
+      };
+      return {
+        id: u.id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        email: u.email,
+        role: u.role,
+        status: u.status,
+        verification: deriveVerificationStatus(u.documents),
+        createdAt: u.createdAt,
+        balance: summaries.get(u.id)?.balance ?? 0,
+        equity: summaries.get(u.id)?.equity ?? 0,
+        unreadCount: unread.deposits + unread.withdrawals + unread.verification,
+      };
+    });
 
     return apiSuccess({
       users: rows,

@@ -34,6 +34,13 @@ vi.mock("@/hooks/use-api", () => ({
     isLoading: false,
   }),
   useSpotWallet: () => ({ data: [], isLoading: false }),
+  useWalletFinancials: () => ({
+    availableBalance: 0,
+    lockedInOrders: 0,
+    assetsValue: 0,
+    profitLoss: 0,
+    isLoading: false,
+  }),
   useCreateSpotOrder: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useSpotOrders: () => ({ data: [], isLoading: false }),
   useCancelSpotOrder: () => ({ mutateAsync: vi.fn(), isPending: false }),
@@ -154,11 +161,12 @@ describe("TradingTerminal — Spot-only", () => {
     expect(container.textContent).toContain("Price (USDT)");
   });
 
-  it("the header shows Balance/Equity/Profit, with no Credit anywhere", () => {
+  it("the header shows Available Balance/In Orders/Assets Value/Profit-Loss, with no Credit anywhere", () => {
     renderTerminal();
-    expect(container.textContent).toContain("Balance");
-    expect(container.textContent).toContain("Equity");
-    expect(container.textContent).toContain("Profit");
+    expect(container.textContent).toContain("Available Balance");
+    expect(container.textContent).toContain("In Orders");
+    expect(container.textContent).toContain("Assets Value");
+    expect(container.textContent).toContain("Profit / Loss");
     expect(container.textContent).not.toContain("Credit");
   });
 });

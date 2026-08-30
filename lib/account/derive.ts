@@ -89,3 +89,49 @@ export function calculateUnrealizedPnlPercent(
   const totalUnrealizedPnl = spotCurrencies.reduce((sum, c) => sum + c.unrealizedPnl, 0);
   return (totalUnrealizedPnl / totalCostBasis) * 100;
 }
+
+export interface WalletFinancialsInput {
+  /** SpotWallet(USDT).balance — free, non-locked. Undefined if the
+   *  wallet row doesn't exist yet (brand-new user). */
+  usdtBalance: number | undefined;
+  /** SpotWallet(USDT).locked — reserved by this user's own OPEN LIMIT
+   *  BUY orders (see app/api/spot/orders/route.ts: a LIMIT BUY moves
+   *  notional from `balance` into `locked`). A LIMIT SELL reserves the
+   *  base crypto currency instead, never USDT, so it never appears
+   *  here — that reserved crypto is already inside `spotCurrencies`
+   *  below (its quantity is balance + locked per currency). */
+  usdtLocked: number | undefined;
+  spotCurrencies: SpotCurrencySummary[];
+  /** Realized PnL from completed sells — account-summary's own
+   *  `profit`, passed straight through. */
+  profit: number;
+}
+
+export interface DerivedWalletFinancials {
+  availableBalance: number;
+  lockedInOrders: number;
+  assetsValue: number;
+  profitLoss: number;
+}
+
+/**
+ * The pure arithmetic behind Available Balance / In Orders / Assets
+ * Value / Profit-Loss — the one source of truth for both /wallet and
+ * /trading (see hooks/use-api.ts's useWalletFinancials, which just
+ * feeds this function real data from useAccountSummary()/
+ * useSpotWallet()). Deliberately NOT `calculateAccountSummary`'s
+ * balance/equity pair above: that pair is locked-inclusive and crypto+
+ * cash combined, right for Account's own cards, wrong for these four.
+ */
+export function deriveWalletFinancials(
+  input: WalletFinancialsInput
+): DerivedWalletFinancials {
+  const assetsValue = input.spotCurrencies.reduce((sum, c) => sum + c.value, 0);
+
+  return {
+    availableBalance: input.usdtBalance ?? 0,
+    lockedInOrders: input.usdtLocked ?? 0,
+    assetsValue,
+    profitLoss: input.profit,
+  };
+}

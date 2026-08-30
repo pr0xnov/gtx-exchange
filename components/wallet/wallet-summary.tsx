@@ -10,43 +10,68 @@ import { WalletChart } from "@/components/wallet/wallet-chart";
 import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
- * Purely presentational — WalletOverview supplies `balance`/`equity`/
- * `profit` straight from useAccountSummary(), the exact same numbers
- * Account's Balance/Equity/Profit cards show (same endpoint, same
- * formulas — see lib/account/derive.ts) — there is no second "Est.
- * Total Value" figure computed here anymore.
+ * Purely presentational — WalletOverview supplies these four figures,
+ * each with its own distinct source (see hooks/use-api.ts's
+ * useWalletFinancials, the shared hook Trading's header also uses, so
+ * the two pages can never disagree):
+ *
+ * - `availableBalance`: free (non-locked) USDT only — the same number
+ *   /withdrawal's own "Available" uses.
+ * - `lockedInOrders`: USDT reserved by this user's own OPEN LIMIT BUY
+ *   orders (SpotWallet(USDT).locked). Moving money here from
+ *   `availableBalance` (placing an order) or back (cancelling one) is
+ *   never itself a gain or loss — it doesn't touch `profitLoss`.
+ * - `assetsValue`: current market value of crypto holdings only, USDT
+ *   excluded.
+ * - `profitLoss`: realized PnL from completed sells (unchanged from the
+ *   previous "Profit" card, just relabeled).
  *
  * `unrealizedPnl`/`unrealizedPnlPercent` are a distinct, Wallet-specific
  * figure: the mark-to-market gain/loss on assets still held right now
  * (aggregated from the same call's per-asset cost-basis data). This is
- * deliberately NOT the same as `profit` (realized PnL from completed
+ * deliberately NOT the same as `profitLoss` (realized PnL from completed
  * sells) — showing both, clearly labeled, is the point.
  */
 export function WalletSummary({
-  balance,
-  equity,
-  profit,
+  availableBalance,
+  lockedInOrders,
+  assetsValue,
+  profitLoss,
   unrealizedPnl,
   unrealizedPnlPercent,
   isLoading,
 }: {
-  balance: number;
-  equity: number;
-  profit: number;
+  availableBalance: number;
+  lockedInOrders: number;
+  assetsValue: number;
+  profitLoss: number;
   unrealizedPnl: number;
   unrealizedPnlPercent: number;
   isLoading: boolean;
 }) {
   const { t } = useLocale();
-  const profitPositive = profit >= 0;
+  const profitPositive = profitLoss >= 0;
   const unrealizedPositive = unrealizedPnl >= 0;
 
   const cards = [
-    { label: t("wallet.summary.balance"), value: balance, accent: "text-foreground" },
-    { label: t("wallet.summary.equity"), value: equity, accent: "text-blue-300" },
     {
-      label: t("wallet.summary.profit"),
-      value: profit,
+      label: t("wallet.summary.availableBalance"),
+      value: availableBalance,
+      accent: "text-foreground",
+    },
+    {
+      label: t("wallet.summary.lockedInOrders"),
+      value: lockedInOrders,
+      accent: "text-muted",
+    },
+    {
+      label: t("wallet.summary.assetsValue"),
+      value: assetsValue,
+      accent: "text-blue-300",
+    },
+    {
+      label: t("wallet.summary.profitLoss"),
+      value: profitLoss,
       accent: profitPositive ? "text-primary" : "text-danger",
       showSign: true,
     },
@@ -55,7 +80,7 @@ export function WalletSummary({
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
       <div className="flex flex-wrap items-start justify-between gap-6">
-        <div className="grid grid-cols-3 gap-x-8 gap-y-6 sm:gap-x-12 md:gap-x-16">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4 sm:gap-x-10 md:gap-x-12">
           {cards.map((card) => (
             <div key={card.label}>
               <div className="text-xs font-medium text-muted">{card.label}</div>
@@ -70,7 +95,7 @@ export function WalletSummary({
           ))}
         </div>
         <div className="w-full sm:w-56">
-          <WalletChart value={equity} />
+          <WalletChart value={availableBalance + lockedInOrders + assetsValue} />
         </div>
       </div>
 

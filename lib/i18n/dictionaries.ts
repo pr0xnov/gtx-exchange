@@ -60,9 +60,6 @@ const en = {
 
   // Account
   "account.makeDeposit": "Make a deposit",
-  "account.balance": "Balance",
-  "account.equity": "Equity",
-  "account.profit": "Profit",
   "account.accountInfo": "Account info",
   "account.login": "Login",
   "account.email": "E-mail",
@@ -280,9 +277,10 @@ const en = {
 
   // Wallet
   "wallet.page.title": "Wallet",
-  "wallet.summary.balance": "Balance",
-  "wallet.summary.equity": "Equity",
-  "wallet.summary.profit": "Profit",
+  "wallet.summary.availableBalance": "Available Balance",
+  "wallet.summary.lockedInOrders": "In Orders",
+  "wallet.summary.assetsValue": "Assets Value",
+  "wallet.summary.profitLoss": "Profit / Loss",
   "wallet.summary.unrealizedPnl": "Unrealized PnL",
   "wallet.summary.deposit": "Deposit",
   "wallet.summary.withdraw": "Withdraw",
@@ -366,9 +364,6 @@ const en = {
   "trading.orders.cancelError": "Failed to cancel order",
   "trading.orders.openTab": "Open orders",
   "trading.orders.historyTab": "Order history",
-  "trading.topbar.balance": "Balance",
-  "trading.topbar.equity": "Equity",
-  "trading.topbar.profit": "Profit",
 
   // Marketing — Home
   "marketing.home.hero.titleLine1": "Earn on the best",
@@ -658,9 +653,6 @@ const ru: Dictionary = {
   "nav.searchNoResults": "Криптовалюты не найдены.",
 
   "account.makeDeposit": "Внести депозит",
-  "account.balance": "Баланс",
-  "account.equity": "Средства",
-  "account.profit": "Прибыль",
   "account.accountInfo": "Информация об аккаунте",
   "account.login": "Логин",
   "account.email": "E-mail",
@@ -873,9 +865,10 @@ const ru: Dictionary = {
   "account.verification": "Верификация",
 
   "wallet.page.title": "Кошелёк",
-  "wallet.summary.balance": "Баланс",
-  "wallet.summary.equity": "Средства",
-  "wallet.summary.profit": "Прибыль",
+  "wallet.summary.availableBalance": "Доступный баланс",
+  "wallet.summary.lockedInOrders": "В ордерах",
+  "wallet.summary.assetsValue": "Стоимость активов",
+  "wallet.summary.profitLoss": "Прибыль / Убыток",
   "wallet.summary.unrealizedPnl": "Нереализованный PnL",
   "wallet.summary.deposit": "Пополнение",
   "wallet.summary.withdraw": "Вывод",
@@ -959,9 +952,6 @@ const ru: Dictionary = {
   "trading.orders.cancelError": "Не удалось отменить ордер",
   "trading.orders.openTab": "Открытые ордера",
   "trading.orders.historyTab": "История ордеров",
-  "trading.topbar.balance": "Баланс",
-  "trading.topbar.equity": "Средства",
-  "trading.topbar.profit": "Прибыль",
 
   "marketing.home.hero.titleLine1": "Зарабатывайте на лучших",
   "marketing.home.hero.titleHighlight": "финансовых активах",
@@ -1239,9 +1229,6 @@ const uk: Dictionary = {
   "nav.searchNoResults": "Криптовалюти не знайдено.",
 
   "account.makeDeposit": "Внести депозит",
-  "account.balance": "Баланс",
-  "account.equity": "Кошти",
-  "account.profit": "Прибуток",
   "account.accountInfo": "Інформація про акаунт",
   "account.login": "Логін",
   "account.email": "E-mail",
@@ -1455,9 +1442,10 @@ const uk: Dictionary = {
   "account.verification": "Верифікація",
 
   "wallet.page.title": "Гаманець",
-  "wallet.summary.balance": "Баланс",
-  "wallet.summary.equity": "Кошти",
-  "wallet.summary.profit": "Прибуток",
+  "wallet.summary.availableBalance": "Доступний баланс",
+  "wallet.summary.lockedInOrders": "В ордерах",
+  "wallet.summary.assetsValue": "Вартість активів",
+  "wallet.summary.profitLoss": "Прибуток / Збиток",
   "wallet.summary.unrealizedPnl": "Нереалізований PnL",
   "wallet.summary.deposit": "Поповнення",
   "wallet.summary.withdraw": "Виведення",
@@ -1540,9 +1528,6 @@ const uk: Dictionary = {
   "trading.orders.cancelError": "Не вдалося скасувати ордер",
   "trading.orders.openTab": "Відкриті ордери",
   "trading.orders.historyTab": "Історія ордерів",
-  "trading.topbar.balance": "Баланс",
-  "trading.topbar.equity": "Кошти",
-  "trading.topbar.profit": "Прибуток",
 
   "marketing.home.hero.titleLine1": "Заробляйте на найкращих",
   "marketing.home.hero.titleHighlight": "фінансових активах",

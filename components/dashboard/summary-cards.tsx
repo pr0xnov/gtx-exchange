@@ -1,39 +1,49 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useAccountSummary } from "@/hooks/use-api";
+import { useWalletFinancials } from "@/hooks/use-api";
 import { AnimatedCurrency } from "@/components/dashboard/animated-currency";
 import { Skeleton } from "@/components/shared/skeleton";
 import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
- * Exactly three cards: Balance, Equity, Profit — sourced from the one
- * shared useAccountSummary() hook (GET /api/account/summary), the same
- * data Wallet and Trading's header read. No client-side price merging
- * or Credit/Futures involvement happens here at all; the server already
+ * Exactly four cards — Available Balance / In Orders / Assets Value /
+ * Profit-Loss — sourced from the one shared useWalletFinancials() hook
+ * (hooks/use-api.ts), the same hook /wallet and /trading's header
+ * already use. Reuses their exact "wallet.summary.*" translation keys
+ * too, not a separate "account.*" set, so labels can never drift apart
+ * across the three pages either. No client-side price merging or
+ * Credit/Futures involvement happens here at all — the server already
  * computed everything from a single snapshot.
  */
 export function SummaryCards() {
-  const { data, isLoading } = useAccountSummary();
+  const { availableBalance, lockedInOrders, assetsValue, profitLoss, isLoading } =
+    useWalletFinancials();
   const { t } = useLocale();
-  const profitPositive = (data?.profit ?? 0) >= 0;
+  const profitPositive = profitLoss >= 0;
 
   const cards = [
     {
-      label: t("account.balance"),
-      value: data?.balance ?? 0,
+      label: t("wallet.summary.availableBalance"),
+      value: availableBalance,
       tone: "bg-surface",
       accent: "text-foreground",
     },
     {
-      label: t("account.equity"),
-      value: data?.equity ?? 0,
+      label: t("wallet.summary.lockedInOrders"),
+      value: lockedInOrders,
+      tone: "bg-surface",
+      accent: "text-muted",
+    },
+    {
+      label: t("wallet.summary.assetsValue"),
+      value: assetsValue,
       tone: "bg-[#1E2A44]",
       accent: "text-blue-300",
     },
     {
-      label: t("account.profit"),
-      value: data?.profit ?? 0,
+      label: t("wallet.summary.profitLoss"),
+      value: profitLoss,
       tone: "bg-primary/10",
       accent: profitPositive ? "text-primary" : "text-danger",
       showSign: true,
@@ -41,7 +51,7 @@ export function SummaryCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {cards.map((card) => (
         <div
           key={card.label}

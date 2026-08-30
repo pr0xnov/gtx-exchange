@@ -5,6 +5,10 @@ import { useQueries, useQuery, useMutation, useQueryClient } from "@tanstack/rea
 import { closesFromCandles } from "@/lib/markets/derive";
 import type { Candle } from "@/lib/binance/client";
 import { refreshAccessToken } from "@/lib/auth/client-refresh";
+import {
+  deriveWalletFinancials,
+  type DerivedWalletFinancials,
+} from "@/lib/account/derive";
 
 // Sparkline requests are one-shot (not polled) but there can now be up to
 // ~100 tracked symbols — firing that many /api/markets/klines calls at
@@ -374,6 +378,39 @@ export function useAccountSummary() {
     queryFn: () => fetchJson<AccountSummaryDto>("/api/account/summary"),
     refetchInterval: 5000,
   });
+}
+
+export interface WalletFinancials extends DerivedWalletFinancials {
+  isLoading: boolean;
+}
+
+const QUOTE_CURRENCY = "USDT";
+
+/**
+ * The single source of Available Balance / In Orders / Assets Value /
+ * Profit-Loss for both Wallet and Trading's header — composed from the
+ * same two existing queries (useAccountSummary + useSpotWallet) every
+ * other balance-aware component already reads, so the two pages can
+ * never quietly disagree and no third, parallel financial source is
+ * introduced. The actual arithmetic is lib/account/derive.ts's
+ * deriveWalletFinancials, a plain function so it's unit-testable
+ * without React Query — this hook only wires it to live query data.
+ */
+export function useWalletFinancials(): WalletFinancials {
+  const { data: summary, isLoading: summaryLoading } = useAccountSummary();
+  const { data: spotWallets, isLoading: walletLoading } = useSpotWallet();
+
+  const usdtWallet = spotWallets?.find((w) => w.currency === QUOTE_CURRENCY);
+
+  return {
+    ...deriveWalletFinancials({
+      usdtBalance: usdtWallet?.balance,
+      usdtLocked: usdtWallet?.locked,
+      spotCurrencies: summary?.spotAssets ?? [],
+      profit: summary?.profit ?? 0,
+    }),
+    isLoading: summaryLoading || walletLoading,
+  };
 }
 
 export interface VerificationDocumentDto {

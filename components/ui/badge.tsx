@@ -5,7 +5,7 @@ export function Badge({
   variant = "default",
   ...props
 }: React.HTMLAttributes<HTMLSpanElement> & {
-  variant?: "default" | "success" | "danger" | "pending" | "muted";
+  variant?: "default" | "success" | "danger" | "pending" | "muted" | "count";
 }) {
   const variants = {
     default: "bg-foreground/10 text-foreground",
@@ -13,6 +13,10 @@ export function Badge({
     danger: "bg-danger/15 text-danger",
     pending: "bg-amber-500/15 text-amber-400",
     muted: "bg-foreground/5 text-muted",
+    // Solid (not tinted) — a pending-request count indicator, not a
+    // status label; see components/admin/admin-sidebar.tsx and
+    // app/admin/users/**.
+    count: "bg-danger text-white",
   };
 
   return (

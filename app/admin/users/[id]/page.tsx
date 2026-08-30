@@ -208,7 +208,6 @@ export default function AdminUserDetailPage({
             <Field label="Login ID" value={profile.login} />
             <Field label="Role" value={profile.role} />
             <Field label="Account type" value={profile.accountType} />
-            <Field label="Leverage max" value={`${profile.leverageMax}x`} />
             <Field label="Created" value={formatDate(profile.createdAt)} />
             <div>
               <dt className="text-xs text-muted">Status</dt>

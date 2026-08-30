@@ -40,35 +40,58 @@ export async function GET(
     });
     if (!user) return apiError("User not found", 404);
 
-    const [spotWallets, orders, transactions, activity, summaries, unreadCounts] =
-      await Promise.all([
-        prisma.spotWallet.findMany({
-          where: { userId: id },
-          orderBy: { currency: "asc" },
-        }),
-        prisma.spotOrder.findMany({
-          where: { userId: id },
-          orderBy: { createdAt: "desc" },
-          take: 50,
-        }),
-        prisma.transaction.findMany({
-          where: { userId: id },
-          orderBy: { createdAt: "desc" },
-          take: 50,
-        }),
-        prisma.auditLog.findMany({
-          where: { targetUserId: id },
-          orderBy: { createdAt: "desc" },
-          take: 50,
-          include: {
-            admin: { select: { firstName: true, lastName: true, email: true } },
-          },
-        }),
-        batchUserFinancialSummaries([id]),
-        batchUnreadRequestCounts([id]),
-      ]);
+    const [
+      spotWallets,
+      orders,
+      deposits,
+      withdrawals,
+      activity,
+      summaries,
+      unreadCounts,
+    ] = await Promise.all([
+      prisma.spotWallet.findMany({ where: { userId: id }, orderBy: { currency: "asc" } }),
+      prisma.spotOrder.findMany({
+        where: { userId: id },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      }),
+      // Deposits and Withdrawals are fetched separately (each with their
+      // own take: 50), not sliced from one combined "50 most recent
+      // transactions of any type" query — a shared cap let a genuinely
+      // PENDING request quietly age out of view whenever this user also
+      // had many other transactions (ADMIN_BALANCE_ADJUSTMENT, BONUS,
+      // or the other of Deposit/Withdrawal), which is exactly what made
+      // the Withdrawals badge look wrong: the badge (a separate,
+      // unbounded, status-only query — see batchUnreadRequestCounts)
+      // stayed correct, but the row itself had scrolled out of this
+      // table entirely.
+      prisma.transaction.findMany({
+        where: { userId: id, type: "DEPOSIT" },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      }),
+      prisma.transaction.findMany({
+        where: { userId: id, type: "WITHDRAWAL" },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      }),
+      prisma.auditLog.findMany({
+        where: { targetUserId: id },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        include: { admin: { select: { firstName: true, lastName: true, email: true } } },
+      }),
+      batchUserFinancialSummaries([id]),
+      batchUnreadRequestCounts([id]),
+    ]);
 
     const trades = orders.filter((o) => Number(o.filledQuantity) > 0);
+    // Kept as one merged field (the page's own Deposits/Withdrawals tabs
+    // already just .filter() this by `type`) rather than changing the
+    // response shape — each source query above is independently capped by
+    // its own type, so a PENDING row from either type survives here
+    // regardless of how many transactions of OTHER types this user has.
+    const transactions = [...deposits, ...withdrawals];
 
     return apiSuccess({
       profile: {

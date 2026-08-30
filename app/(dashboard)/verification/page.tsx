@@ -55,7 +55,11 @@ export default function VerificationPage() {
               <h2 className="mb-4 text-sm font-semibold text-foreground">
                 {t("verification.uploadDocumentsHeading")}
               </h2>
-              <VerificationForm />
+              <VerificationForm
+                initialCountry={data?.profile.country ?? ""}
+                initialDateOfBirth={data?.profile.dateOfBirth?.slice(0, 10) ?? ""}
+                initialAddress={data?.profile.address ?? ""}
+              />
             </div>
             <InfoPanel
               title={t("verification.infoTitle")}

@@ -10,12 +10,25 @@ import { Label } from "@/components/ui/label";
 import { FileUploadRow } from "@/components/dashboard/file-upload-row";
 import { useLocale } from "@/lib/i18n/locale-context";
 
-export function VerificationForm() {
+export function VerificationForm({
+  initialCountry = "",
+  initialDateOfBirth = "",
+  initialAddress = "",
+}: {
+  /** Prefills from the user's own already-saved profile (from a previous
+   *  submission) so a resubmission after REJECTED doesn't force retyping
+   *  info the user reasonably assumes is already saved — leaving these
+   *  blank previously meant the "missing info" client-side check below
+   *  silently blocked the resubmit before any request was even sent. */
+  initialCountry?: string;
+  initialDateOfBirth?: string;
+  initialAddress?: string;
+}) {
   const { t } = useLocale();
   const queryClient = useQueryClient();
-  const [country, setCountry] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [address, setAddress] = useState("");
+  const [country, setCountry] = useState(initialCountry);
+  const [dateOfBirth, setDateOfBirth] = useState(initialDateOfBirth);
+  const [address, setAddress] = useState(initialAddress);
   const [identityFile, setIdentityFile] = useState<File | null>(null);
   const [addressFile, setAddressFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);

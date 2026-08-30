@@ -97,7 +97,7 @@ function findRow(text: string): Element | undefined {
 describe("AssetWatchlist — DISPLAY_NAMES now covers the whole registry", () => {
   it("has an entry for every MARKET_REGISTRY symbol, not just the original 8", () => {
     for (const entry of MARKET_REGISTRY) {
-      expect(DISPLAY_NAMES[entry.symbol]).toBe(`${entry.baseAsset}/USD`);
+      expect(DISPLAY_NAMES[entry.symbol]).toBe(`${entry.baseAsset}/USDT`);
     }
   });
 });
@@ -107,7 +107,7 @@ describe("AssetWatchlist — an original symbol (BTC)", () => {
     render();
     const btcRow = findRow("Bitcoin");
     expect(btcRow).toBeDefined();
-    expect(btcRow!.textContent).toContain("BTC/USD");
+    expect(btcRow!.textContent).toContain("BTC/USDT");
     expect(btcRow!.textContent).toContain("Bitcoin");
     expect(btcRow!.querySelector("svg")).not.toBeNull(); // real CoinIcon, not blank
     expect(btcRow!.textContent).toContain("60,000.00");
@@ -120,7 +120,7 @@ describe("AssetWatchlist — a symbol added after the old 8-entry map (AVAX)", (
     render();
     const avaxRow = findRow("Avalanche");
     expect(avaxRow).toBeDefined();
-    expect(avaxRow!.textContent).toContain("AVAX/USD");
+    expect(avaxRow!.textContent).toContain("AVAX/USDT");
     expect(avaxRow!.textContent).toContain("Avalanche");
     expect(avaxRow!.textContent).not.toContain("undefined");
     expect(avaxRow!.querySelector("svg")).not.toBeNull();
@@ -192,7 +192,7 @@ describe("AssetWatchlist — a symbol with no live tick yet", () => {
     render(); // PRICES has no ETHUSDT entry
     const ethRow = findRow("Ethereum");
     expect(ethRow).toBeDefined();
-    expect(ethRow!.textContent).toContain("ETH/USD");
+    expect(ethRow!.textContent).toContain("ETH/USDT");
     expect(ethRow!.querySelector("svg")).not.toBeNull();
   });
 });

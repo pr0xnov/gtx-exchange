@@ -5,14 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(value: number | string, currency = "USD"): string {
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
+/** The account's main currency (Balance/Equity/Profit, asset value, PnL —
+ *  every figure this platform's Spot ledger is denominated in; see
+ *  app/api/account/summary/route.ts). Every existing caller already only
+ *  ever passed a Spot-USDT-derived number here, so this is a display fix,
+ *  not a behavior change: was rendered as Intl "$X.XX" (via `currency:
+ *  "USD"`), which is numerically identical to USDT on this platform but
+ *  mislabeled it as US dollars. Trims trailing zeros the same way
+ *  formatAmount() already does elsewhere (e.g. "100.5", not "100.50"). */
+export function formatCurrency(value: number | string): string {
+  return `${formatAmount(value, 2)} USDT`;
 }
 
 export function formatPrice(value: number | string, decimals = 2): string {

@@ -27,7 +27,7 @@ export function DepositForm() {
     try {
       await deposit.mutateAsync({ amount: numericAmount, method });
       toast.success(
-        `${t("deposit.completedPrefix")} $${numericAmount.toFixed(2)} ${t("deposit.completedSuffix")}`
+        `${t("deposit.completedPrefix")} ${numericAmount.toFixed(2)} USDT ${t("deposit.completedSuffix")}`
       );
       setAmount("1000");
     } catch (err) {
@@ -56,12 +56,12 @@ export function DepositForm() {
             className="pr-16 text-lg font-semibold"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted">
-            USD
+            USDT
           </span>
         </div>
         <p className="mt-2 text-sm text-muted">
           {t("deposit.youWillGet")}{" "}
-          <span className="text-foreground">{numericAmount.toFixed(2)} USD</span>
+          <span className="text-foreground">{numericAmount.toFixed(2)} USDT</span>
         </p>
       </div>
 

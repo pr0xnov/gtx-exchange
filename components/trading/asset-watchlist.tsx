@@ -20,13 +20,16 @@ import { useLocale } from "@/lib/i18n/locale-context";
 // with zero further edits to this file.
 const REGISTRY_BY_SYMBOL = new Map(MARKET_REGISTRY.map((e) => [e.symbol, e]));
 
-// Kept as a flat symbol -> "BASE/USD" map and still exported under this
+// Kept as a flat symbol -> "BASE/USDT" map and still exported under this
 // exact name because trading-terminal.tsx already imports it for the
 // chart header / order panel pair labels — deriving it from the same
 // registry fixes those for every symbol too, with no change needed
-// there.
+// there. "USDT", not "USD": every tracked pair is Binance USDT-quoted
+// (see TRACKED_SYMBOLS above — every entry ends in "USDT"), and this is
+// exactly what a trader is buying/selling against on Spot, so labeling it
+// "USD" was simply wrong, not a stylistic choice.
 const DISPLAY_NAMES: Record<string, string> = Object.fromEntries(
-  MARKET_REGISTRY.map((e) => [e.symbol, `${e.baseAsset}/USD`])
+  MARKET_REGISTRY.map((e) => [e.symbol, `${e.baseAsset}/USDT`])
 );
 
 export function AssetWatchlist({

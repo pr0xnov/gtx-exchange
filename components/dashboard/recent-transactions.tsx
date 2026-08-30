@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useHistory } from "@/hooks/use-api";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/shared/skeleton";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -93,7 +93,8 @@ export function RecentTransactions() {
                   sign > 0 ? "text-primary" : "text-danger"
                 )}
               >
-                {sign > 0 ? "+" : "-"}${Math.abs(parseFloat(tx.amount)).toFixed(2)}
+                {sign > 0 ? "+" : "-"}
+                {formatCurrency(Math.abs(parseFloat(tx.amount)))}
               </div>
             </div>
           );

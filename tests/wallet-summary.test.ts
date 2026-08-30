@@ -75,23 +75,23 @@ describe("WalletSummary — Balance/Equity/Profit replace 'Est. Total Value'", (
     expect(container.textContent).toContain("Balance");
     expect(container.textContent).toContain("Equity");
     expect(container.textContent).toContain("Profit");
-    expect(container.textContent).toContain("$1,000.00"); // balance
-    expect(container.textContent).toContain("$1,200.00"); // equity
+    expect(container.textContent).toContain("1,000 USDT"); // balance
+    expect(container.textContent).toContain("1,200 USDT"); // equity
   });
 
   it("shows Unrealized PnL as a separate figure from Profit", () => {
     render({ profit: 50, unrealizedPnl: 20 });
     expect(container.textContent).toContain("Unrealized PnL");
-    expect(container.textContent).toContain("$20.00");
-    // Profit (+$50.00) and Unrealized PnL (+$20.00) must both be visible
+    expect(container.textContent).toContain("20 USDT");
+    // Profit (+50 USDT) and Unrealized PnL (+20 USDT) must both be visible
     // and distinct — never collapsed into one number.
-    expect(container.textContent).toContain("$50.00");
+    expect(container.textContent).toContain("50 USDT");
   });
 
   it("colors Profit red when negative, independent of Equity/Balance", () => {
     render({ balance: 1000, equity: 1200, profit: -30 });
     const profitSpan = Array.from(container.querySelectorAll("span")).find((s) =>
-      s.textContent?.includes("-$30.00")
+      s.textContent?.includes("-30 USDT")
     );
     expect(profitSpan).toBeTruthy();
     expect(profitSpan!.parentElement!.className).toContain("text-danger");

@@ -92,8 +92,7 @@ function clickButton(text: string) {
 describe("SpotOrderPanel — Available balance per side", () => {
   it("shows the real available USDT for BUY (default side)", () => {
     render();
-    expect(container.textContent).toContain("$65.94");
-    expect(container.textContent).toContain("USDT");
+    expect(container.textContent).toContain("65.94 USDT");
   });
 
   it("shows the real available BTC balance after switching to SELL", () => {

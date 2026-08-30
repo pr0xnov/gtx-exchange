@@ -129,10 +129,11 @@ export function WalletAssetsTable({
                 </td>
                 <td className="px-3 py-3">
                   <div className="font-tabular text-foreground">
-                    {formatPrice(row.currentPrice, decimals)}
+                    {formatPrice(row.currentPrice, decimals)} USDT
                   </div>
                   <div className="font-tabular text-xs text-muted">
-                    {t("wallet.assets.costLabel")} {formatPrice(costPerUnit, decimals)}
+                    {t("wallet.assets.costLabel")} {formatPrice(costPerUnit, decimals)}{" "}
+                    USDT
                   </div>
                 </td>
                 <td className="px-3 py-3" data-testid="chart-cell">

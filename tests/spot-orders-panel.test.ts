@@ -207,7 +207,7 @@ describe("SpotOrdersPanel — existing behavior stays intact", () => {
     pairCells.forEach((cell) => {
       expect(cell.querySelector("svg")).not.toBeNull();
     });
-    expect(openBox.textContent).toContain("BTC/USD");
+    expect(openBox.textContent).toContain("BTC/USDT");
   });
 
   it("cancel button still calls useCancelSpotOrder with the order id", () => {

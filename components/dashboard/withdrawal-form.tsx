@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PaymentMethodSelector } from "@/components/dashboard/payment-method-selector";
 import { useWithdraw, useSpotWallet } from "@/hooks/use-api";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { formatCurrency } from "@/lib/utils";
 
 const QUOTE_CURRENCY = "USDT";
 
@@ -45,7 +46,7 @@ export function WithdrawalForm() {
     try {
       await withdraw.mutateAsync({ amount: numericAmount, method });
       toast.success(
-        `${t("withdrawal.requestPrefix")} $${numericAmount.toFixed(2)} ${t("withdrawal.requestSuffix")}`
+        `${t("withdrawal.requestPrefix")} ${numericAmount.toFixed(2)} USDT ${t("withdrawal.requestSuffix")}`
       );
       setAmount("500");
     } catch (err) {
@@ -63,7 +64,17 @@ export function WithdrawalForm() {
       </div>
 
       <div>
-        <Label>{t("withdrawal.detailsLabel")}</Label>
+        <div className="flex items-center justify-between">
+          <Label>{t("withdrawal.detailsLabel")}</Label>
+          {availableBalance !== undefined && (
+            <span className="text-xs text-muted">
+              {t("withdrawal.availableLabel")}{" "}
+              <span className="font-tabular text-foreground">
+                {formatCurrency(availableBalance)}
+              </span>
+            </span>
+          )}
+        </div>
         <div className="relative mt-2">
           <Input
             type="number"
@@ -74,12 +85,12 @@ export function WithdrawalForm() {
             className="pr-16 text-lg font-semibold"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted">
-            USD
+            USDT
           </span>
         </div>
         <p className="mt-2 text-sm text-muted">
           {t("withdrawal.youWillGet")}{" "}
-          <span className="text-foreground">{numericAmount.toFixed(2)} USD</span>
+          <span className="text-foreground">{numericAmount.toFixed(2)} USDT</span>
         </p>
       </div>
 

@@ -78,7 +78,7 @@ describe("WalletTradeHistory — only completed trades", () => {
     render();
     const rows = container.querySelectorAll("tbody tr");
     expect(rows.length).toBe(1);
-    expect(container.textContent).toContain("BTC/USD");
+    expect(container.textContent).toContain("BTC/USDT");
   });
 
   it("excludes an OPEN order — it isn't a completed trade yet", () => {
@@ -113,10 +113,10 @@ describe("WalletTradeHistory — Total = executed price × executed quantity", (
     ];
     render();
     // 0.05 * 60000 = 3000.00
-    expect(container.textContent).toContain("$3,000.00");
+    expect(container.textContent).toContain("3,000 USDT");
   });
 
-  it("XRP/USD limit sell example from the spec renders the right Total", () => {
+  it("XRP/USDT limit sell example from the spec renders the right Total", () => {
     ordersData = [
       makeOrder({
         symbol: "XRPUSDT",
@@ -128,12 +128,12 @@ describe("WalletTradeHistory — Total = executed price × executed quantity", (
       }),
     ];
     render();
-    expect(container.textContent).toContain("XRP/USD");
+    expect(container.textContent).toContain("XRP/USDT");
     expect(container.textContent).toContain("Limit");
     expect(container.textContent).toContain("Sell");
     expect(container.textContent).toContain("1.02");
     expect(container.textContent).toContain("100 XRP");
-    expect(container.textContent).toContain("$102.00");
+    expect(container.textContent).toContain("102 USDT");
   });
 });
 
@@ -163,7 +163,7 @@ describe("WalletTradeHistory — shared coin icon system", () => {
     render();
     const firstCell = container.querySelector("tbody tr td:first-child")!;
     expect(firstCell.querySelector("svg")).not.toBeNull();
-    expect(container.textContent).toContain("ETH/USD");
+    expect(container.textContent).toContain("ETH/USDT");
     expect(container.textContent).toContain("Ethereum");
   });
 });

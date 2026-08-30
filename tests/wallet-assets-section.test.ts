@@ -132,7 +132,7 @@ describe("WalletAssetsSection — Open Orders reuses Trading's own order data", 
     act(() => ordersTab.click());
 
     const text = container.textContent!;
-    expect(text).toContain("BTC/USD");
+    expect(text).toContain("BTC/USDT");
     expect(text).toContain("Limit");
     expect(text).toContain("Buy");
     expect(text).toContain("60,000.00");
@@ -176,7 +176,7 @@ describe("WalletAssetsSection — History tab", () => {
     act(() => historyTab.click());
 
     const text = container.textContent!;
-    expect(text).toContain("BTC/USD");
+    expect(text).toContain("BTC/USDT");
     expect(text).toContain("Market");
     expect(text).toContain("Buy");
     expect(text).toContain("Filled");
@@ -196,7 +196,7 @@ describe("WalletAssetsSection — History tab", () => {
     act(() => historyTab.click());
     act(() => assetsTab.click());
     act(() => historyTab.click());
-    expect(container.textContent).toContain("BTC/USD");
+    expect(container.textContent).toContain("BTC/USDT");
     expect(container.textContent).toContain("Filled");
   });
 });

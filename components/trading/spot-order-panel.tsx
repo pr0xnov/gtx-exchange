@@ -225,7 +225,7 @@ export function SpotOrderPanel({
               {t("trading.orderPanel.available")}{" "}
               <span className="font-tabular text-foreground">
                 {side === "BUY"
-                  ? `${formatCurrency(quoteAvailable)} ${QUOTE_CURRENCY}`
+                  ? formatCurrency(quoteAvailable)
                   : `${baseAvailable} ${baseCurrency}`}
               </span>
             </span>

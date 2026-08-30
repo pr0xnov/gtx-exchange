@@ -134,3 +134,19 @@ describe("WalletSummary — Available Balance / Assets Value / Profit-Loss", () 
     expect(profitSpan!.parentElement!.className).toContain("text-danger");
   });
 });
+
+describe("WalletSummary — decorative sparkline chart is gone", () => {
+  it("leaves no empty reserved space where the chart used to sit", () => {
+    render();
+    // The chart's old wrapper classes (w-full sm:w-56) must not survive
+    // as a leftover empty node.
+    expect(container.querySelector(".sm\\:w-56")).toBeNull();
+  });
+
+  it("still shows Unrealized PnL, unaffected by the chart's removal", () => {
+    render({ unrealizedPnl: -13.22, unrealizedPnlPercent: -0.54 });
+    expect(container.textContent).toContain("Unrealized PnL");
+    expect(container.textContent).toContain("-13.22 USDT");
+    expect(container.textContent).toContain("-0.54%");
+  });
+});

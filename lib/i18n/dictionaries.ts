@@ -285,8 +285,6 @@ const en = {
   "wallet.summary.deposit": "Deposit",
   "wallet.summary.withdraw": "Withdraw",
   "wallet.summary.history": "History",
-  "wallet.chart.emptyState":
-    "Value history will appear here as it changes during this session.",
   "wallet.tabs.myAssets": "My Assets",
   "wallet.tabs.openOrders": "Open Orders",
   "wallet.tabs.history": "History",
@@ -873,8 +871,6 @@ const ru: Dictionary = {
   "wallet.summary.deposit": "Пополнение",
   "wallet.summary.withdraw": "Вывод",
   "wallet.summary.history": "История",
-  "wallet.chart.emptyState":
-    "История стоимости появится здесь по мере изменений в течение сессии.",
   "wallet.tabs.myAssets": "Мои активы",
   "wallet.tabs.openOrders": "Открытые ордера",
   "wallet.tabs.history": "История",
@@ -1450,7 +1446,6 @@ const uk: Dictionary = {
   "wallet.summary.deposit": "Поповнення",
   "wallet.summary.withdraw": "Виведення",
   "wallet.summary.history": "Історія",
-  "wallet.chart.emptyState": "Історія вартості з'явиться тут у міру змін протягом сесії.",
   "wallet.tabs.myAssets": "Мої активи",
   "wallet.tabs.openOrders": "Відкриті ордери",
   "wallet.tabs.history": "Історія",

@@ -6,7 +6,6 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AnimatedCurrency } from "@/components/dashboard/animated-currency";
 import { Skeleton } from "@/components/shared/skeleton";
-import { WalletChart } from "@/components/wallet/wallet-chart";
 import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
@@ -79,24 +78,19 @@ export function WalletSummary({
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
-      <div className="flex flex-wrap items-start justify-between gap-6">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4 sm:gap-x-10 md:gap-x-12">
-          {cards.map((card) => (
-            <div key={card.label}>
-              <div className="text-xs font-medium text-muted">{card.label}</div>
-              {isLoading ? (
-                <Skeleton className="mt-2 h-8 w-24" />
-              ) : (
-                <div className={cn("mt-1 text-2xl font-bold", card.accent)}>
-                  <AnimatedCurrency value={card.value} showSign={card.showSign} />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="w-full sm:w-56">
-          <WalletChart value={availableBalance + lockedInOrders + assetsValue} />
-        </div>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4 sm:gap-x-10 md:gap-x-12">
+        {cards.map((card) => (
+          <div key={card.label}>
+            <div className="text-xs font-medium text-muted">{card.label}</div>
+            {isLoading ? (
+              <Skeleton className="mt-2 h-8 w-24" />
+            ) : (
+              <div className={cn("mt-1 text-2xl font-bold", card.accent)}>
+                <AnimatedCurrency value={card.value} showSign={card.showSign} />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-xs text-muted">

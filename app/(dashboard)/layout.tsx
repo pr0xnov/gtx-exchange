@@ -1,4 +1,4 @@
-import { getOptionalUser } from "@/lib/auth/session";
+import { getOptionalUserAllowingRefresh } from "@/lib/auth/session";
 import { Navbar } from "@/components/layout/navbar";
 
 export default async function DashboardLayout({
@@ -6,7 +6,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getOptionalUser();
+  const user = await getOptionalUserAllowingRefresh();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

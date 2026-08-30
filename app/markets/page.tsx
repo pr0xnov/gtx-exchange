@@ -1,9 +1,9 @@
-import { getOptionalUser } from "@/lib/auth/session";
+import { getOptionalUserAllowingRefresh } from "@/lib/auth/session";
 import { Navbar } from "@/components/layout/navbar";
 import { MarketsClient } from "@/components/markets/markets-client";
 
 export default async function MarketsPage() {
-  const user = await getOptionalUser();
+  const user = await getOptionalUserAllowingRefresh();
 
   return (
     <div className="min-h-screen bg-background">

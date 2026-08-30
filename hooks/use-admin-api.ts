@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { refreshAccessToken } from "@/lib/auth/client-refresh";
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -8,11 +9,24 @@ interface ApiEnvelope<T> {
   error?: string;
 }
 
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+async function fetchJson<T>(
+  url: string,
+  init?: RequestInit,
+  isRetry = false
+): Promise<T> {
   const res = await fetch(url, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
+
+  // See hooks/use-api.ts's fetchJson for why: access token expired (15m),
+  // refresh once and replay this exact request rather than surfacing a
+  // false "logged out" for a session whose refresh token is still valid.
+  if (res.status === 401 && !isRetry) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) return fetchJson<T>(url, init, true);
+  }
+
   const json: ApiEnvelope<T> = await res.json();
   if (!res.ok || !json.success) {
     throw new Error(json.error ?? "Request failed");

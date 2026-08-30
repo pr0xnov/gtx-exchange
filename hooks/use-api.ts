@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQueries, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { closesFromCandles } from "@/lib/markets/derive";
 import type { Candle } from "@/lib/binance/client";
+import { refreshAccessToken } from "@/lib/auth/client-refresh";
 
 // Sparkline requests are one-shot (not polled) but there can now be up to
 // ~100 tracked symbols — firing that many /api/markets/klines calls at
@@ -20,11 +21,26 @@ interface ApiEnvelope<T> {
   error?: string;
 }
 
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+async function fetchJson<T>(
+  url: string,
+  init?: RequestInit,
+  isRetry = false
+): Promise<T> {
   const res = await fetch(url, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
+
+  // Access token expired (15m) but the refresh token may still be valid —
+  // refresh once and replay this exact request, so a session that's still
+  // good never surfaces as "logged out" mid-use. `isRetry` guards against
+  // looping if the retried request 401s again (e.g. the refresh token is
+  // also expired/revoked) — that's a real logout, not something to retry.
+  if (res.status === 401 && !isRetry) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) return fetchJson<T>(url, init, true);
+  }
+
   const json: ApiEnvelope<T> = await res.json();
   if (!res.ok || !json.success) {
     throw new Error(json.error ?? "Request failed");

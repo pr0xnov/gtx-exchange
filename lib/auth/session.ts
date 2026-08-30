@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/db";
-import { setAuthCookies, getAccessTokenFromCookies } from "@/lib/auth/cookies";
+import {
+  setAuthCookies,
+  getAccessTokenFromCookies,
+  getRefreshTokenFromCookies,
+} from "@/lib/auth/cookies";
 import {
   verifyAccessToken,
+  verifyRefreshToken,
   signAccessToken,
   signRefreshToken,
   refreshTokenExpiryDate,
@@ -57,6 +62,46 @@ export async function getOptionalUser() {
   } catch {
     return null;
   }
+}
+
+/**
+ * Like getOptionalUser(), but a still-valid refresh token also counts as
+ * "logged in" once the (much shorter-lived, 15m) access token has expired
+ * — for display-only decisions where a merely-stale access token cookie
+ * must never make an actual, still-logged-in session render as a guest
+ * (e.g. the dashboard Navbar, or Markets' Favorites tab/star gating).
+ *
+ * Read-only: never rotates or writes any cookie itself (a Server
+ * Component render can't do that anyway — Next.js only allows cookie
+ * writes from a Server Action or Route Handler). The access-token cookie
+ * itself only ever gets renewed by a real POST /api/auth/refresh call
+ * (see hooks/use-api.ts's fetchJson), which still runs on the next
+ * authenticated client-side API request. Real authorization — API
+ * mutations via requireUser()/requireAdmin(), including the whole /admin
+ * subtree — is completely unchanged and still requires a genuinely valid
+ * access token or an explicit refresh; this function is never used there.
+ */
+export async function getOptionalUserAllowingRefresh() {
+  const direct = await getOptionalUser();
+  if (direct) return direct;
+
+  const refreshToken = await getRefreshTokenFromCookies();
+  if (!refreshToken) return null;
+
+  let payload;
+  try {
+    payload = verifyRefreshToken(refreshToken);
+  } catch {
+    return null;
+  }
+
+  const stored = await prisma.refreshToken.findUnique({ where: { token: refreshToken } });
+  if (!stored || stored.revoked || stored.expiresAt < new Date()) return null;
+
+  return prisma.user.findUnique({
+    where: { id: payload.sub },
+    include: { wallet: true },
+  });
 }
 
 /**

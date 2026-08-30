@@ -441,6 +441,14 @@ export function useWithdraw() {
       queryClient.invalidateQueries({ queryKey: ["portfolio"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["history"] });
+      // A withdrawal debits SpotWallet immediately (see app/api/withdraw/
+      // route.ts) — without these, the Wallet page / Withdrawal form's own
+      // balance check (useAccountSummary / useSpotWallet) would keep
+      // showing the pre-withdrawal amount until their next poll (up to
+      // 5s), same pair useCancelSpotOrder() already invalidates for the
+      // same reason.
+      queryClient.invalidateQueries({ queryKey: ["spot-wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["account-summary"] });
     },
   });
 }

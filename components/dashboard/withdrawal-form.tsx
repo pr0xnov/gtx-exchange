@@ -7,15 +7,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PaymentMethodSelector } from "@/components/dashboard/payment-method-selector";
-import { useWithdraw, usePortfolio } from "@/hooks/use-api";
+import { useWithdraw, useSpotWallet } from "@/hooks/use-api";
 import { useLocale } from "@/lib/i18n/locale-context";
+
+const QUOTE_CURRENCY = "USDT";
 
 export function WithdrawalForm() {
   const { t } = useLocale();
-  const [method, setMethod] = useState("VISA_MASTERCARD");
+  const [method, setMethod] = useState("TETHER_USDT");
   const [amount, setAmount] = useState("500");
   const withdraw = useWithdraw();
-  const { data: portfolio } = usePortfolio();
+  // The actual withdrawable amount — app/api/withdraw/route.ts checks and
+  // debits SpotWallet.balance alone, never `locked` (funds reserved by
+  // this user's own open Spot limit orders, see spot-order-panel.tsx's
+  // identical use of this same hook). account-summary's `balance` is
+  // balance+locked (the right number for a "Balance" headline, wrong one
+  // here) — using it let this pre-check silently pass amounts the server
+  // would then correctly reject as insufficient, which is exactly what
+  // made "Balance shows plenty, withdrawal still fails" look like a bug.
+  const { data: spotWallets } = useSpotWallet();
+  const availableBalance = spotWallets?.find(
+    (w) => w.currency === QUOTE_CURRENCY
+  )?.balance;
 
   const numericAmount = parseFloat(amount) || 0;
 
@@ -25,7 +38,7 @@ export function WithdrawalForm() {
       toast.error(t("withdrawal.minAmountError"));
       return;
     }
-    if (portfolio && numericAmount > portfolio.balance) {
+    if (availableBalance !== undefined && numericAmount > availableBalance) {
       toast.error(t("withdrawal.insufficientBalanceError"));
       return;
     }

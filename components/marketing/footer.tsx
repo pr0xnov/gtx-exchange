@@ -62,17 +62,7 @@ export async function Footer() {
         <p>
           © {new Date().getFullYear()} {t("marketing.footer.copyright")}
         </p>
-        <p className="mt-1">
-          {t("marketing.footer.chartsPoweredBy")}{" "}
-          <a
-            href="https://www.tradingview.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-foreground hover:underline"
-          >
-            TradingView Lightweight Charts
-          </a>
-        </p>
+        <p className="mt-1">{t("marketing.footer.rightsReserved")}</p>
       </div>
     </footer>
   );

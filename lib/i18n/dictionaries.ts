@@ -522,7 +522,7 @@ const en = {
     "GTX is a paper-trading education platform. All balances are virtual and all trades are simulated — no real funds are ever at risk.",
   "marketing.footer.copyright":
     "GTX. Virtual trading simulator for educational purposes only.",
-  "marketing.footer.chartsPoweredBy": "Charts powered by",
+  "marketing.footer.rightsReserved": "All rights reserved",
 
   // Auth
   "auth.emailLabel": "E-mail",
@@ -1130,10 +1130,9 @@ const ru: Dictionary = {
   "marketing.footer.privacyPolicy": "Политика конфиденциальности",
   "marketing.footer.termsOfService": "Условия использования",
   "marketing.footer.description":
-    "GTX — образовательная платформа для учебной торговли. Все балансы виртуальны, все сделки смоделированы — реальные средства никогда не подвергаются риску.",
-  "marketing.footer.copyright":
-    "GTX. Симулятор виртуальной торговли исключительно в образовательных целях.",
-  "marketing.footer.chartsPoweredBy": "Графики предоставлены",
+    "GTX — современная платформа для торговли криптовалютами. Покупайте, продавайте и управляйте цифровыми активами быстро и удобно в одном месте. Получайте доступ к популярным криптовалютам, удобным торговым инструментам и всему необходимому для уверенной работы с цифровыми активами.",
+  "marketing.footer.copyright": "GTX",
+  "marketing.footer.rightsReserved": "Все права защищены",
 
   "auth.emailLabel": "E-mail",
   "auth.passwordLabel": "Пароль",
@@ -1734,10 +1733,9 @@ const uk: Dictionary = {
   "marketing.footer.privacyPolicy": "Політика конфіденційності",
   "marketing.footer.termsOfService": "Умови використання",
   "marketing.footer.description":
-    "GTX — освітня платформа для навчальної торгівлі. Усі баланси віртуальні, усі угоди змодельовані — реальні кошти ніколи не наражаються на ризик.",
-  "marketing.footer.copyright":
-    "GTX. Симулятор віртуальної торгівлі виключно з освітньою метою.",
-  "marketing.footer.chartsPoweredBy": "Графіки надано",
+    "GTX — сучасна платформа для торгівлі криптовалютами. Купуйте, продавайте та керуйте цифровими активами швидко й зручно в одному місці. Отримуйте доступ до популярних криптовалют, зручних торгових інструментів і всього необхідного для впевненої роботи з цифровими активами.",
+  "marketing.footer.copyright": "GTX",
+  "marketing.footer.rightsReserved": "Усі права захищені",
 
   "auth.emailLabel": "E-mail",
   "auth.passwordLabel": "Пароль",

@@ -345,12 +345,12 @@ describe("Navbar — guest", () => {
     expect(container.querySelector('button[aria-label="Account menu"]')).toBeNull();
   });
 
-  it("still shows Language and Search", () => {
+  it("still shows Language, but not Search", () => {
     renderNavbar(null);
     expect(container.textContent).toContain("EN");
     expect(
       container.querySelector('button[aria-label="Search cryptocurrencies"]')
-    ).not.toBeNull();
+    ).toBeNull();
   });
 
   it("shows the existing Login/Registration instead", () => {

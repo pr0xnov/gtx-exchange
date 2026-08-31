@@ -254,8 +254,8 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
 /**
  * The single Navbar used on every page. Right side order (desktop):
  * Language -> Search -> Deposit -> Account (icon-only) for an
- * authenticated user; Language -> Search -> Login/Registration for a
- * guest. Deposit and Account never show for a guest.
+ * authenticated user; Language -> Login/Registration for a guest.
+ * Search, Deposit, and Account never show for a guest.
  */
 export function Navbar({ user }: { user: NavbarUser | null }) {
   const { t } = useLocale();
@@ -303,9 +303,9 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
 
         <div className="hidden items-center gap-3 lg:flex">
           <LanguageDropdown />
-          <NavbarSearch />
           {user && (
             <>
+              <NavbarSearch />
               <Button size="sm" asChild>
                 <Link href="/deposit">{t("nav.deposit")}</Link>
               </Button>

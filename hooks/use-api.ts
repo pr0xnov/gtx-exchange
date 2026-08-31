@@ -456,24 +456,24 @@ export function useCancelSpotOrder() {
   });
 }
 
-export function useDeposit() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: { amount: number; method: string }) =>
-      fetchJson("/api/deposit", { method: "POST", body: JSON.stringify(payload) }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["portfolio"] });
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-      queryClient.invalidateQueries({ queryKey: ["history"] });
-    },
-  });
-}
+// No useDeposit() hook here — a deposit now always carries a required
+// payment-confirmation screenshot (see app/api/deposit/route.ts), so it
+// must be a multipart request, not JSON. fetchJson (used by every other
+// mutation in this file) always forces a JSON Content-Type header, which
+// would break a FormData body's own multipart boundary — the same
+// reason POST /api/verification is a raw fetch() in verification-
+// form.tsx rather than a useMutation here. See deposit-proof-modal.tsx
+// for the equivalent raw fetch() and its own manual query invalidation.
 
 export function useWithdraw() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { amount: number; method: string }) =>
-      fetchJson("/api/withdraw", { method: "POST", body: JSON.stringify(payload) }),
+    mutationFn: (payload: {
+      amount: number;
+      method: string;
+      network: string;
+      destinationAddress: string;
+    }) => fetchJson("/api/withdraw", { method: "POST", body: JSON.stringify(payload) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["portfolio"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });

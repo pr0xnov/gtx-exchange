@@ -49,6 +49,27 @@ function patchRequest(url: string, body: unknown): NextRequest {
   });
 }
 
+// A deposit is now a multipart request — a payment-confirmation
+// screenshot is required (see app/api/deposit/route.ts) — same pattern
+// as tests/verification-resubmit.test.ts's own submitRequest().
+function depositRequest(fields: {
+  amount: number;
+  method: string;
+  network: string;
+  proof?: File;
+}): NextRequest {
+  const form = new FormData();
+  form.set("amount", String(fields.amount));
+  form.set("method", fields.method);
+  form.set("network", fields.network);
+  form.set(
+    "proof",
+    fields.proof ??
+      new File([new Uint8Array([1, 2, 3])], "proof.png", { type: "image/png" })
+  );
+  return new NextRequest("http://test/api/deposit", { method: "POST", body: form });
+}
+
 async function seedVerifiedUser(spotUsdtBalance: number) {
   const user = await seedUserWithWallet(0);
   await seedSpotWallet({ userId: user.id, currency: "USDT", balance: spotUsdtBalance });
@@ -106,7 +127,7 @@ describe("Deposit — create then Approve", () => {
     loginAs(user);
 
     const res = await deposit(
-      jsonRequest("http://test/api/deposit", { amount: 100, method: "TETHER_USDT" })
+      depositRequest({ amount: 100, method: "TETHER_USDT", network: "BSC" })
     );
     expect(res.status).toBe(201);
     const created = (await res.json()).data;
@@ -130,7 +151,7 @@ describe("Deposit — create then Reject", () => {
     loginAs(user);
 
     const res = await deposit(
-      jsonRequest("http://test/api/deposit", { amount: 100, method: "TETHER_USDT" })
+      depositRequest({ amount: 100, method: "TETHER_USDT", network: "BSC" })
     );
     const created = (await res.json()).data;
 
@@ -150,7 +171,7 @@ describe("Deposit — double Approve protection", () => {
     const user = await seedVerifiedUser(0);
     loginAs(user);
     const res = await deposit(
-      jsonRequest("http://test/api/deposit", { amount: 100, method: "TETHER_USDT" })
+      depositRequest({ amount: 100, method: "TETHER_USDT", network: "BSC" })
     );
     const created = (await res.json()).data;
 
@@ -168,7 +189,7 @@ describe("Deposit — double Approve protection", () => {
     const user = await seedVerifiedUser(0);
     loginAs(user);
     const res = await deposit(
-      jsonRequest("http://test/api/deposit", { amount: 100, method: "TETHER_USDT" })
+      depositRequest({ amount: 100, method: "TETHER_USDT", network: "BSC" })
     );
     const created = (await res.json()).data;
 
@@ -188,7 +209,12 @@ describe("Withdrawal — creation immediately debits balance", () => {
     loginAs(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 60, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 60,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     expect(res.status).toBe(201);
     const created = (await res.json()).data;
@@ -202,7 +228,12 @@ describe("Withdrawal — Approve does not debit again", () => {
     const user = await seedVerifiedUser(100);
     loginAs(user);
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 60, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 60,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     const created = (await res.json()).data;
     expect(await usdtBalance(user.id)).toBe(40);
@@ -223,7 +254,12 @@ describe("Withdrawal — Reject refunds the debited amount", () => {
     const user = await seedVerifiedUser(100);
     loginAs(user);
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 60, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 60,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     const created = (await res.json()).data;
     expect(await usdtBalance(user.id)).toBe(40);
@@ -244,7 +280,12 @@ describe("Withdrawal — double Reject protection", () => {
     const user = await seedVerifiedUser(100);
     loginAs(user);
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 60, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 60,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     const created = (await res.json()).data;
 
@@ -262,7 +303,12 @@ describe("Withdrawal — double Reject protection", () => {
     const user = await seedVerifiedUser(100);
     loginAs(user);
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 60, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 60,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     const created = (await res.json()).data;
 
@@ -282,7 +328,12 @@ describe("Withdrawal — insufficient balance", () => {
     loginAs(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 100,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     expect(res.status).toBe(400);
     expect(await usdtBalance(user.id)).toBe(50);
@@ -298,7 +349,12 @@ describe("Withdrawal — invalid amounts are rejected, balance untouched", () =>
     loginAs(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     expect(res.status).toBe(422);
     expect(await usdtBalance(user.id)).toBe(500);
@@ -310,7 +366,7 @@ describe("Security — a plain USER cannot decide transactions", () => {
     const user = await seedVerifiedUser(0);
     loginAs(user);
     const res = await deposit(
-      jsonRequest("http://test/api/deposit", { amount: 100, method: "TETHER_USDT" })
+      depositRequest({ amount: 100, method: "TETHER_USDT", network: "BSC" })
     );
     const created = (await res.json()).data;
 

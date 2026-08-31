@@ -31,7 +31,10 @@ vi.mock("@/hooks/use-api", () => ({
   useSpotWallet: () => ({ data: mockSpotWallets }),
 }));
 
-vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+const toastError = vi.fn();
+vi.mock("sonner", () => ({
+  toast: { error: (...a: unknown[]) => toastError(...a), success: vi.fn() },
+}));
 
 // LocaleProvider itself calls useRouter() (for router.refresh() on locale
 // change) regardless of what WithdrawalForm uses — needed for every
@@ -47,6 +50,7 @@ let queryClient: QueryClient;
 
 beforeEach(() => {
   withdrawMutateAsync.mockClear();
+  toastError.mockClear();
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -84,10 +88,49 @@ function setAmount(value: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
+function setAddress(value: string) {
+  const input = container.querySelector('input[type="text"]') as HTMLInputElement;
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value"
+  )!.set!;
+  act(() => {
+    setter.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
+function addressValue(): string {
+  return (container.querySelector('input[type="text"]') as HTMLInputElement).value;
+}
+
+function selectNetwork(code: string) {
+  const select = container.querySelector("select")!;
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLSelectElement.prototype,
+    "value"
+  )!.set!;
+  act(() => {
+    setter.call(select, code);
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+}
+
 function submit() {
   const form = container.querySelector("form")!;
   act(() => form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
 }
+
+describe("Amount has no default — the user must type it themselves", () => {
+  it("the amount input is empty on first render, unlike Deposit's 250 default", () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
+    render();
+
+    const input = container.querySelector('input[type="number"]') as HTMLInputElement;
+    expect(input.value).toBe("");
+    expect(container.textContent).toContain("0.00 USDT");
+  });
+});
 
 describe("WithdrawalForm — pre-check uses the actual withdrawable (non-locked) balance", () => {
   it("blocks an amount that exceeds available balance even though the account's total (incl. locked) would cover it", async () => {
@@ -96,6 +139,8 @@ describe("WithdrawalForm — pre-check uses the actual withdrawable (non-locked)
     mockSpotWallets = [{ currency: "USDT", balance: 328.6, locked: 4252.7 }];
     render();
 
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
     setAmount("4000"); // > available (328.6), but < total (4581.3)
     await act(async () => {
       submit();
@@ -109,6 +154,8 @@ describe("WithdrawalForm — pre-check uses the actual withdrawable (non-locked)
     mockSpotWallets = [{ currency: "USDT", balance: 328.6, locked: 4252.7 }];
     render();
 
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
     setAmount("50");
     await act(async () => {
       submit();
@@ -118,6 +165,8 @@ describe("WithdrawalForm — pre-check uses the actual withdrawable (non-locked)
     expect(withdrawMutateAsync).toHaveBeenCalledWith({
       amount: 50,
       method: "TETHER_USDT",
+      network: "TRX",
+      destinationAddress: "TXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     });
   });
 
@@ -125,6 +174,8 @@ describe("WithdrawalForm — pre-check uses the actual withdrawable (non-locked)
     mockSpotWallets = [{ currency: "USDT", balance: 10_000, locked: 0 }];
     render();
 
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
     setAmount("10");
     await act(async () => {
       submit();
@@ -132,5 +183,105 @@ describe("WithdrawalForm — pre-check uses the actual withdrawable (non-locked)
     });
 
     expect(withdrawMutateAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe("Test 24 — network is included in the submitted payload", () => {
+  it("Available=1000, Network=ETH, Amount=500 -> withdraw called with asset amount/method/network/destinationAddress", async () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
+    render();
+
+    selectNetwork("ETH");
+    setAddress("0xXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    setAmount("500");
+    await act(async () => {
+      submit();
+      await Promise.resolve();
+    });
+
+    expect(withdrawMutateAsync).toHaveBeenCalledWith({
+      amount: 500,
+      method: "TETHER_USDT",
+      network: "ETH",
+      destinationAddress: "0xXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    });
+  });
+});
+
+describe("Test 25 — network is required", () => {
+  it("Amount=500, Network=none -> blocked with an error, withdraw never called", async () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
+    render();
+
+    setAmount("500");
+    await act(async () => {
+      submit();
+      await Promise.resolve();
+    });
+
+    expect(withdrawMutateAsync).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith("Select a network");
+  });
+
+  it("Network=none, Address=filled -> still blocked with the network error, never the address one", async () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
+    render();
+
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    setAmount("500");
+    await act(async () => {
+      submit();
+      await Promise.resolve();
+    });
+
+    expect(withdrawMutateAsync).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith("Select a network");
+  });
+});
+
+describe("Test C — wallet address is required", () => {
+  it("Network=TRX, Address=empty, Amount=500 -> blocked, withdraw never called, balance not debited", async () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
+    render();
+
+    selectNetwork("TRX");
+    setAmount("500");
+    await act(async () => {
+      submit();
+      await Promise.resolve();
+    });
+
+    expect(withdrawMutateAsync).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith("Enter wallet address");
+  });
+
+  it("an address that is only whitespace is treated as empty", async () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
+    render();
+
+    selectNetwork("TRX");
+    setAddress("   ");
+    setAmount("500");
+    await act(async () => {
+      submit();
+      await Promise.resolve();
+    });
+
+    expect(withdrawMutateAsync).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith("Enter wallet address");
+  });
+});
+
+describe("Test E — changing the network clears whatever address was already typed", () => {
+  it("TRX address is cleared after switching to ETH", async () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
+    render();
+
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    expect(addressValue()).toBe("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+    selectNetwork("ETH");
+    expect(addressValue()).toBe("");
   });
 });

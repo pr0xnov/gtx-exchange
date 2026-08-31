@@ -18,10 +18,26 @@ export async function GET(req: NextRequest) {
     const filter = req.nextUrl.searchParams.get("filter") ?? "all";
     const types = FILTER_MAP[filter] ?? FILTER_MAP.all;
 
+    // Explicit select, never a blanket findMany: a DEPOSIT row's
+    // `proofData` is the raw payment-confirmation screenshot bytes (see
+    // app/api/deposit/route.ts) — must never be bundled into this list
+    // response, only ever served through its own protected GET
+    // (app/api/deposit/[id]/proof).
     const transactions = await prisma.transaction.findMany({
       where: { userId: user.id, type: { in: types } },
       orderBy: { createdAt: "desc" },
       take: 100,
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        asset: true,
+        method: true,
+        network: true,
+        direction: true,
+        status: true,
+        createdAt: true,
+      },
     });
 
     return apiSuccess(transactions);

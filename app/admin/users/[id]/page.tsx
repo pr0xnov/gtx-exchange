@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import type { ReactNode } from "react";
+import { Copy } from "lucide-react";
 import {
   useAdminUserDetail,
   useUpdateUserStatus,
@@ -11,7 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/shared/skeleton";
 import { BalanceAdjustmentForm } from "@/components/admin/balance-adjustment-form";
+import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
 import { cn, formatPrice, formatAmount, formatDate } from "@/lib/utils";
+import { USDT_NETWORKS, isUsdtNetwork } from "@/lib/deposit/usdt-networks";
 import { toast } from "sonner";
 
 const TABS = [
@@ -43,6 +46,11 @@ export default function AdminUserDetailPage({
   const { data, isLoading } = useAdminUserDetail(id);
   const [tab, setTab] = useState<Tab>("Profile");
   const [adjustment, setAdjustment] = useState<"CREDIT" | "DEBIT" | null>(null);
+  const [previewProof, setPreviewProof] = useState<{
+    id: string;
+    fileName: string;
+    mimeType: string | null;
+  } | null>(null);
   const updateStatus = useUpdateUserStatus();
 
   if (isLoading || !data) {
@@ -99,9 +107,14 @@ export default function AdminUserDetailPage({
       type: string;
       asset: string;
       amount: string;
+      method: string | null;
+      network: string | null;
+      destinationAddress: string | null;
       direction: string | null;
       status: string;
       createdAt: string;
+      proofFileName: string | null;
+      proofMimeType: string | null;
     }[];
     verification: {
       status: string;
@@ -306,36 +319,85 @@ export default function AdminUserDetailPage({
 
       {tab === "Deposits" && (
         <SimpleTable
-          columns={["Asset", "Amount", "Status", "Date", "Actions"]}
-          rows={deposits.map((t) => [
-            t.asset,
-            formatAmount(t.amount),
-            t.status,
-            formatDate(t.createdAt),
-            t.status === "PENDING" ? (
-              <TransactionDecisionButtons key={t.id} transactionId={t.id} userId={id} />
-            ) : (
-              "—"
-            ),
-          ])}
+          columns={[
+            "Asset",
+            "Amount",
+            "Network",
+            "Deposit address",
+            "Payment confirmation",
+            "Status",
+            "Date",
+            "Actions",
+          ]}
+          rows={deposits.map((t) => {
+            const network = t.network && isUsdtNetwork(t.network) ? t.network : null;
+            return [
+              t.asset,
+              formatAmount(t.amount),
+              network ? `${network} — ${USDT_NETWORKS[network].description}` : "—",
+              network ? USDT_NETWORKS[network].address : "—",
+              t.proofFileName ? (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() =>
+                    setPreviewProof({
+                      id: t.id,
+                      fileName: t.proofFileName!,
+                      mimeType: t.proofMimeType,
+                    })
+                  }
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Open file
+                </button>
+              ) : (
+                "—"
+              ),
+              t.status,
+              formatDate(t.createdAt),
+              t.status === "PENDING" ? (
+                <TransactionDecisionButtons key={t.id} transactionId={t.id} userId={id} />
+              ) : (
+                "—"
+              ),
+            ];
+          })}
           empty="No deposits."
         />
       )}
 
       {tab === "Withdrawals" && (
         <SimpleTable
-          columns={["Asset", "Amount", "Status", "Date", "Actions"]}
-          rows={withdrawals.map((t) => [
-            t.asset,
-            formatAmount(t.amount),
-            t.status,
-            formatDate(t.createdAt),
-            t.status === "PENDING" ? (
-              <TransactionDecisionButtons key={t.id} transactionId={t.id} userId={id} />
-            ) : (
-              "—"
-            ),
-          ])}
+          columns={[
+            "Asset",
+            "Amount",
+            "Network",
+            "Wallet address",
+            "Status",
+            "Date",
+            "Actions",
+          ]}
+          rows={withdrawals.map((t) => {
+            const network = t.network && isUsdtNetwork(t.network) ? t.network : null;
+            return [
+              t.asset,
+              formatAmount(t.amount),
+              network ? `${network} — ${USDT_NETWORKS[network].description}` : "—",
+              t.destinationAddress ? (
+                <AddressCell key={t.id} address={t.destinationAddress} />
+              ) : (
+                "—"
+              ),
+              t.status,
+              formatDate(t.createdAt),
+              t.status === "PENDING" ? (
+                <TransactionDecisionButtons key={t.id} transactionId={t.id} userId={id} />
+              ) : (
+                "—"
+              ),
+            ];
+          })}
           empty="No withdrawals."
         />
       )}
@@ -397,6 +459,15 @@ export default function AdminUserDetailPage({
           onClose={() => setAdjustment(null)}
         />
       )}
+
+      {previewProof && (
+        <DocumentViewerModal
+          url={`/api/deposit/${previewProof.id}/proof`}
+          fileName={previewProof.fileName}
+          mimeType={previewProof.mimeType}
+          onClose={() => setPreviewProof(null)}
+        />
+      )}
     </div>
   );
 }
@@ -437,6 +508,27 @@ function TransactionDecisionButtons({
       >
         Reject
       </Button>
+    </div>
+  );
+}
+
+function AddressCell({ address }: { address: string }) {
+  async function handleCopy() {
+    await navigator.clipboard.writeText(address);
+    toast.success("Address copied");
+  }
+
+  return (
+    <div className="flex items-start gap-2">
+      <span className="font-tabular max-w-[220px] break-all text-xs">{address}</span>
+      <button
+        type="button"
+        onClick={handleCopy}
+        aria-label="Copy address"
+        className="shrink-0 rounded-md p-1 text-muted hover:bg-foreground/5 hover:text-foreground"
+      >
+        <Copy className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }

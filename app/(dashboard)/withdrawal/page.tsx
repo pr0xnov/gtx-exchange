@@ -47,6 +47,7 @@ export default async function WithdrawalPage() {
           title={t("withdrawal.infoTitle")}
           items={[
             t("withdrawal.infoProcessingTime"),
+            t("withdrawal.infoNetworkCorrect"),
             t("withdrawal.infoClosePositions"),
             t("withdrawal.infoNoFee"),
           ]}

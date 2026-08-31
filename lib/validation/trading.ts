@@ -34,15 +34,34 @@ export const createSpotOrderSchema = z
   });
 
 // Only Tether (USDT) is offered for now — see components/dashboard/
-// payment-method-selector.tsx.
+// payment-method-selector.tsx. `network` picks which of the three fixed
+// deposit addresses (see lib/deposit/usdt-networks.ts) the user is
+// sending to — required so app/api/deposit/route.ts can record it for
+// Admin's own Deposits-tab display. `amount` is `z.coerce.number()`
+// because this now arrives as multipart form data (a proof screenshot
+// travels alongside it — see app/api/deposit/route.ts), where every
+// field is a string; the proof file itself is validated separately in
+// the route (size/MIME checks don't fit zod's string validators
+// cleanly, same reasoning as verificationSchema below).
 export const depositSchema = z.object({
-  amount: z.number().positive("Amount must be greater than 0").max(10_000_000),
+  amount: z.coerce.number().positive("Amount must be greater than 0").max(10_000_000),
   method: z.enum(["TETHER_USDT"]),
+  network: z.enum(["BSC", "TRX", "ETH"]),
 });
 
+// `network` mirrors depositSchema's — which of the three fixed networks
+// (lib/deposit/usdt-networks.ts) the user will withdraw to.
+// `destinationAddress` is the user's own wallet on that network — unlike
+// Deposit there's no fixed address to derive it from, so it's collected
+// and persisted per-request. Deliberately minimal validation (required,
+// trimmed, bounded length) rather than a per-network format/checksum
+// check — no external blockchain API is wired up anywhere in this
+// project to actually verify an address belongs to its network.
 export const withdrawSchema = z.object({
   amount: z.number().min(50, "Minimum withdrawal amount is 50 USD"),
   method: z.enum(["TETHER_USDT"]),
+  network: z.enum(["BSC", "TRX", "ETH"]),
+  destinationAddress: z.string().trim().min(1, "Wallet address is required").max(128),
 });
 
 // Personal info fields collected on submission (multipart form — see

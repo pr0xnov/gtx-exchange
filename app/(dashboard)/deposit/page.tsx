@@ -19,6 +19,7 @@ export default async function DepositPage() {
           items={[
             t("deposit.infoMinAmount"),
             t("deposit.infoCorrectDetails"),
+            t("deposit.infoNetworkCorrect"),
             t("deposit.infoNoFee"),
           ]}
         />

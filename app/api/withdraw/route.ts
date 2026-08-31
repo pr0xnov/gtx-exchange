@@ -55,6 +55,8 @@ export async function POST(req: NextRequest) {
             userId: user.id,
             type: "WITHDRAWAL",
             method: METHOD_LABELS[input.method],
+            network: input.network,
+            destinationAddress: input.destinationAddress,
             amount: input.amount,
             asset: QUOTE_CURRENCY,
             status: "PENDING",

@@ -65,15 +65,47 @@ export async function GET(
       // unbounded, status-only query — see batchUnreadRequestCounts)
       // stayed correct, but the row itself had scrolled out of this
       // table entirely.
+      // Explicit select on both, never a blanket findMany: `proofData` is
+      // the raw deposit-proof screenshot bytes — like
+      // VerificationDocument.fileData, it must only ever leave the server
+      // through its own protected GET (app/api/deposit/[id]/proof), never
+      // bundled into this general list response. `proofFileName`/
+      // `proofMimeType` are enough for the page to know a proof exists
+      // and how to open it.
       prisma.transaction.findMany({
         where: { userId: id, type: "DEPOSIT" },
         orderBy: { createdAt: "desc" },
         take: 50,
+        select: {
+          id: true,
+          type: true,
+          asset: true,
+          amount: true,
+          method: true,
+          network: true,
+          direction: true,
+          status: true,
+          createdAt: true,
+          proofFileName: true,
+          proofMimeType: true,
+        },
       }),
       prisma.transaction.findMany({
         where: { userId: id, type: "WITHDRAWAL" },
         orderBy: { createdAt: "desc" },
         take: 50,
+        select: {
+          id: true,
+          type: true,
+          asset: true,
+          amount: true,
+          method: true,
+          network: true,
+          destinationAddress: true,
+          direction: true,
+          status: true,
+          createdAt: true,
+        },
       }),
       prisma.auditLog.findMany({
         where: { targetUserId: id },

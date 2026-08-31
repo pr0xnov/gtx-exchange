@@ -18,7 +18,16 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
-        include: { user: { select: { firstName: true, lastName: true, email: true } } },
+        select: {
+          id: true,
+          amount: true,
+          asset: true,
+          method: true,
+          network: true,
+          status: true,
+          createdAt: true,
+          user: { select: { firstName: true, lastName: true, email: true } },
+        },
       }),
     ]);
 

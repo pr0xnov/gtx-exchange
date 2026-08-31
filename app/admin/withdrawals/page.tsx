@@ -4,15 +4,22 @@ import { useState } from "react";
 import { useAdminList } from "@/hooks/use-admin-api";
 import { Skeleton } from "@/components/shared/skeleton";
 import { formatPrice, formatDate } from "@/lib/utils";
+import { USDT_NETWORKS, isUsdtNetwork } from "@/lib/deposit/usdt-networks";
 
 interface WithdrawalRow {
   id: string;
   amount: string;
   asset: string;
   method: string | null;
+  network: string | null;
   status: string;
   createdAt: string;
   user: { firstName: string; lastName: string; email: string };
+}
+
+function networkLabel(network: string | null): string {
+  if (!network || !isUsdtNetwork(network)) return "—";
+  return `${network} — ${USDT_NETWORKS[network].description}`;
 }
 
 export default function AdminWithdrawalsPage() {
@@ -35,6 +42,7 @@ export default function AdminWithdrawalsPage() {
             <tr className="border-b border-border text-left text-xs text-muted">
               <th className="px-4 py-3 font-medium">User</th>
               <th className="px-4 py-3 font-medium">Method</th>
+              <th className="px-4 py-3 font-medium">Network</th>
               <th className="px-4 py-3 text-right font-medium">Amount</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Date</th>
@@ -44,14 +52,14 @@ export default function AdminWithdrawalsPage() {
             {isLoading &&
               Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i}>
-                  <td className="px-4 py-3.5" colSpan={5}>
+                  <td className="px-4 py-3.5" colSpan={6}>
                     <Skeleton className="h-5 w-full" />
                   </td>
                 </tr>
               ))}
             {!isLoading && result?.withdrawals.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted">
+                <td colSpan={6} className="px-4 py-8 text-center text-muted">
                   No withdrawals yet.
                 </td>
               </tr>
@@ -64,6 +72,7 @@ export default function AdminWithdrawalsPage() {
                     <div className="text-xs text-muted">{w.user.email}</div>
                   </td>
                   <td className="px-4 py-3.5 text-muted">{w.method ?? "—"}</td>
+                  <td className="px-4 py-3.5 text-muted">{networkLabel(w.network)}</td>
                   <td className="font-tabular px-4 py-3.5 text-right text-danger">
                     -{formatPrice(Number(w.amount))} {w.asset}
                   </td>

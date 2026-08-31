@@ -100,7 +100,12 @@ describe("useWithdraw — invalidates the balance queries the UI actually reads"
     expect(accountSummaryCallsBefore).toBeGreaterThan(0);
 
     await act(async () => {
-      await latestWithdraw.mutateAsync({ amount: 50, method: "TETHER_USDT" });
+      await latestWithdraw.mutateAsync({
+        amount: 50,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      });
     });
 
     const spotWalletCallsAfter = fetchMock.mock.calls.filter(

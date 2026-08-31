@@ -114,7 +114,12 @@ describe("Withdrawal requires verification", () => {
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 100,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     expect(res.status).toBe(201);
 
@@ -136,7 +141,12 @@ describe("Withdrawal requires verification", () => {
     vi.mocked(requireUser).mockResolvedValue(user);
 
     const res = await withdraw(
-      jsonRequest("http://test/api/withdraw", { amount: 100, method: "TETHER_USDT" })
+      jsonRequest("http://test/api/withdraw", {
+        amount: 100,
+        method: "TETHER_USDT",
+        network: "BSC",
+        destinationAddress: "0xe8c7c0815b3641cf74e78e2da933072aae348a58",
+      })
     );
     expect(res.status).toBe(201);
   });

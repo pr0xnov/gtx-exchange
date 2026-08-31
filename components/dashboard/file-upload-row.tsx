@@ -8,9 +8,17 @@ import { useLocale } from "@/lib/i18n/locale-context";
 export function FileUploadRow({
   label,
   onFileSelected,
+  accept = "image/*,.pdf",
+  buttonLabel,
 }: {
   label: string;
   onFileSelected: (file: File) => void;
+  /** Defaults to Verification's own image-or-PDF allowance. Deposit's
+   *  proof upload passes a narrower, images-only value. */
+  accept?: string;
+  /** Defaults to Verification's own button text so its two existing
+   *  call sites (identity/proof-of-address) are unaffected. */
+  buttonLabel?: string;
 }) {
   const { t } = useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +45,7 @@ export function FileUploadRow({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,.pdf"
+        accept={accept}
         className="hidden"
         onChange={handleChange}
       />
@@ -48,7 +56,7 @@ export function FileUploadRow({
         onClick={() => inputRef.current?.click()}
       >
         <Upload className="mr-1.5 h-3.5 w-3.5" />
-        {t("verification.chooseFile")}
+        {buttonLabel ?? t("verification.chooseFile")}
       </Button>
     </div>
   );

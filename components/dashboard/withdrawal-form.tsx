@@ -7,17 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PaymentMethodSelector } from "@/components/dashboard/payment-method-selector";
+import { NetworkSelector } from "@/components/dashboard/network-selector";
 import { useWithdraw, useSpotWallet } from "@/hooks/use-api";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { formatCurrency } from "@/lib/utils";
+import type { UsdtNetwork } from "@/lib/deposit/usdt-networks";
 
 const QUOTE_CURRENCY = "USDT";
 
 export function WithdrawalForm() {
   const { t } = useLocale();
   const [method, setMethod] = useState("TETHER_USDT");
-  const [amount, setAmount] = useState("500");
+  const [network, setNetwork] = useState<UsdtNetwork | "">("");
+  const [address, setAddress] = useState("");
+  const [amount, setAmount] = useState("");
   const withdraw = useWithdraw();
+
+  // Switching networks clears any address already typed — it would have
+  // been for the previous network's chain, and silently reusing it could
+  // send funds down the wrong rail.
+  function handleNetworkChange(next: UsdtNetwork | "") {
+    setNetwork(next);
+    setAddress("");
+  }
   // The actual withdrawable amount — app/api/withdraw/route.ts checks and
   // debits SpotWallet.balance alone, never `locked` (funds reserved by
   // this user's own open Spot limit orders, see spot-order-panel.tsx's
@@ -35,6 +47,14 @@ export function WithdrawalForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!network) {
+      toast.error(t("withdrawal.selectNetworkError"));
+      return;
+    }
+    if (!address.trim()) {
+      toast.error(t("withdrawal.addressRequiredError"));
+      return;
+    }
     if (numericAmount < 50) {
       toast.error(t("withdrawal.minAmountError"));
       return;
@@ -44,11 +64,17 @@ export function WithdrawalForm() {
       return;
     }
     try {
-      await withdraw.mutateAsync({ amount: numericAmount, method });
+      await withdraw.mutateAsync({
+        amount: numericAmount,
+        method,
+        network,
+        destinationAddress: address.trim(),
+      });
       toast.success(
         `${t("withdrawal.requestPrefix")} ${numericAmount.toFixed(2)} USDT ${t("withdrawal.requestSuffix")}`
       );
-      setAmount("500");
+      setAmount("");
+      setAddress("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("withdrawal.failedFallback"));
     }
@@ -60,6 +86,25 @@ export function WithdrawalForm() {
         <Label>{t("withdrawal.selectPaymentMethod")}</Label>
         <div className="mt-2">
           <PaymentMethodSelector value={method} onChange={setMethod} />
+        </div>
+      </div>
+
+      <div>
+        <Label>{t("deposit.selectNetwork")}</Label>
+        <div className="mt-2">
+          <NetworkSelector value={network} onChange={handleNetworkChange} />
+        </div>
+      </div>
+
+      <div>
+        <Label>{t("withdrawal.addressLabel")}</Label>
+        <div className="mt-2">
+          <Input
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder={t("withdrawal.addressPlaceholder")}
+          />
         </div>
       </div>
 

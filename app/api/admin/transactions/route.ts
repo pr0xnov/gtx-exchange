@@ -26,12 +26,30 @@ export async function GET(req: NextRequest) {
 
     const [total, transactions] = await Promise.all([
       prisma.transaction.count({ where }),
+      // Explicit select, never a blanket findMany: a DEPOSIT row's
+      // `proofData` is the raw payment-confirmation screenshot bytes (see
+      // app/api/deposit/route.ts) — must never be bundled into this list
+      // response, only ever served through its own protected GET
+      // (app/api/deposit/[id]/proof).
       prisma.transaction.findMany({
         where,
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
-        include: { user: { select: { firstName: true, lastName: true, email: true } } },
+        select: {
+          id: true,
+          type: true,
+          amount: true,
+          asset: true,
+          method: true,
+          network: true,
+          direction: true,
+          status: true,
+          createdAt: true,
+          proofFileName: true,
+          proofMimeType: true,
+          user: { select: { firstName: true, lastName: true, email: true } },
+        },
       }),
     ]);
 

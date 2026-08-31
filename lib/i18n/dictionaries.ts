@@ -382,31 +382,50 @@ const en = {
   "trading.orders.historyTab": "Order history",
 
   // Marketing — Home
-  "marketing.home.hero.titleLine1": "Earn on the best",
-  "marketing.home.hero.titleHighlight": "financial assets",
+  "marketing.home.hero.badge": "+20% on your first deposit",
+  "marketing.home.hero.titleLine1": "Your first deposit —",
+  "marketing.home.hero.titlePrefix": "",
+  "marketing.home.hero.titleHighlight": "20% bigger",
   "marketing.home.hero.subtitle":
-    "Reliable, simple, innovative. Trade the most popular assets in Europe: S&P/ASX 200, Bitcoin, EUR/USD, with our CFD-style paper trading service.",
-  "marketing.home.hero.startTrading": "Start trading",
+    "Fund your account for the first time and get a bonus. Trade crypto and other assets on a reliable, easy-to-use platform.",
+  "marketing.home.hero.primaryCta": "Get +20% bonus",
   "marketing.home.hero.viewMarkets": "View markets",
-  "marketing.home.features.title": "Why traders choose GTX",
-  "marketing.home.features.subtitle":
-    "Everything you need to learn the mechanics of trading, with none of the downside.",
-  "marketing.home.features.zeroRisk.title": "Zero risk, real conditions",
-  "marketing.home.features.zeroRisk.description":
-    "Trade with live market prices and a realistic order book — without ever risking real capital.",
-  "marketing.home.features.charting.title": "Professional charting",
-  "marketing.home.features.charting.description":
-    "Candlestick charts, multiple timeframes, and volume — the same tools used on institutional desks.",
-  "marketing.home.features.balance.title": "$10,000 virtual balance",
-  "marketing.home.features.balance.description":
-    "Every new account starts with $10,000 in virtual USDT so you can practice sizing and risk management.",
-  "marketing.home.features.riskControls.title": "Built-in risk controls",
-  "marketing.home.features.riskControls.description":
-    "Set Take Profit and Stop Loss on every position to learn disciplined trade management from day one.",
-  "marketing.home.cta.title": "Ready to start trading?",
-  "marketing.home.cta.subtitle":
-    "Create a free account and get $10,000 in virtual funds instantly. No card, no risk.",
-  "marketing.home.cta.button": "Create free account",
+
+  "marketing.home.phone.balanceLabel": "Your balance",
+  "marketing.home.phone.depositLabel": "First deposit",
+  "marketing.home.phone.bonusLabel": "Bonus +20%",
+  "marketing.home.phone.totalLabel": "Total",
+
+  "marketing.home.stats.bonus.value": "+20%",
+  "marketing.home.stats.bonus.label": "Bonus on your first deposit",
+  "marketing.home.stats.assets.value": "100+",
+  "marketing.home.stats.assets.label": "Assets available",
+  "marketing.home.stats.uptime.value": "24/7",
+  "marketing.home.stats.uptime.label": "Platform access, around the clock",
+  "marketing.home.stats.referral.value": "up to 100 USDT",
+  "marketing.home.stats.referral.label": "Per invited friend",
+  "marketing.home.stats.referral.sublabel": "(referral program)",
+
+  "marketing.home.referral.titleLine1": "Invite friends —",
+  "marketing.home.referral.titleLine2Prefix": "get ",
+  "marketing.home.referral.titleHighlight": "up to 100 USDT",
+  "marketing.home.referral.description":
+    "Your friend gets +20% on their first deposit, and you get 10% of their deposit amount (up to 100 USDT).",
+  "marketing.home.referral.depositLabel": "deposits",
+  "marketing.home.referral.receiveLabel": "you get",
+  "marketing.home.referral.deposit1Value": "250 USDT",
+  "marketing.home.referral.receive1Value": "25 USDT",
+  "marketing.home.referral.deposit2Value": "1,000 USDT",
+  "marketing.home.referral.receive2Value": "100 USDT",
+
+  "marketing.home.benefits.security.title": "Fund security",
+  "marketing.home.benefits.security.description": "Cold wallets and 2FA protection",
+  "marketing.home.benefits.instant.title": "Instant operations",
+  "marketing.home.benefits.instant.description": "Fast deposits and withdrawals",
+  "marketing.home.benefits.fees.title": "Low fees",
+  "marketing.home.benefits.fees.description": "Favorable conditions for traders",
+  "marketing.home.benefits.support.title": "24/7 support",
+  "marketing.home.benefits.support.description": "We're always here to help",
 
   // Marketing — About
   "marketing.about.hero.titlePrefix": "About",
@@ -504,14 +523,6 @@ const en = {
   "marketing.footer.copyright":
     "GTX. Virtual trading simulator for educational purposes only.",
   "marketing.footer.chartsPoweredBy": "Charts powered by",
-  "marketing.phone.portfolioValue": "Portfolio value",
-  "marketing.popularPairs.title": "Popular trading pairs",
-  "marketing.popularPairs.viewAll": "View all markets",
-  "marketing.popularPairs.tradeButton": "Trade",
-  "marketing.stats.tradingLabel": "Trading",
-  "marketing.stats.assetsLabel": "Trading assets",
-  "marketing.stats.minDepositLabel": "Minimum deposit",
-  "marketing.stats.leverageLabel": "Leverage",
 
   // Auth
   "auth.emailLabel": "E-mail",
@@ -986,31 +997,50 @@ const ru: Dictionary = {
   "trading.orders.openTab": "Открытые ордера",
   "trading.orders.historyTab": "История ордеров",
 
-  "marketing.home.hero.titleLine1": "Зарабатывайте на лучших",
-  "marketing.home.hero.titleHighlight": "финансовых активах",
+  "marketing.home.hero.badge": "+20% на первый депозит",
+  "marketing.home.hero.titleLine1": "Ваш первый депозит —",
+  "marketing.home.hero.titlePrefix": "на ",
+  "marketing.home.hero.titleHighlight": "20% больше",
   "marketing.home.hero.subtitle":
-    "Надёжно, просто, инновационно. Торгуйте самыми популярными активами Европы: S&P/ASX 200, Bitcoin, EUR/USD — в нашем CFD-подобном сервисе учебной торговли.",
-  "marketing.home.hero.startTrading": "Начать торговать",
+    "Пополните счёт впервые и получите бонус. Торгуйте криптовалютой на надёжной и удобной платформе.",
+  "marketing.home.hero.primaryCta": "Получить бонус +20%",
   "marketing.home.hero.viewMarkets": "Смотреть рынки",
-  "marketing.home.features.title": "Почему трейдеры выбирают GTX",
-  "marketing.home.features.subtitle":
-    "Всё необходимое, чтобы освоить механику торговли — без каких-либо рисков.",
-  "marketing.home.features.zeroRisk.title": "Никаких рисков, реальные условия",
-  "marketing.home.features.zeroRisk.description":
-    "Торгуйте по живым рыночным ценам с реалистичным стаканом заявок — не рискуя реальным капиталом.",
-  "marketing.home.features.charting.title": "Профессиональные графики",
-  "marketing.home.features.charting.description":
-    "Свечные графики, множество таймфреймов и объёмы — те же инструменты, что используют институциональные трейдеры.",
-  "marketing.home.features.balance.title": "$10 000 виртуального баланса",
-  "marketing.home.features.balance.description":
-    "Каждый новый аккаунт получает $10 000 в виртуальных USDT для отработки размера позиций и управления рисками.",
-  "marketing.home.features.riskControls.title": "Встроенные инструменты риск-менеджмента",
-  "marketing.home.features.riskControls.description":
-    "Устанавливайте Take Profit и Stop Loss на каждую позицию, чтобы с первого дня учиться дисциплинированному управлению сделками.",
-  "marketing.home.cta.title": "Готовы начать торговать?",
-  "marketing.home.cta.subtitle":
-    "Создайте бесплатный аккаунт и мгновенно получите $10 000 виртуальных средств. Без карты, без риска.",
-  "marketing.home.cta.button": "Создать бесплатный аккаунт",
+
+  "marketing.home.phone.balanceLabel": "Ваш баланс",
+  "marketing.home.phone.depositLabel": "Первый депозит",
+  "marketing.home.phone.bonusLabel": "Бонус +20%",
+  "marketing.home.phone.totalLabel": "Итого",
+
+  "marketing.home.stats.bonus.value": "+20%",
+  "marketing.home.stats.bonus.label": "Бонус на первый депозит",
+  "marketing.home.stats.assets.value": "100+",
+  "marketing.home.stats.assets.label": "Доступных активов",
+  "marketing.home.stats.uptime.value": "24/7",
+  "marketing.home.stats.uptime.label": "Доступ к платформе круглосуточно",
+  "marketing.home.stats.referral.value": "до 100 USDT",
+  "marketing.home.stats.referral.label": "За приглашённого друга",
+  "marketing.home.stats.referral.sublabel": "(реферальная программа)",
+
+  "marketing.home.referral.titleLine1": "Приглашайте друзей —",
+  "marketing.home.referral.titleLine2Prefix": "получите ",
+  "marketing.home.referral.titleHighlight": "до 100 USDT",
+  "marketing.home.referral.description":
+    "Ваш друг получает +20% к первому депозиту, а вы — 10% от суммы его депозита (максимум 100 USDT).",
+  "marketing.home.referral.depositLabel": "пополняет",
+  "marketing.home.referral.receiveLabel": "получает",
+  "marketing.home.referral.deposit1Value": "250 USDT",
+  "marketing.home.referral.receive1Value": "25 USDT",
+  "marketing.home.referral.deposit2Value": "1 000 USDT",
+  "marketing.home.referral.receive2Value": "100 USDT",
+
+  "marketing.home.benefits.security.title": "Безопасность средств",
+  "marketing.home.benefits.security.description": "Холодные кошельки и 2FA защита",
+  "marketing.home.benefits.instant.title": "Мгновенные операции",
+  "marketing.home.benefits.instant.description": "Быстрый депозит и вывод",
+  "marketing.home.benefits.fees.title": "Без комиссии",
+  "marketing.home.benefits.fees.description": "Выгодные условия для трейдеров",
+  "marketing.home.benefits.support.title": "Поддержка 24/7",
+  "marketing.home.benefits.support.description": "Мы всегда на связи",
 
   "marketing.about.hero.titlePrefix": "О платформе",
   "marketing.about.hero.subtitle":
@@ -1104,14 +1134,6 @@ const ru: Dictionary = {
   "marketing.footer.copyright":
     "GTX. Симулятор виртуальной торговли исключительно в образовательных целях.",
   "marketing.footer.chartsPoweredBy": "Графики предоставлены",
-  "marketing.phone.portfolioValue": "Стоимость портфеля",
-  "marketing.popularPairs.title": "Популярные торговые пары",
-  "marketing.popularPairs.viewAll": "Все рынки",
-  "marketing.popularPairs.tradeButton": "Торговать",
-  "marketing.stats.tradingLabel": "Торговля",
-  "marketing.stats.assetsLabel": "Торговых активов",
-  "marketing.stats.minDepositLabel": "Минимальный депозит",
-  "marketing.stats.leverageLabel": "Плечо",
 
   "auth.emailLabel": "E-mail",
   "auth.passwordLabel": "Пароль",
@@ -1580,31 +1602,50 @@ const uk: Dictionary = {
   "trading.orders.openTab": "Відкриті ордери",
   "trading.orders.historyTab": "Історія ордерів",
 
-  "marketing.home.hero.titleLine1": "Заробляйте на найкращих",
-  "marketing.home.hero.titleHighlight": "фінансових активах",
+  "marketing.home.hero.badge": "+20% на перший депозит",
+  "marketing.home.hero.titleLine1": "Ваш перший депозит —",
+  "marketing.home.hero.titlePrefix": "на ",
+  "marketing.home.hero.titleHighlight": "20% більше",
   "marketing.home.hero.subtitle":
-    "Надійно, просто, інноваційно. Торгуйте найпопулярнішими активами Європи: S&P/ASX 200, Bitcoin, EUR/USD — у нашому CFD-подібному сервісі навчальної торгівлі.",
-  "marketing.home.hero.startTrading": "Почати торгувати",
+    "Поповніть рахунок вперше та отримайте бонус. Торгуйте криптовалютою на надійній та зручній платформі.",
+  "marketing.home.hero.primaryCta": "Отримати бонус +20%",
   "marketing.home.hero.viewMarkets": "Переглянути ринки",
-  "marketing.home.features.title": "Чому трейдери обирають GTX",
-  "marketing.home.features.subtitle":
-    "Усе необхідне, щоб опанувати механіку торгівлі — без жодних ризиків.",
-  "marketing.home.features.zeroRisk.title": "Жодних ризиків, реальні умови",
-  "marketing.home.features.zeroRisk.description":
-    "Торгуйте за живими ринковими цінами з реалістичним стаканом заявок — не ризикуючи реальним капіталом.",
-  "marketing.home.features.charting.title": "Професійні графіки",
-  "marketing.home.features.charting.description":
-    "Свічкові графіки, безліч таймфреймів та обсяги — ті самі інструменти, що використовують інституційні трейдери.",
-  "marketing.home.features.balance.title": "$10 000 віртуального балансу",
-  "marketing.home.features.balance.description":
-    "Кожен новий акаунт отримує $10 000 у віртуальних USDT для відпрацювання розміру позицій та управління ризиками.",
-  "marketing.home.features.riskControls.title": "Вбудовані інструменти ризик-менеджменту",
-  "marketing.home.features.riskControls.description":
-    "Встановлюйте Take Profit і Stop Loss на кожну позицію, щоб із першого дня вчитися дисциплінованого управління угодами.",
-  "marketing.home.cta.title": "Готові почати торгувати?",
-  "marketing.home.cta.subtitle":
-    "Створіть безкоштовний акаунт і миттєво отримайте $10 000 віртуальних коштів. Без картки, без ризику.",
-  "marketing.home.cta.button": "Створити безкоштовний акаунт",
+
+  "marketing.home.phone.balanceLabel": "Ваш баланс",
+  "marketing.home.phone.depositLabel": "Перший депозит",
+  "marketing.home.phone.bonusLabel": "Бонус +20%",
+  "marketing.home.phone.totalLabel": "Разом",
+
+  "marketing.home.stats.bonus.value": "+20%",
+  "marketing.home.stats.bonus.label": "Бонус до першого депозиту",
+  "marketing.home.stats.assets.value": "100+",
+  "marketing.home.stats.assets.label": "Доступних активів",
+  "marketing.home.stats.uptime.value": "24/7",
+  "marketing.home.stats.uptime.label": "Доступ до платформи цілодобово",
+  "marketing.home.stats.referral.value": "до 100 USDT",
+  "marketing.home.stats.referral.label": "За запрошеного друга",
+  "marketing.home.stats.referral.sublabel": "(реферальна програма)",
+
+  "marketing.home.referral.titleLine1": "Запрошуйте друзів —",
+  "marketing.home.referral.titleLine2Prefix": "отримайте ",
+  "marketing.home.referral.titleHighlight": "до 100 USDT",
+  "marketing.home.referral.description":
+    "Ваш друг отримує +20% до першого депозиту, а ви — 10% від суми його депозиту (максимум 100 USDT).",
+  "marketing.home.referral.depositLabel": "поповнює",
+  "marketing.home.referral.receiveLabel": "отримує",
+  "marketing.home.referral.deposit1Value": "250 USDT",
+  "marketing.home.referral.receive1Value": "25 USDT",
+  "marketing.home.referral.deposit2Value": "1 000 USDT",
+  "marketing.home.referral.receive2Value": "100 USDT",
+
+  "marketing.home.benefits.security.title": "Безпека коштів",
+  "marketing.home.benefits.security.description": "Холодні гаманці та 2FA захист",
+  "marketing.home.benefits.instant.title": "Миттєві операції",
+  "marketing.home.benefits.instant.description": "Швидкий депозит та вивід",
+  "marketing.home.benefits.fees.title": "Без комісії",
+  "marketing.home.benefits.fees.description": "Вигідні умови для трейдерів",
+  "marketing.home.benefits.support.title": "Підтримка 24/7",
+  "marketing.home.benefits.support.description": "Ми завжди на зв'язку",
 
   "marketing.about.hero.titlePrefix": "Про платформу",
   "marketing.about.hero.subtitle":
@@ -1697,14 +1738,6 @@ const uk: Dictionary = {
   "marketing.footer.copyright":
     "GTX. Симулятор віртуальної торгівлі виключно з освітньою метою.",
   "marketing.footer.chartsPoweredBy": "Графіки надано",
-  "marketing.phone.portfolioValue": "Вартість портфеля",
-  "marketing.popularPairs.title": "Популярні торгові пари",
-  "marketing.popularPairs.viewAll": "Усі ринки",
-  "marketing.popularPairs.tradeButton": "Торгувати",
-  "marketing.stats.tradingLabel": "Торгівля",
-  "marketing.stats.assetsLabel": "Торгових активів",
-  "marketing.stats.minDepositLabel": "Мінімальний депозит",
-  "marketing.stats.leverageLabel": "Плече",
 
   "auth.emailLabel": "E-mail",
   "auth.passwordLabel": "Пароль",

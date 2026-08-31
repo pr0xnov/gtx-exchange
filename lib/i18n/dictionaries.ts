@@ -428,28 +428,88 @@ const en = {
   "marketing.home.benefits.support.description": "We're always here to help",
 
   // Marketing — About
-  "marketing.about.hero.titlePrefix": "About",
+  "marketing.about.hero.badge": "GTX • Crypto, without the clutter",
+  "marketing.about.hero.titleLine1": "We're building a space",
+  "marketing.about.hero.titleLine2": "where crypto becomes",
+  "marketing.about.hero.titleHighlight": "simpler.",
   "marketing.about.hero.subtitle":
-    "GTX is a paper-trading platform that lets anyone practice crypto, forex, and CFD-style trading against real market prices — without risking a single dollar.",
-  "marketing.about.why.title": "Why we built it",
-  "marketing.about.why.description":
-    "Most people learn to trade the expensive way: with real money, on their first attempt. GTX gives traders a realistic simulator to build intuition for order types, leverage, and risk management before a single dollar is ever at stake.",
-  "marketing.about.values.zeroRisk.title": "Zero risk",
-  "marketing.about.values.zeroRisk.description":
-    "Every account trades with virtual funds only. There is no path from GTX to a real wallet or bank account — the platform exists purely to practice on.",
-  "marketing.about.values.realConditions.title": "Real conditions",
-  "marketing.about.values.realConditions.description":
-    "Prices, order books, and P&L are computed against live Binance market data, so the mechanics you learn translate directly to real trading.",
-  "marketing.about.values.builtForLearning.title": "Built for learning",
-  "marketing.about.values.builtForLearning.description":
-    "From leverage and liquidation to limit orders and portfolio tracking, GTX mirrors the tools of a real exchange so mistakes stay free.",
-  "marketing.about.values.alwaysImproving.title": "Always improving",
-  "marketing.about.values.alwaysImproving.description":
-    "We ship new markets, order types, and terminal features regularly based on what our community of practicing traders asks for.",
-  "marketing.about.stats.balance.label": "virtual balance on signup",
-  "marketing.about.stats.leverage.label": "maximum leverage supported",
-  "marketing.about.stats.live.value": "Live",
-  "marketing.about.stats.live.label": "prices streamed from Binance",
+    "GTX is a modern crypto trading platform built for people who value speed, a clear interface, and control over their digital assets.",
+  "marketing.about.hero.primaryCta": "Start trading",
+
+  "marketing.about.stats.assets.value": "100+",
+  "marketing.about.stats.assets.label": "Crypto assets",
+  "marketing.about.stats.uptime.value": "24/7",
+  "marketing.about.stats.uptime.label": "Platform access",
+  "marketing.about.stats.currency.value": "USDT",
+  "marketing.about.stats.currency.label": "Primary currency",
+  "marketing.about.stats.fee.value": "0%",
+  "marketing.about.stats.fee.label": "Deposit and withdrawal fee",
+
+  "marketing.about.mission.label": "OUR IDEA",
+  "marketing.about.mission.headingLine1": "Trading crypto",
+  "marketing.about.mission.headingLine2": "shouldn't be complicated.",
+  "marketing.about.mission.paragraph1":
+    "We build GTX around one simple idea: you should always understand what's happening with your assets, see the information you need, and have quick access to the tools that matter.",
+  "marketing.about.mission.paragraph2":
+    "From funding your account to buying, selling, and managing crypto — we aim to make every step clear and easy.",
+
+  "marketing.about.why.title": "Why GTX?",
+  "marketing.about.why.subtitle":
+    "Everything you need to work with digital assets — in one place.",
+  "marketing.about.why.speed.title": "Speed",
+  "marketing.about.why.speed.description":
+    "Quick access to markets, operations, and core tools without unnecessary steps.",
+  "marketing.about.why.simplicity.title": "Simplicity",
+  "marketing.about.why.simplicity.description":
+    "A clear interface that's easy to navigate regardless of your experience.",
+  "marketing.about.why.control.title": "Control",
+  "marketing.about.why.control.description":
+    "Balance, assets, orders, and operation history are always available in one account.",
+  "marketing.about.why.available.title": "24/7",
+  "marketing.about.why.available.description":
+    "The crypto market never stops — GTX is available around the clock.",
+
+  "marketing.about.platform.headingLine1": "Everything under control.",
+  "marketing.about.platform.headingLine2": "In one space.",
+  "marketing.about.platform.description":
+    "Track your balance, manage assets, and move to trading without juggling dozens of different tools.",
+  "marketing.about.platform.availableBalance": "Available balance",
+  "marketing.about.platform.inOrders": "In orders",
+  "marketing.about.platform.assetsValue": "Assets value",
+  "marketing.about.platform.pnl": "Profit / Loss",
+
+  "marketing.about.security.label": "SECURITY",
+  "marketing.about.security.headingLine1": "Your assets.",
+  "marketing.about.security.headingLine2": "Your control.",
+  "marketing.about.security.description":
+    "We pay close attention to protecting user accounts and operations.",
+  "marketing.about.security.accountProtection.title": "Account protection",
+  "marketing.about.security.accountProtection.description":
+    "Extra layers of protection for access to your profile.",
+  "marketing.about.security.twoFactor.title": "2FA",
+  "marketing.about.security.twoFactor.description":
+    "Two-factor authentication for extra account security.",
+  "marketing.about.security.activityControl.title": "Activity control",
+  "marketing.about.security.activityControl.description":
+    "Your action and operation history is available right in your account.",
+
+  "marketing.about.values.title": "What matters to us",
+  "marketing.about.values.simplicity.title": "Simplicity",
+  "marketing.about.values.simplicity.description":
+    "Complex tools should still stay clear to the user.",
+  "marketing.about.values.speed.title": "Speed",
+  "marketing.about.values.speed.description":
+    "Fewer unnecessary steps — more time for what actually matters.",
+  "marketing.about.values.transparency.title": "Transparency",
+  "marketing.about.values.transparency.description":
+    "Users should always clearly see their assets, balance, and operations.",
+
+  "marketing.about.finalCta.label": "READY TO START?",
+  "marketing.about.finalCta.headingLine1": "Your next step",
+  "marketing.about.finalCta.headingLine2": "starts with GTX.",
+  "marketing.about.finalCta.description":
+    "Create an account and get access to the crypto market in one convenient space.",
+  "marketing.about.finalCta.primaryGuest": "Create account",
 
   // Marketing — Contacts
   "marketing.contacts.hero.titlePrefix": "Get in",
@@ -1042,28 +1102,88 @@ const ru: Dictionary = {
   "marketing.home.benefits.support.title": "Поддержка 24/7",
   "marketing.home.benefits.support.description": "Мы всегда на связи",
 
-  "marketing.about.hero.titlePrefix": "О платформе",
+  "marketing.about.hero.badge": "GTX • Криптовалюта без лишнего",
+  "marketing.about.hero.titleLine1": "Мы создаём пространство,",
+  "marketing.about.hero.titleLine2": "где криптовалюта становится",
+  "marketing.about.hero.titleHighlight": "проще.",
   "marketing.about.hero.subtitle":
-    "GTX — это платформа для учебной торговли, которая позволяет каждому практиковаться в торговле крипто, форекс и CFD-подобными активами по реальным рыночным ценам — не рискуя ни одним долларом.",
-  "marketing.about.why.title": "Почему мы это создали",
-  "marketing.about.why.description":
-    "Большинство людей учатся торговать дорогим способом: с реальными деньгами с первой же попытки. GTX даёт трейдерам реалистичный симулятор, чтобы выработать интуицию в типах ордеров, кредитном плече и управлении рисками ещё до того, как на кону окажется хоть один доллар.",
-  "marketing.about.values.zeroRisk.title": "Нулевой риск",
-  "marketing.about.values.zeroRisk.description":
-    "Каждый аккаунт торгует исключительно виртуальными средствами. Из GTX нет пути к реальному кошельку или банковскому счёту — платформа существует исключительно для практики.",
-  "marketing.about.values.realConditions.title": "Реальные условия",
-  "marketing.about.values.realConditions.description":
-    "Цены, стаканы заявок и P&L рассчитываются по живым рыночным данным Binance, поэтому освоенная механика напрямую переносится в реальную торговлю.",
-  "marketing.about.values.builtForLearning.title": "Создано для обучения",
-  "marketing.about.values.builtForLearning.description":
-    "От кредитного плеча и ликвидации до лимитных ордеров и отслеживания портфеля — GTX повторяет инструменты настоящей биржи, чтобы ошибки оставались бесплатными.",
-  "marketing.about.values.alwaysImproving.title": "Постоянно развиваемся",
-  "marketing.about.values.alwaysImproving.description":
-    "Мы регулярно добавляем новые рынки, типы ордеров и функции терминала — по запросам нашего сообщества практикующих трейдеров.",
-  "marketing.about.stats.balance.label": "виртуальный баланс при регистрации",
-  "marketing.about.stats.leverage.label": "максимальное доступное плечо",
-  "marketing.about.stats.live.value": "Онлайн",
-  "marketing.about.stats.live.label": "цены транслируются с Binance",
+    "GTX — современная платформа для торговли криптовалютами, созданная для тех, кто ценит скорость, понятный интерфейс и контроль над своими цифровыми активами.",
+  "marketing.about.hero.primaryCta": "Начать торговать",
+
+  "marketing.about.stats.assets.value": "100+",
+  "marketing.about.stats.assets.label": "Криптоактивов",
+  "marketing.about.stats.uptime.value": "24/7",
+  "marketing.about.stats.uptime.label": "Доступ к платформе",
+  "marketing.about.stats.currency.value": "USDT",
+  "marketing.about.stats.currency.label": "Основная валюта",
+  "marketing.about.stats.fee.value": "0%",
+  "marketing.about.stats.fee.label": "Комиссия за пополнение и вывод",
+
+  "marketing.about.mission.label": "НАША ИДЕЯ",
+  "marketing.about.mission.headingLine1": "Торговля криптовалютой",
+  "marketing.about.mission.headingLine2": "не должна быть сложной.",
+  "marketing.about.mission.paragraph1":
+    "Мы создаём GTX вокруг простой идеи: пользователь должен понимать, что происходит с его активами, видеть необходимую информацию и иметь быстрый доступ к ключевым инструментам.",
+  "marketing.about.mission.paragraph2":
+    "От пополнения счёта до покупки, продажи и управления криптовалютой — мы стремимся сделать каждый шаг понятным и удобным.",
+
+  "marketing.about.why.title": "Почему GTX?",
+  "marketing.about.why.subtitle":
+    "Всё необходимое для работы с цифровыми активами — в одном месте.",
+  "marketing.about.why.speed.title": "Скорость",
+  "marketing.about.why.speed.description":
+    "Быстрый доступ к рынкам, операциям и основным инструментам без лишних шагов.",
+  "marketing.about.why.simplicity.title": "Простота",
+  "marketing.about.why.simplicity.description":
+    "Понятный интерфейс, в котором легко ориентироваться независимо от вашего опыта.",
+  "marketing.about.why.control.title": "Контроль",
+  "marketing.about.why.control.description":
+    "Баланс, активы, ордера и история операций всегда доступны в одном аккаунте.",
+  "marketing.about.why.available.title": "24/7",
+  "marketing.about.why.available.description":
+    "Криптовалютный рынок не останавливается — GTX доступен в любое время.",
+
+  "marketing.about.platform.headingLine1": "Всё под контролем.",
+  "marketing.about.platform.headingLine2": "В одном пространстве.",
+  "marketing.about.platform.description":
+    "Следите за балансом, управляйте активами и переходите к торговле без необходимости использовать десятки разных инструментов.",
+  "marketing.about.platform.availableBalance": "Доступный баланс",
+  "marketing.about.platform.inOrders": "В ордерах",
+  "marketing.about.platform.assetsValue": "Стоимость активов",
+  "marketing.about.platform.pnl": "Прибыль / Убыток",
+
+  "marketing.about.security.label": "БЕЗОПАСНОСТЬ",
+  "marketing.about.security.headingLine1": "Ваши активы.",
+  "marketing.about.security.headingLine2": "Ваш контроль.",
+  "marketing.about.security.description":
+    "Мы уделяем особое внимание защите аккаунтов и операций пользователей.",
+  "marketing.about.security.accountProtection.title": "Защита аккаунта",
+  "marketing.about.security.accountProtection.description":
+    "Дополнительные уровни защиты для доступа к вашему профилю.",
+  "marketing.about.security.twoFactor.title": "2FA",
+  "marketing.about.security.twoFactor.description":
+    "Двухфакторная аутентификация для дополнительной защиты аккаунта.",
+  "marketing.about.security.activityControl.title": "Контроль операций",
+  "marketing.about.security.activityControl.description":
+    "История действий и операций доступна прямо в вашем аккаунте.",
+
+  "marketing.about.values.title": "Что для нас важно",
+  "marketing.about.values.simplicity.title": "Простота",
+  "marketing.about.values.simplicity.description":
+    "Сложные инструменты должны оставаться понятными для пользователя.",
+  "marketing.about.values.speed.title": "Скорость",
+  "marketing.about.values.speed.description":
+    "Меньше лишних действий — больше времени на то, что действительно важно.",
+  "marketing.about.values.transparency.title": "Прозрачность",
+  "marketing.about.values.transparency.description":
+    "Пользователь должен чётко видеть свои активы, баланс и операции.",
+
+  "marketing.about.finalCta.label": "ГОТОВЫ НАЧАТЬ?",
+  "marketing.about.finalCta.headingLine1": "Ваш следующий шаг",
+  "marketing.about.finalCta.headingLine2": "начинается с GTX.",
+  "marketing.about.finalCta.description":
+    "Создайте аккаунт и получите доступ к криптовалютному рынку в одном удобном пространстве.",
+  "marketing.about.finalCta.primaryGuest": "Создать аккаунт",
 
   "marketing.contacts.hero.titlePrefix": "Свяжитесь",
   "marketing.contacts.hero.titleHighlight": "с нами",
@@ -1646,28 +1766,88 @@ const uk: Dictionary = {
   "marketing.home.benefits.support.title": "Підтримка 24/7",
   "marketing.home.benefits.support.description": "Ми завжди на зв'язку",
 
-  "marketing.about.hero.titlePrefix": "Про платформу",
+  "marketing.about.hero.badge": "GTX • Криптовалюта без зайвого",
+  "marketing.about.hero.titleLine1": "Ми створюємо простір,",
+  "marketing.about.hero.titleLine2": "де криптовалюта стає",
+  "marketing.about.hero.titleHighlight": "простішою.",
   "marketing.about.hero.subtitle":
-    "GTX — це платформа для навчальної торгівлі, яка дає змогу кожному практикуватися в торгівлі крипто, форекс і CFD-подібними активами за реальними ринковими цінами — не ризикуючи жодним доларом.",
-  "marketing.about.why.title": "Чому ми це створили",
-  "marketing.about.why.description":
-    "Більшість людей навчаються торгувати дорогим способом: з реальними грошима з першої ж спроби. GTX дає трейдерам реалістичний симулятор, щоб виробити інтуїцію щодо типів ордерів, кредитного плеча та управління ризиками ще до того, як на кону опиниться хоча б один долар.",
-  "marketing.about.values.zeroRisk.title": "Нульовий ризик",
-  "marketing.about.values.zeroRisk.description":
-    "Кожен акаунт торгує виключно віртуальними коштами. Із GTX немає шляху до реального гаманця чи банківського рахунку — платформа існує виключно для практики.",
-  "marketing.about.values.realConditions.title": "Реальні умови",
-  "marketing.about.values.realConditions.description":
-    "Ціни, стакани заявок і P&L розраховуються за живими ринковими даними Binance, тому засвоєна механіка напряму переноситься в реальну торгівлю.",
-  "marketing.about.values.builtForLearning.title": "Створено для навчання",
-  "marketing.about.values.builtForLearning.description":
-    "Від кредитного плеча й ліквідації до лімітних ордерів і відстеження портфеля — GTX повторює інструменти справжньої біржі, щоб помилки залишалися безкоштовними.",
-  "marketing.about.values.alwaysImproving.title": "Постійно розвиваємось",
-  "marketing.about.values.alwaysImproving.description":
-    "Ми регулярно додаємо нові ринки, типи ордерів і функції терміналу — за запитами нашої спільноти трейдерів-практиків.",
-  "marketing.about.stats.balance.label": "віртуальний баланс під час реєстрації",
-  "marketing.about.stats.leverage.label": "максимальне доступне плече",
-  "marketing.about.stats.live.value": "Онлайн",
-  "marketing.about.stats.live.label": "ціни транслюються з Binance",
+    "GTX — сучасна платформа для торгівлі криптовалютами, створена для тих, хто цінує швидкість, зрозумілий інтерфейс та контроль над своїми цифровими активами.",
+  "marketing.about.hero.primaryCta": "Почати торгувати",
+
+  "marketing.about.stats.assets.value": "100+",
+  "marketing.about.stats.assets.label": "Криптоактивів",
+  "marketing.about.stats.uptime.value": "24/7",
+  "marketing.about.stats.uptime.label": "Доступ до платформи",
+  "marketing.about.stats.currency.value": "USDT",
+  "marketing.about.stats.currency.label": "Основна валюта",
+  "marketing.about.stats.fee.value": "0%",
+  "marketing.about.stats.fee.label": "Комісія за поповнення та виведення",
+
+  "marketing.about.mission.label": "НАША ІДЕЯ",
+  "marketing.about.mission.headingLine1": "Торгівля криптовалютою",
+  "marketing.about.mission.headingLine2": "не повинна бути складною.",
+  "marketing.about.mission.paragraph1":
+    "Ми створюємо GTX навколо простої ідеї: користувач повинен розуміти, що відбувається з його активами, бачити необхідну інформацію та мати швидкий доступ до ключових інструментів.",
+  "marketing.about.mission.paragraph2":
+    "Від поповнення рахунку до купівлі, продажу та керування криптовалютою — ми прагнемо зробити кожен крок зрозумілим і зручним.",
+
+  "marketing.about.why.title": "Чому GTX?",
+  "marketing.about.why.subtitle":
+    "Усе необхідне для роботи з цифровими активами — в одному місці.",
+  "marketing.about.why.speed.title": "Швидкість",
+  "marketing.about.why.speed.description":
+    "Швидкий доступ до ринків, операцій та основних інструментів без зайвих кроків.",
+  "marketing.about.why.simplicity.title": "Простота",
+  "marketing.about.why.simplicity.description":
+    "Зрозумілий інтерфейс, у якому легко орієнтуватися незалежно від вашого досвіду.",
+  "marketing.about.why.control.title": "Контроль",
+  "marketing.about.why.control.description":
+    "Баланс, активи, ордери та історія операцій завжди доступні в одному акаунті.",
+  "marketing.about.why.available.title": "24/7",
+  "marketing.about.why.available.description":
+    "Криптовалютний ринок не зупиняється — GTX доступний у будь-який час.",
+
+  "marketing.about.platform.headingLine1": "Усе під контролем.",
+  "marketing.about.platform.headingLine2": "В одному просторі.",
+  "marketing.about.platform.description":
+    "Слідкуйте за балансом, керуйте активами та переходьте до торгівлі без необхідності використовувати десятки різних інструментів.",
+  "marketing.about.platform.availableBalance": "Доступний баланс",
+  "marketing.about.platform.inOrders": "В ордерах",
+  "marketing.about.platform.assetsValue": "Вартість активів",
+  "marketing.about.platform.pnl": "Прибуток / Збиток",
+
+  "marketing.about.security.label": "БЕЗПЕКА",
+  "marketing.about.security.headingLine1": "Ваші активи.",
+  "marketing.about.security.headingLine2": "Ваш контроль.",
+  "marketing.about.security.description":
+    "Ми приділяємо особливу увагу захисту акаунтів та операцій користувачів.",
+  "marketing.about.security.accountProtection.title": "Захист акаунта",
+  "marketing.about.security.accountProtection.description":
+    "Додаткові рівні захисту для доступу до вашого профілю.",
+  "marketing.about.security.twoFactor.title": "2FA",
+  "marketing.about.security.twoFactor.description":
+    "Двофакторна автентифікація для додаткового захисту акаунта.",
+  "marketing.about.security.activityControl.title": "Контроль операцій",
+  "marketing.about.security.activityControl.description":
+    "Історія дій та операцій доступна безпосередньо у вашому акаунті.",
+
+  "marketing.about.values.title": "Що для нас важливо",
+  "marketing.about.values.simplicity.title": "Простота",
+  "marketing.about.values.simplicity.description":
+    "Складні інструменти повинні залишатися зрозумілими для користувача.",
+  "marketing.about.values.speed.title": "Швидкість",
+  "marketing.about.values.speed.description":
+    "Менше зайвих дій — більше часу на те, що справді важливо.",
+  "marketing.about.values.transparency.title": "Прозорість",
+  "marketing.about.values.transparency.description":
+    "Користувач повинен чітко бачити свої активи, баланс та операції.",
+
+  "marketing.about.finalCta.label": "ГОТОВІ ПОЧАТИ?",
+  "marketing.about.finalCta.headingLine1": "Ваш наступний крок",
+  "marketing.about.finalCta.headingLine2": "починається з GTX.",
+  "marketing.about.finalCta.description":
+    "Створіть акаунт і отримайте доступ до криптовалютного ринку в одному зручному просторі.",
+  "marketing.about.finalCta.primaryGuest": "Створити акаунт",
 
   "marketing.contacts.hero.titlePrefix": "Зв'яжіться",
   "marketing.contacts.hero.titleHighlight": "з нами",

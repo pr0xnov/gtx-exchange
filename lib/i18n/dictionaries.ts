@@ -511,6 +511,127 @@ const en = {
     "Create an account and get access to the crypto market in one convenient space.",
   "marketing.about.finalCta.primaryGuest": "Create account",
 
+  // Privacy
+  "privacy.seo.title": "Privacy Center | GTX",
+  "privacy.seo.description":
+    "Learn how GTX handles personal data and what rights you have over your information.",
+
+  "privacy.hero.label": "PRIVACY CENTER",
+  "privacy.hero.headingLine1": "Privacy",
+  "privacy.hero.headingLine2": "at GTX",
+  "privacy.hero.subtitle":
+    "We built this page to clearly explain how GTX handles user data, the principles we apply, and the options you have over your own information.",
+  "privacy.hero.tagline": "Your data. Your control.",
+  "privacy.hero.lastUpdated": "Last updated: August 31, 2026",
+
+  "privacy.principles.title": "GTX privacy principles",
+  "privacy.principles.transparency.title": "Transparency",
+  "privacy.principles.transparency.description":
+    "We aim to clearly explain what data may be processed and what it's used for.",
+  "privacy.principles.minimization.title": "Data minimization",
+  "privacy.principles.minimization.description":
+    "We aim to use only the data that's necessary for the relevant platform features to work.",
+  "privacy.principles.accountability.title": "Accountability",
+  "privacy.principles.accountability.description":
+    "Access to information is limited to relevant roles and used only for defined purposes.",
+  "privacy.principles.userRights.title": "User rights",
+  "privacy.principles.userRights.description":
+    "You can reach out about accessing, correcting, or taking other actions on your data under applicable law.",
+  "privacy.principles.dataProtection.title": "Data protection",
+  "privacy.principles.dataProtection.description":
+    "We apply technical and organizational measures to protect accounts and information from unauthorized access.",
+
+  "privacy.usage.title": "How GTX uses your data",
+
+  "privacy.usage.personalData.title": "What is personal data?",
+  "privacy.usage.personalData.paragraph1":
+    "Personal data is information that can be directly or indirectly linked to a specific user.",
+  "privacy.usage.personalData.paragraph2":
+    "At GTX, this can include data you provide when creating an account, completing verification, using deposit and withdrawal features, and other information necessary for the relevant platform features to work.",
+  "privacy.usage.personalData.examplesIntro": "For example, this can include:",
+  "privacy.usage.personalData.example1": "Name and email address",
+  "privacy.usage.personalData.example2": "Data provided during identity verification",
+  "privacy.usage.personalData.example3":
+    "Information about deposit and withdrawal operations",
+  "privacy.usage.personalData.example4":
+    "Technical session and device information (e.g. IP address)",
+
+  "privacy.usage.howWeUse.title": "How does GTX use data?",
+  "privacy.usage.howWeUse.intro": "We use user data to:",
+  "privacy.usage.howWeUse.item1": "Create and maintain your account",
+  "privacy.usage.howWeUse.item2": "Authenticate you",
+  "privacy.usage.howWeUse.item3": "Verify your identity",
+  "privacy.usage.howWeUse.item4": "Process deposits",
+  "privacy.usage.howWeUse.item5": "Process withdrawals",
+  "privacy.usage.howWeUse.item6": "Perform trading functions",
+  "privacy.usage.howWeUse.item7": "Provide user support",
+  "privacy.usage.howWeUse.item8": "Protect the platform",
+  "privacy.usage.howWeUse.item9": "Prevent abuse",
+  "privacy.usage.howWeUse.item10": "Provide the technical operation of the service",
+
+  "privacy.usage.retention.title": "How long can data be kept?",
+  "privacy.usage.retention.description":
+    "Information may be kept for as long as necessary for the relevant feature to work, to maintain your account, to comply with legal requirements, to ensure security, or to resolve disputes.",
+
+  "privacy.usage.thirdParties.title": "Does GTX share data with third parties?",
+  "privacy.usage.thirdParties.description":
+    "In some cases, GTX may use third-party technical services to support specific platform features, for example, delivering account and security emails. Personal data is shared only when necessary for the relevant feature or where required by applicable rules.",
+
+  "privacy.usage.cookies.title": "How does GTX use cookies?",
+  "privacy.usage.cookies.intro": "Technically necessary cookies may be used to:",
+  "privacy.usage.cookies.item1": "Sign in to your account",
+  "privacy.usage.cookies.item2": "Maintain your session",
+  "privacy.usage.cookies.item3": "Keep platform features working securely",
+  "privacy.usage.cookies.item4": "Remember your language preference",
+
+  "privacy.rights.title": "Your rights over personal data",
+  "privacy.rights.intro":
+    "Depending on applicable law, you may have the following rights:",
+  "privacy.rights.access.question": "Right of access",
+  "privacy.rights.access.answer":
+    "You can reach out to ask what personal data GTX processes about you.",
+  "privacy.rights.rectification.question": "Right to rectification",
+  "privacy.rights.rectification.answer":
+    "You can ask us to correct inaccurate or incomplete information in your account.",
+  "privacy.rights.erasure.question": "Right to erasure",
+  "privacy.rights.erasure.answer":
+    "You can ask us to delete your personal data where this is possible under applicable law and other requirements.",
+  "privacy.rights.restriction.question": "Right to restrict processing",
+  "privacy.rights.restriction.answer":
+    "You can ask us to restrict further processing of your data in certain cases.",
+  "privacy.rights.objection.question": "Right to object",
+  "privacy.rights.objection.answer":
+    "You can object to certain types of processing of your personal data where applicable law provides for it.",
+  "privacy.rights.withdrawConsent.question": "Right to withdraw consent",
+  "privacy.rights.withdrawConsent.answer":
+    "Where processing is based on consent, you can withdraw that consent at any time.",
+  "privacy.rights.portability.question": "Right to data portability",
+  "privacy.rights.portability.answer":
+    "In certain cases, you can ask us to provide your data in a structured format.",
+
+  "privacy.faq.title": "Frequently asked questions",
+  "privacy.faq.q1.question": "How do I get information about my data?",
+  "privacy.faq.q1.answer":
+    "You can reach out to GTX support with a request about your personal data.",
+  "privacy.faq.q2.question": "How do I correct my account data?",
+  "privacy.faq.q2.answer":
+    "Most core details can be updated directly in your account. For anything else, contact support.",
+  "privacy.faq.q3.question": "How do I ask for my data to be deleted?",
+  "privacy.faq.q3.answer": "Contact GTX support with your request.",
+  "privacy.faq.q4.question": "How do I change data submitted during verification?",
+  "privacy.faq.q4.answer": "Contact GTX support to change your verification details.",
+  "privacy.faq.q5.question": "Where can I learn more about cookies?",
+  "privacy.faq.q5.answer":
+    'See the "How GTX uses cookies" section on this page for details.',
+  "privacy.faq.q6.question": "How do I ask a privacy-related question?",
+  "privacy.faq.q6.answer": "Contact GTX support with any privacy-related questions.",
+
+  "privacy.support.title": "Need help?",
+  "privacy.support.description":
+    "If you have questions about privacy or how your data is used, reach out to GTX support.",
+  "privacy.support.primaryCta": "Contact support",
+  "privacy.support.secondaryCta": "Go to account",
+
   // Marketing — Contacts
   "marketing.contacts.hero.titlePrefix": "Get in",
   "marketing.contacts.hero.titleHighlight": "touch",
@@ -1185,6 +1306,131 @@ const ru: Dictionary = {
     "Создайте аккаунт и получите доступ к криптовалютному рынку в одном удобном пространстве.",
   "marketing.about.finalCta.primaryGuest": "Создать аккаунт",
 
+  "privacy.seo.title": "Центр конфиденциальности | GTX",
+  "privacy.seo.description":
+    "Узнайте, как GTX работает с персональными данными и какие права есть у пользователя в отношении своей информации.",
+
+  "privacy.hero.label": "ЦЕНТР КОНФИДЕНЦИАЛЬНОСТИ",
+  "privacy.hero.headingLine1": "Конфиденциальность",
+  "privacy.hero.headingLine2": "в GTX",
+  "privacy.hero.subtitle":
+    "Мы создали эту страницу, чтобы просто объяснить, как GTX работает с данными пользователей, какие принципы мы применяем и какие возможности есть у пользователя в отношении своей информации.",
+  "privacy.hero.tagline": "Ваши данные. Ваш контроль.",
+  "privacy.hero.lastUpdated": "Последнее обновление: 31 августа 2026 года",
+
+  "privacy.principles.title": "Принципы конфиденциальности GTX",
+  "privacy.principles.transparency.title": "Прозрачность",
+  "privacy.principles.transparency.description":
+    "Мы стремимся понятно объяснять, какие данные могут обрабатываться и для чего они используются.",
+  "privacy.principles.minimization.title": "Минимизация данных",
+  "privacy.principles.minimization.description":
+    "Мы стремимся использовать только те данные, которые необходимы для работы соответствующих функций платформы.",
+  "privacy.principles.accountability.title": "Ответственность",
+  "privacy.principles.accountability.description":
+    "Доступ к информации ограничен соответствующими ролями и используется только в определённых целях.",
+  "privacy.principles.userRights.title": "Права пользователя",
+  "privacy.principles.userRights.description":
+    "Пользователь может обратиться по вопросам доступа, исправления или других действий со своими данными в соответствии с применимым законодательством.",
+  "privacy.principles.dataProtection.title": "Защита данных",
+  "privacy.principles.dataProtection.description":
+    "Мы применяем технические и организационные меры для защиты аккаунтов и информации от несанкционированного доступа.",
+
+  "privacy.usage.title": "Как GTX использует ваши данные",
+
+  "privacy.usage.personalData.title": "Что такое персональные данные?",
+  "privacy.usage.personalData.paragraph1":
+    "Персональные данные — это информация, которая прямо или косвенно может быть связана с конкретным пользователем.",
+  "privacy.usage.personalData.paragraph2":
+    "В GTX к такой информации могут относиться данные, которые пользователь предоставляет при создании аккаунта, прохождении верификации, использовании функций пополнения и вывода, а также другая информация, необходимая для работы соответствующих функций платформы.",
+  "privacy.usage.personalData.examplesIntro": "Например, это могут быть:",
+  "privacy.usage.personalData.example1": "Имя, фамилия и email",
+  "privacy.usage.personalData.example2":
+    "Данные, предоставленные при верификации личности",
+  "privacy.usage.personalData.example3":
+    "Информация об операциях пополнения и вывода средств",
+  "privacy.usage.personalData.example4":
+    "Техническая информация о сессиях и устройстве (например, IP-адрес)",
+
+  "privacy.usage.howWeUse.title": "Как GTX использует данные?",
+  "privacy.usage.howWeUse.intro": "Мы используем данные пользователей для:",
+  "privacy.usage.howWeUse.item1": "Создания и поддержки аккаунта",
+  "privacy.usage.howWeUse.item2": "Авторизации",
+  "privacy.usage.howWeUse.item3": "Верификации личности",
+  "privacy.usage.howWeUse.item4": "Обработки депозитов",
+  "privacy.usage.howWeUse.item5": "Обработки выводов",
+  "privacy.usage.howWeUse.item6": "Выполнения торговых функций",
+  "privacy.usage.howWeUse.item7": "Поддержки пользователей",
+  "privacy.usage.howWeUse.item8": "Защиты платформы",
+  "privacy.usage.howWeUse.item9": "Предотвращения злоупотреблений",
+  "privacy.usage.howWeUse.item10": "Технического обеспечения работы сервиса",
+
+  "privacy.usage.retention.title": "Как долго могут храниться данные?",
+  "privacy.usage.retention.description":
+    "Информация может храниться в течение срока, необходимого для работы соответствующей функции, поддержки аккаунта, выполнения законных требований, обеспечения безопасности или разрешения споров.",
+
+  "privacy.usage.thirdParties.title": "Передаёт ли GTX данные третьим сторонам?",
+  "privacy.usage.thirdParties.description":
+    "В некоторых случаях GTX может использовать сторонние технические сервисы для обеспечения отдельных функций платформы, например, для отправки писем об аккаунте и безопасности. Передача персональных данных осуществляется только тогда, когда это необходимо для соответствующей функции или предусмотрено применимыми требованиями.",
+
+  "privacy.usage.cookies.title": "Как GTX использует cookies?",
+  "privacy.usage.cookies.intro":
+    "Технически необходимые cookies могут использоваться для:",
+  "privacy.usage.cookies.item1": "Входа в аккаунт",
+  "privacy.usage.cookies.item2": "Поддержания сессии",
+  "privacy.usage.cookies.item3": "Безопасной работы функций платформы",
+  "privacy.usage.cookies.item4": "Запоминания языковых настроек",
+
+  "privacy.rights.title": "Ваши права в отношении персональных данных",
+  "privacy.rights.intro":
+    "В зависимости от применимого законодательства, пользователь может иметь следующие права:",
+  "privacy.rights.access.question": "Право на доступ",
+  "privacy.rights.access.answer":
+    "Вы можете обратиться с запросом о том, какие персональные данные GTX обрабатывает в отношении вас.",
+  "privacy.rights.rectification.question": "Право на исправление",
+  "privacy.rights.rectification.answer":
+    "Вы можете попросить исправить неточную или неполную информацию в вашем аккаунте.",
+  "privacy.rights.erasure.question": "Право на удаление",
+  "privacy.rights.erasure.answer":
+    "Вы можете попросить удалить ваши персональные данные, если это возможно в соответствии с применимым законодательством и другими требованиями.",
+  "privacy.rights.restriction.question": "Право на ограничение обработки",
+  "privacy.rights.restriction.answer":
+    "Вы можете попросить ограничить дальнейшую обработку ваших данных в определённых случаях.",
+  "privacy.rights.objection.question": "Право на возражение",
+  "privacy.rights.objection.answer":
+    "Вы можете возразить против определённых видов обработки ваших персональных данных, если это предусмотрено применимым законодательством.",
+  "privacy.rights.withdrawConsent.question": "Право отозвать согласие",
+  "privacy.rights.withdrawConsent.answer":
+    "Если обработка ваших данных основана на согласии, вы можете отозвать это согласие в любой момент.",
+  "privacy.rights.portability.question": "Право на перенос данных",
+  "privacy.rights.portability.answer":
+    "В определённых случаях вы можете попросить предоставить ваши данные в структурированном формате.",
+
+  "privacy.faq.title": "Часто задаваемые вопросы",
+  "privacy.faq.q1.question": "Как получить информацию о своих данных?",
+  "privacy.faq.q1.answer":
+    "Вы можете обратиться в поддержку GTX с запросом о ваших персональных данных.",
+  "privacy.faq.q2.question": "Как исправить данные аккаунта?",
+  "privacy.faq.q2.answer":
+    "Большинство основных данных можно обновить прямо в разделе аккаунта. Для остального — обратитесь в поддержку.",
+  "privacy.faq.q3.question": "Как обратиться по вопросу удаления данных?",
+  "privacy.faq.q3.answer":
+    "Обратитесь в службу поддержки GTX с соответствующим запросом.",
+  "privacy.faq.q4.question": "Как изменить данные, предоставленные при верификации?",
+  "privacy.faq.q4.answer":
+    "Для изменения данных верификации обратитесь в службу поддержки GTX.",
+  "privacy.faq.q5.question": "Где узнать больше о cookies?",
+  "privacy.faq.q5.answer":
+    "Информация об использовании cookies приведена в разделе «Как GTX использует cookies» на этой странице.",
+  "privacy.faq.q6.question": "Как обратиться по вопросу конфиденциальности?",
+  "privacy.faq.q6.answer":
+    "С любыми вопросами о конфиденциальности обращайтесь в службу поддержки GTX.",
+
+  "privacy.support.title": "Нужна помощь?",
+  "privacy.support.description":
+    "Если у вас есть вопросы о конфиденциальности или использовании ваших данных, обратитесь в службу поддержки GTX.",
+  "privacy.support.primaryCta": "Обратиться в поддержку",
+  "privacy.support.secondaryCta": "Перейти в аккаунт",
+
   "marketing.contacts.hero.titlePrefix": "Свяжитесь",
   "marketing.contacts.hero.titleHighlight": "с нами",
   "marketing.contacts.hero.subtitle":
@@ -1848,6 +2094,129 @@ const uk: Dictionary = {
   "marketing.about.finalCta.description":
     "Створіть акаунт і отримайте доступ до криптовалютного ринку в одному зручному просторі.",
   "marketing.about.finalCta.primaryGuest": "Створити акаунт",
+
+  "privacy.seo.title": "Центр конфіденційності | GTX",
+  "privacy.seo.description":
+    "Дізнайтеся, як GTX працює з персональними даними та які права має користувач щодо своєї інформації.",
+
+  "privacy.hero.label": "ЦЕНТР КОНФІДЕНЦІЙНОСТІ",
+  "privacy.hero.headingLine1": "Конфіденційність",
+  "privacy.hero.headingLine2": "у GTX",
+  "privacy.hero.subtitle":
+    "Ми створили цю сторінку, щоб просто пояснити, як GTX працює з даними користувачів, які принципи ми застосовуємо та які можливості має користувач щодо своєї інформації.",
+  "privacy.hero.tagline": "Ваші дані. Ваш контроль.",
+  "privacy.hero.lastUpdated": "Останнє оновлення: 31 серпня 2026 року",
+
+  "privacy.principles.title": "Принципи конфіденційності GTX",
+  "privacy.principles.transparency.title": "Прозорість",
+  "privacy.principles.transparency.description":
+    "Ми прагнемо зрозуміло пояснювати, які дані можуть оброблятися та для чого вони використовуються.",
+  "privacy.principles.minimization.title": "Мінімізація даних",
+  "privacy.principles.minimization.description":
+    "Ми прагнемо використовувати лише ті дані, які необхідні для роботи відповідних функцій платформи.",
+  "privacy.principles.accountability.title": "Відповідальність",
+  "privacy.principles.accountability.description":
+    "Доступ до інформації має бути обмежений відповідними ролями та використовуватися лише для визначених цілей.",
+  "privacy.principles.userRights.title": "Права користувача",
+  "privacy.principles.userRights.description":
+    "Користувач може звернутися щодо доступу, виправлення або інших дій зі своїми даними відповідно до застосовного законодавства.",
+  "privacy.principles.dataProtection.title": "Захист даних",
+  "privacy.principles.dataProtection.description":
+    "Ми застосовуємо технічні та організаційні заходи для захисту акаунтів та інформації від несанкціонованого доступу.",
+
+  "privacy.usage.title": "Як GTX використовує ваші дані",
+
+  "privacy.usage.personalData.title": "Що таке персональні дані?",
+  "privacy.usage.personalData.paragraph1":
+    "Персональні дані — це інформація, яка прямо або опосередковано може бути пов'язана з конкретним користувачем.",
+  "privacy.usage.personalData.paragraph2":
+    "В GTX до такої інформації можуть належати дані, які користувач надає під час створення акаунта, верифікації, використання функцій поповнення та виведення, а також інша інформація, необхідна для роботи відповідних функцій платформи.",
+  "privacy.usage.personalData.examplesIntro": "Наприклад, це можуть бути:",
+  "privacy.usage.personalData.example1": "Ім'я, прізвище та email",
+  "privacy.usage.personalData.example2": "Дані, надані під час верифікації особи",
+  "privacy.usage.personalData.example3":
+    "Інформація про операції поповнення та виведення коштів",
+  "privacy.usage.personalData.example4":
+    "Технічна інформація про сесії та пристрій (наприклад, IP-адреса)",
+
+  "privacy.usage.howWeUse.title": "Як GTX використовує дані?",
+  "privacy.usage.howWeUse.intro": "Ми використовуємо дані користувачів для:",
+  "privacy.usage.howWeUse.item1": "Створення та підтримки акаунта",
+  "privacy.usage.howWeUse.item2": "Авторизації",
+  "privacy.usage.howWeUse.item3": "Верифікації особи",
+  "privacy.usage.howWeUse.item4": "Обробки депозитів",
+  "privacy.usage.howWeUse.item5": "Обробки виведень",
+  "privacy.usage.howWeUse.item6": "Виконання торгових функцій",
+  "privacy.usage.howWeUse.item7": "Підтримки користувачів",
+  "privacy.usage.howWeUse.item8": "Захисту платформи",
+  "privacy.usage.howWeUse.item9": "Запобігання зловживанням",
+  "privacy.usage.howWeUse.item10": "Технічного забезпечення роботи сервісу",
+
+  "privacy.usage.retention.title": "Як довго можуть зберігатися дані?",
+  "privacy.usage.retention.description":
+    "Інформація може зберігатися протягом строку, необхідного для роботи відповідної функції, підтримки акаунта, виконання законних вимог, забезпечення безпеки або вирішення спорів.",
+
+  "privacy.usage.thirdParties.title": "Чи передає GTX дані третім сторонам?",
+  "privacy.usage.thirdParties.description":
+    "У деяких випадках GTX може використовувати сторонні технічні сервіси для забезпечення окремих функцій платформи, наприклад, для надсилання листів про акаунт і безпеку. Передача персональних даних здійснюється лише тоді, коли це необхідно для відповідної функції або передбачено застосовними вимогами.",
+
+  "privacy.usage.cookies.title": "Як GTX використовує cookies?",
+  "privacy.usage.cookies.intro":
+    "Технічно необхідні cookies можуть використовуватися для:",
+  "privacy.usage.cookies.item1": "Входу в акаунт",
+  "privacy.usage.cookies.item2": "Підтримання сесії",
+  "privacy.usage.cookies.item3": "Безпечної роботи функцій платформи",
+  "privacy.usage.cookies.item4": "Запам'ятовування мовних налаштувань",
+
+  "privacy.rights.title": "Ваші права щодо персональних даних",
+  "privacy.rights.intro":
+    "Залежно від застосовного законодавства, користувач може мати такі права:",
+  "privacy.rights.access.question": "Право на доступ",
+  "privacy.rights.access.answer":
+    "Ви можете звернутися із запитом щодо того, які персональні дані GTX обробляє щодо вас.",
+  "privacy.rights.rectification.question": "Право на виправлення",
+  "privacy.rights.rectification.answer":
+    "Ви можете звернутися з проханням виправити неточну або неповну інформацію у вашому акаунті.",
+  "privacy.rights.erasure.question": "Право на видалення",
+  "privacy.rights.erasure.answer":
+    "Ви можете звернутися з проханням видалити ваші персональні дані, якщо це можливо відповідно до застосовного законодавства та інших вимог.",
+  "privacy.rights.restriction.question": "Право на обмеження обробки",
+  "privacy.rights.restriction.answer":
+    "Ви можете звернутися з проханням обмежити подальшу обробку ваших даних у визначених випадках.",
+  "privacy.rights.objection.question": "Право заперечити",
+  "privacy.rights.objection.answer":
+    "Ви можете заперечити проти певних видів обробки ваших персональних даних, якщо це передбачено застосовним законодавством.",
+  "privacy.rights.withdrawConsent.question": "Право відкликати згоду",
+  "privacy.rights.withdrawConsent.answer":
+    "Якщо обробка ваших даних базується на згоді, ви можете відкликати цю згоду в будь-який момент.",
+  "privacy.rights.portability.question": "Право на перенесення даних",
+  "privacy.rights.portability.answer":
+    "У визначених випадках ви можете звернутися з проханням надати ваші дані у структурованому форматі.",
+
+  "privacy.faq.title": "Часті запитання",
+  "privacy.faq.q1.question": "Як отримати інформацію про свої дані?",
+  "privacy.faq.q1.answer":
+    "Ви можете звернутися до підтримки GTX із запитом щодо ваших персональних даних.",
+  "privacy.faq.q2.question": "Як виправити дані акаунта?",
+  "privacy.faq.q2.answer":
+    "Більшість основних даних можна оновити безпосередньо в розділі акаунта. Для решти — зверніться до підтримки.",
+  "privacy.faq.q3.question": "Як звернутися щодо видалення даних?",
+  "privacy.faq.q3.answer": "Зверніться до служби підтримки GTX із відповідним запитом.",
+  "privacy.faq.q4.question": "Як змінити дані, надані під час верифікації?",
+  "privacy.faq.q4.answer":
+    "Для зміни даних верифікації зверніться до служби підтримки GTX.",
+  "privacy.faq.q5.question": "Як дізнатися більше про cookies?",
+  "privacy.faq.q5.answer":
+    "Інформацію про використання cookies наведено в розділі «Як GTX використовує cookies» на цій сторінці.",
+  "privacy.faq.q6.question": "Як звернутися щодо конфіденційності?",
+  "privacy.faq.q6.answer":
+    "З будь-якими запитаннями щодо конфіденційності звертайтеся до служби підтримки GTX.",
+
+  "privacy.support.title": "Потрібна допомога?",
+  "privacy.support.description":
+    "Якщо у вас є запитання щодо конфіденційності або використання ваших даних, зверніться до служби підтримки GTX.",
+  "privacy.support.primaryCta": "Звернутися до підтримки",
+  "privacy.support.secondaryCta": "Перейти до акаунта",
 
   "marketing.contacts.hero.titlePrefix": "Зв'яжіться",
   "marketing.contacts.hero.titleHighlight": "з нами",

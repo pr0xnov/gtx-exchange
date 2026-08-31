@@ -205,7 +205,6 @@ describe("Navbar — Account dropdown", () => {
       "Withdrawal",
       "History",
       "Verification",
-      "Downloads",
       "Settings",
       "Support",
       "Log out",

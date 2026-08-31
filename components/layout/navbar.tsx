@@ -13,7 +13,6 @@ import {
   ArrowUpFromLine,
   History,
   ShieldCheck,
-  Download,
   Settings,
   LifeBuoy,
   LogOut,
@@ -50,7 +49,6 @@ const ACCOUNT_LINKS = [
   { key: "nav.withdrawal", href: "/withdrawal", icon: ArrowUpFromLine },
   { key: "nav.history", href: "/history", icon: History },
   { key: "nav.verification", href: "/verification", icon: ShieldCheck },
-  { key: "nav.downloads", href: "/downloads", icon: Download },
   { key: "nav.settings", href: "/settings", icon: Settings },
   { key: "nav.support", href: "/support", icon: LifeBuoy },
 ] satisfies { key: DictionaryKey; href: string; icon: typeof UserIcon }[];

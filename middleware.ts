@@ -12,7 +12,6 @@ const PROTECTED_PREFIXES = [
   "/support",
   "/verification",
   "/trading",
-  "/downloads",
   "/wallet",
   // Only gates "must be logged in at all" — middleware runs on the Edge
   // runtime and can't safely check `role` against the DB (Prisma/bcrypt

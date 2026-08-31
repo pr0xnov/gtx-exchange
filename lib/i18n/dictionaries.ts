@@ -46,7 +46,6 @@ const en = {
   "nav.withdrawal": "Withdrawal",
   "nav.history": "History",
   "nav.verification": "Verification",
-  "nav.downloads": "Downloads",
   "nav.settings": "Settings",
   "nav.support": "Support",
   "nav.accountMenu": "Account menu",
@@ -163,12 +162,6 @@ const en = {
   "support.faqLeverageQ": "What leverage is available?",
   "support.faqLeverageA":
     "You can trade with up to 1:100 leverage on supported pairs, matching real CFD-style trading conditions.",
-
-  // Downloads
-  "downloads.title": "Downloads",
-  "downloads.desktopTerminal": "Desktop trading terminal",
-  "downloads.tradeOnTheGo": "Trade on the go",
-  "downloads.download": "Download",
 
   // Deposit
   "deposit.pageTitle": "Deposit",
@@ -663,7 +656,6 @@ const ru: Dictionary = {
   "nav.withdrawal": "Вывод",
   "nav.history": "История",
   "nav.verification": "Верификация",
-  "nav.downloads": "Загрузки",
   "nav.settings": "Настройки",
   "nav.support": "Поддержка",
   "nav.accountMenu": "Меню аккаунта",
@@ -778,11 +770,6 @@ const ru: Dictionary = {
   "support.faqLeverageQ": "Какое кредитное плечо доступно?",
   "support.faqLeverageA":
     "Вы можете торговать с плечом до 1:100 по поддерживаемым парам — как в реальных условиях CFD-торговли.",
-
-  "downloads.title": "Загрузки",
-  "downloads.desktopTerminal": "Настольный торговый терминал",
-  "downloads.tradeOnTheGo": "Торгуйте где угодно",
-  "downloads.download": "Скачать",
 
   "deposit.pageTitle": "Пополнение",
   "deposit.infoTitle": "Важная информация",
@@ -1262,7 +1249,6 @@ const uk: Dictionary = {
   "nav.withdrawal": "Виведення",
   "nav.history": "Історія",
   "nav.verification": "Верифікація",
-  "nav.downloads": "Завантаження",
   "nav.settings": "Налаштування",
   "nav.support": "Підтримка",
   "nav.accountMenu": "Меню акаунта",
@@ -1378,11 +1364,6 @@ const uk: Dictionary = {
   "support.faqLeverageQ": "Яке кредитне плече доступне?",
   "support.faqLeverageA":
     "Ви можете торгувати з плечем до 1:100 за підтримуваними парами — як у реальних умовах CFD-торгівлі.",
-
-  "downloads.title": "Завантаження",
-  "downloads.desktopTerminal": "Настільний торговий термінал",
-  "downloads.tradeOnTheGo": "Торгуйте будь-де",
-  "downloads.download": "Завантажити",
 
   "deposit.pageTitle": "Поповнення",
   "deposit.infoTitle": "Важлива інформація",

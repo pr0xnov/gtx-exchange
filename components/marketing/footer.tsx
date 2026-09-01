@@ -11,7 +11,7 @@ export async function Footer() {
       links: [
         { label: t("nav.trading"), href: "/trading" },
         { label: t("nav.markets"), href: "/markets" },
-        { label: t("nav.tariffs"), href: "/tariffs" },
+        { label: t("nav.news"), href: "/news" },
       ],
     },
     {

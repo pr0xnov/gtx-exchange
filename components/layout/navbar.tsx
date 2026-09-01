@@ -31,7 +31,7 @@ const NAV_LINKS = [
   { key: "nav.trading", href: "/trading" },
   { key: "nav.markets", href: "/markets" },
   { key: "nav.about", href: "/about" },
-  { key: "nav.tariffs", href: "/tariffs" },
+  { key: "nav.news", href: "/news" },
   { key: "nav.contacts", href: "/contacts" },
 ] satisfies { key: DictionaryKey; href: string }[];
 

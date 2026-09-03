@@ -64,6 +64,12 @@ services:
       APP_URL: ${APP_URL:-http://localhost:3000}
     ports:
       - "3000:3000"
+    volumes:
+      # Persists Next's own fetch-response cache across container
+      # recreates — without this, a rebuild/recreate wipes the container's
+      # writable layer and every cached external fetch (Binance market
+      # data, RSS feeds, etc) would start cold again on the next request.
+      - gtx_next_cache:/app/.next/cache
     depends_on:
       postgres:
         condition: service_healthy
@@ -89,3 +95,4 @@ services:
 
 volumes:
   gtx_postgres_data:
+  gtx_next_cache:

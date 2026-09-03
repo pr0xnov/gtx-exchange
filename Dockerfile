@@ -40,6 +40,13 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Doesn't exist in the standalone build output — created here (rather than
+# left to the first cache write) so it has the right owner *before* the
+# gtx_next_cache volume (see docker-compose.yml) mounts over it. A named
+# volume mounted onto a path that doesn't pre-exist in the image would
+# otherwise be created root-owned, and the non-root `nextjs` user below
+# could never write to it.
+RUN mkdir -p ./.next/cache && chown -R nextjs:nodejs ./.next/cache
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma

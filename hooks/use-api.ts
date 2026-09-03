@@ -399,6 +399,30 @@ export function useAccountSummary() {
   });
 }
 
+export interface WeeklyPnlDto {
+  /** 7-day price performance of currently-held crypto only — 0 when
+   *  there's nothing currently held (see app/api/account/weekly-pnl/
+   *  route.ts). Never derived from sold/closed positions. */
+  pnl: number;
+  percent: number;
+}
+
+/**
+ * Account-only, deliberately NOT polled like useAccountSummary — each
+ * currency needs a real historical-price lookup (see the route), so this
+ * stays on React Query's own staleTime instead of a 5s interval, and
+ * lives on its own endpoint precisely so Wallet/Trading's shared
+ * "Прибыль / Убыток" (useAccountSummary's all-time `profit`) is never
+ * slowed down by it.
+ */
+export function useWeeklyAssetPnl() {
+  return useQuery({
+    queryKey: ["account", "weekly-pnl"],
+    queryFn: () => fetchJson<WeeklyPnlDto>("/api/account/weekly-pnl"),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export interface WalletFinancials extends DerivedWalletFinancials {
   isLoading: boolean;
 }

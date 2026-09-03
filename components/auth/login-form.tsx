@@ -192,12 +192,6 @@ export function LoginForm() {
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("common.login")}
       </Button>
-
-      <div className="rounded-xl border border-border bg-surface/60 p-3 text-center text-xs text-muted">
-        {t("auth.login.demoAccountLabel")}{" "}
-        <span className="text-foreground">demo@gtx.com</span> /{" "}
-        <span className="text-foreground">Demo123!</span>
-      </div>
     </form>
   );
 }

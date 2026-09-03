@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { ArrowDownToLine, ArrowUpFromLine, History } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AnimatedCurrency } from "@/components/dashboard/animated-currency";
 import { Skeleton } from "@/components/shared/skeleton";
 import { useLocale } from "@/lib/i18n/locale-context";
 
 /**
- * Purely presentational — WalletOverview supplies these four figures,
- * each with its own distinct source (see hooks/use-api.ts's
+ * Purely presentational — WalletOverview supplies these figures, each
+ * with its own distinct source (see hooks/use-api.ts's
  * useWalletFinancials, the shared hook Trading's header also uses, so
  * the two pages can never disagree):
  *
@@ -19,38 +19,50 @@ import { useLocale } from "@/lib/i18n/locale-context";
  * - `lockedInOrders`: USDT reserved by this user's own OPEN LIMIT BUY
  *   orders (SpotWallet(USDT).locked). Moving money here from
  *   `availableBalance` (placing an order) or back (cancelling one) is
- *   never itself a gain or loss — it doesn't touch `profitLoss`.
+ *   never itself a gain or loss.
  * - `assetsValue`: current market value of crypto holdings only, USDT
  *   excluded.
- * - `profitLoss`: realized PnL from completed sells (unchanged from the
- *   previous "Profit" card, just relabeled).
  *
- * `unrealizedPnl`/`unrealizedPnlPercent` are a distinct, Wallet-specific
- * figure: the mark-to-market gain/loss on assets still held right now
- * (aggregated from the same call's per-asset cost-basis data). This is
- * deliberately NOT the same as `profitLoss` (realized PnL from completed
- * sells) — showing both, clearly labeled, is the point.
+ * `weeklyPnl`/`weeklyPnlPercent` is the SAME trailing-7-day, price-driven
+ * figure /account's own summary card shows — same useWeeklyAssetPnl()
+ * hook, same backend (app/api/account/weekly-pnl/route.ts), so the two
+ * pages can never disagree either. It has its own loading/error state
+ * (a separate query from the other three figures) and, unlike /account,
+ * only the value/percentage text is colored — this panel's own
+ * background never tints red/green.
+ *
+ * The old aggregate "Нереалізований PnL" line (mark-to-market gain/loss
+ * summed across all held assets) has been removed from here entirely —
+ * per-asset Unrealized PnL still lives in the assets table below
+ * (WalletAssetsSection), unchanged.
  */
 export function WalletSummary({
   availableBalance,
   lockedInOrders,
   assetsValue,
-  profitLoss,
-  unrealizedPnl,
-  unrealizedPnlPercent,
+  weeklyPnl,
+  weeklyPnlPercent,
+  weeklyPnlLoading,
+  weeklyPnlError,
   isLoading,
 }: {
   availableBalance: number;
   lockedInOrders: number;
   assetsValue: number;
-  profitLoss: number;
-  unrealizedPnl: number;
-  unrealizedPnlPercent: number;
+  weeklyPnl: number;
+  weeklyPnlPercent: number | null;
+  weeklyPnlLoading: boolean;
+  weeklyPnlError: boolean;
   isLoading: boolean;
 }) {
   const { t } = useLocale();
-  const profitPositive = profitLoss >= 0;
-  const unrealizedPositive = unrealizedPnl >= 0;
+  const weeklyPnlPositive = weeklyPnl >= 0;
+  const weeklyPnlTone =
+    weeklyPnl === 0
+      ? "text-foreground"
+      : weeklyPnlPositive
+        ? "text-primary"
+        : "text-danger";
 
   const cards = [
     {
@@ -68,12 +80,6 @@ export function WalletSummary({
       value: assetsValue,
       accent: "text-blue-300",
     },
-    {
-      label: t("wallet.summary.profitLoss"),
-      value: profitLoss,
-      accent: profitPositive ? "text-primary" : "text-danger",
-      showSign: true,
-    },
   ];
 
   return (
@@ -86,27 +92,36 @@ export function WalletSummary({
               <Skeleton className="mt-2 h-8 w-24" />
             ) : (
               <div className={cn("mt-1 text-2xl font-bold", card.accent)}>
-                <AnimatedCurrency value={card.value} showSign={card.showSign} />
+                <AnimatedCurrency value={card.value} />
               </div>
             )}
           </div>
         ))}
-      </div>
 
-      <div className="mt-3 flex items-center gap-2 text-xs text-muted">
-        <span>{t("wallet.summary.unrealizedPnl")}</span>
-        {!isLoading && (
-          <span
-            className={cn(
-              "font-tabular font-semibold",
-              unrealizedPositive ? "text-primary" : "text-danger"
-            )}
-          >
-            {unrealizedPositive ? "+" : ""}
-            {formatCurrency(unrealizedPnl)} ({unrealizedPositive ? "+" : ""}
-            {unrealizedPnlPercent.toFixed(2)}%)
-          </span>
-        )}
+        <div>
+          <div className="text-xs font-medium text-muted">
+            {t("account.summary.weeklyProfitLoss")}
+          </div>
+          {weeklyPnlLoading ? (
+            <Skeleton className="mt-2 h-8 w-24" />
+          ) : weeklyPnlError ? (
+            <div className="mt-1 text-2xl font-bold text-muted">—</div>
+          ) : (
+            <>
+              <div className={cn("mt-1 text-2xl font-bold", weeklyPnlTone)}>
+                <AnimatedCurrency value={weeklyPnl} showSign />
+              </div>
+              {weeklyPnlPercent !== null && (
+                <div
+                  className={cn("font-tabular mt-1 text-sm font-semibold", weeklyPnlTone)}
+                >
+                  {weeklyPnlPositive ? "+" : ""}
+                  {weeklyPnlPercent.toFixed(2)}%
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">

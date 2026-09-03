@@ -161,13 +161,15 @@ describe("TradingTerminal — Spot-only", () => {
     expect(container.textContent).toContain("Price (USDT)");
   });
 
-  it("the header shows Available Balance/In Orders/Assets Value/Profit-Loss, with no Credit anywhere", () => {
+  it("the header shows Available Balance/In Orders/Assets Value, with no Credit and no Profit/Loss summary", () => {
     renderTerminal();
     expect(container.textContent).toContain("Available Balance");
     expect(container.textContent).toContain("In Orders");
     expect(container.textContent).toContain("Assets Value");
-    expect(container.textContent).toContain("Profit / Loss");
     expect(container.textContent).not.toContain("Credit");
+    // Trading isn't a P/L summary surface — the field was removed
+    // entirely, not replaced with the weekly figure either.
+    expect(container.textContent).not.toContain("Profit / Loss");
   });
 });
 

@@ -64,7 +64,7 @@ describe("Footer — links/columns are unchanged", () => {
     const expectedHrefs = [
       "/trading",
       "/markets",
-      "/news",
+      "/analytics",
       "/about",
       "/contacts",
       "/support",

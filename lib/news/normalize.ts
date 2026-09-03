@@ -1,9 +1,13 @@
 import { XMLParser } from "fast-xml-parser";
 import type { NewsArticle } from "./types";
-import { categorizeArticle } from "./categories";
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
 
+// A generous safety margin, not a target: live checks against all 4
+// configured feeds show every item's actual stripped description already
+// sits well under this (roughly 90-220 chars) — RSS generators cap their
+// own excerpts short. This just guarantees a future oddly-long item is
+// truncated instead of overflowing the compact card it's shown in.
 const MAX_DESCRIPTION_LENGTH = 220;
 
 /**
@@ -36,7 +40,7 @@ function isSafeUrl(value: unknown): value is string {
 /** RSS has no single standard for images — checks every convention the
  *  4 confirmed sources actually use, in order, and takes the first valid
  *  one. Missing/invalid on all of them just means no image (handled by
- *  the UI's own placeholder, never a broken <img>). */
+ *  ArticleImage's own placeholder, never a broken <img>). */
 function extractImage(item: Record<string, unknown>): string | undefined {
   const candidates = [
     (item["media:content"] as Record<string, unknown> | undefined)?.["@_url"],
@@ -97,7 +101,6 @@ export function parseFeed(xml: string, sourceName: string): NewsArticle[] {
       image: extractImage(item),
       source: sourceName,
       publishedAt: toIsoDate(item.pubDate),
-      category: categorizeArticle(title, description ?? ""),
     });
   }
   return articles;

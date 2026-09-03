@@ -365,9 +365,9 @@ describe("Navbar — guest", () => {
 });
 
 describe("Navbar — main navigation links unchanged", () => {
-  it("keeps Trading/Markets/About us/News/Contacts", () => {
+  it("keeps Trading/Markets/About us/Analytics/Contacts", () => {
     renderNavbar(USER);
-    const hrefs = ["/trading", "/markets", "/about", "/news", "/contacts"];
+    const hrefs = ["/trading", "/markets", "/about", "/analytics", "/contacts"];
     for (const href of hrefs) {
       expect(container.querySelector(`a[href="${href}"]`)).not.toBeNull();
     }

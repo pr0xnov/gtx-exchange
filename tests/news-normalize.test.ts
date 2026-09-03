@@ -32,7 +32,6 @@ describe("parseFeed — happy path", () => {
     expect(article!.publishedAt).toBe(
       new Date("Mon, 31 Aug 2026 15:33:14 +0000").toISOString()
     );
-    expect(article!.category).toBe("bitcoin");
   });
 
   it("falls back to enclosure, then media:thumbnail, when media:content is absent", () => {

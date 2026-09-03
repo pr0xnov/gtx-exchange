@@ -37,6 +37,20 @@ export function formatAmount(value: number | string, maxDecimals = 8): string {
   });
 }
 
+/** Compact $-notation for large numbers (e.g. "$4.21B", "$382.5M") — used
+ *  for the /analytics "highest activity" volume figures, which are a
+ *  computed price × base-asset-volume USD-equivalent (see quoteVolumeOf in
+ *  lib/markets/derive.ts), not a separately-fetched quote-volume field
+ *  (Binance's ticker payload only ever exposes base-asset volume in this
+ *  codebase — see lib/binance/client.ts). */
+export function formatCompactUsd(value: number): string {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
+  if (abs >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
+  if (abs >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
+  return `$${value.toFixed(2)}`;
+}
+
 export function formatPercent(value: number | string): string {
   const num = typeof value === "string" ? parseFloat(value) : value;
   const sign = num > 0 ? "+" : "";

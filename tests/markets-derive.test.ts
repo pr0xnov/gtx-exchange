@@ -13,11 +13,14 @@ import {
   closesFromCandles,
   filterBySearch,
   getBiggestMovers,
+  getGainers,
+  getLosers,
   getPopular,
   getTopGainers,
   getTopLosers,
   getTopVolume,
   mergeMarketData,
+  quoteVolumeOf,
   sortRows,
   type EnrichedMarket,
   type MarketAssetLike,
@@ -212,6 +215,63 @@ describe("closesFromCandles", () => {
 
   it("returns an empty array for no candles", () => {
     expect(closesFromCandles([])).toEqual([]);
+  });
+});
+
+describe("quoteVolumeOf", () => {
+  it("multiplies base-asset volume by price for a USD-equivalent figure", () => {
+    expect(quoteVolumeOf({ price: 60000, volume24h: 100 })).toBe(6_000_000);
+  });
+
+  it("returns null (never 0) when there's no live volume yet, propagating the same null volume24h already carries", () => {
+    expect(quoteVolumeOf({ price: 60000, volume24h: null })).toBeNull();
+  });
+});
+
+describe("getGainers / getLosers — filtered, unlike getTopGainers/getTopLosers", () => {
+  const rows = mergeMarketData(ASSETS, {});
+  // ASSETS: BTC +1.5, ETH -2.5, SOL +10, DOGE -8
+
+  it("getGainers returns only change24h > 0, sorted highest first", () => {
+    expect(getGainers(rows).map((r) => r.symbol)).toEqual(["SOLUSDT", "BTCUSDT"]);
+  });
+
+  it("getLosers returns only change24h < 0, most negative first", () => {
+    expect(getLosers(rows).map((r) => r.symbol)).toEqual(["DOGEUSDT", "ETHUSDT"]);
+  });
+
+  it("excludes a flat 0% change from both lists", () => {
+    const flat = mergeMarketData(
+      [
+        ...ASSETS,
+        { id: "5", symbol: "ADAUSDT", displaySymbol: "ADA/USD", price: 1, change24h: 0 },
+      ],
+      {}
+    );
+    expect(getGainers(flat).some((r) => r.symbol === "ADAUSDT")).toBe(false);
+    expect(getLosers(flat).some((r) => r.symbol === "ADAUSDT")).toBe(false);
+  });
+
+  it("returns an empty array (not a throw) when nothing qualifies", () => {
+    const allFlat = mergeMarketData(
+      [{ id: "1", symbol: "BTCUSDT", displaySymbol: "BTC/USD", price: 1, change24h: 0 }],
+      {}
+    );
+    expect(getGainers(allFlat)).toEqual([]);
+    expect(getLosers(allFlat)).toEqual([]);
+  });
+
+  it("returns every real gainer/loser, uncapped — the carousel scrolls through all of them", () => {
+    const many = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i),
+      symbol: `SYM${i}USDT`,
+      displaySymbol: `SYM${i}/USD`,
+      price: 1,
+      change24h: i % 2 === 0 ? i + 1 : -(i + 1),
+    }));
+    const rows2 = mergeMarketData(many, {});
+    expect(getGainers(rows2)).toHaveLength(15);
+    expect(getLosers(rows2)).toHaveLength(15);
   });
 });
 

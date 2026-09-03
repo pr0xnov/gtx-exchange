@@ -140,6 +140,56 @@ export function getBiggestMovers(rows: EnrichedMarket[], n = 10): EnrichedMarket
     .slice(0, n);
 }
 
+/** GTX only ever has *base-asset* 24h volume (see EnrichedMarket.volume24h
+ *  and lib/binance/client.ts — Binance's ticker payload's "quoteVolume"
+ *  field is never captured anywhere in this codebase). This multiplies it
+ *  by the current price to get a USD-equivalent figure for display (e.g.
+ *  /analytics "Самая высокая активность") — a standard, honest derived
+ *  approximation from two real numbers, not a separately-fetched or
+ *  fabricated field. Null propagates: no live tick yet means no honest
+ *  approximation to show, same as volume24h itself. */
+export function quoteVolumeOf(
+  row: Pick<EnrichedMarket, "price" | "volume24h">
+): number | null {
+  return row.volume24h == null ? null : row.volume24h * row.price;
+}
+
+/** Real gainers only — unlike getTopGainers (top N by sort, regardless of
+ *  sign), this filters to change24h > 0 first, so a mostly-red market
+ *  never fills the /analytics "В лидерах роста" carousel with red cards.
+ *  No cap: the carousel scrolls through however many there really are. */
+export function getGainers(rows: EnrichedMarket[]): EnrichedMarket[] {
+  return sortRows(
+    rows.filter((r) => r.change24h > 0),
+    "change24h",
+    "desc"
+  );
+}
+
+/** Real losers only (change24h < 0), most negative first. See getGainers. */
+export function getLosers(rows: EnrichedMarket[]): EnrichedMarket[] {
+  return sortRows(
+    rows.filter((r) => r.change24h < 0),
+    "change24h",
+    "asc"
+  );
+}
+
+/** /trading?symbol=... is the one existing trading route (see
+ *  app/(dashboard)/trading/page.tsx). /trading itself is auth-protected
+ *  (middleware.ts): a guest is sent to /login first, with the intended
+ *  destination preserved via the same `redirect` param middleware
+ *  already uses elsewhere — the same pattern
+ *  components/markets/mini-market-table.tsx already established inline;
+ *  this is the same convention factored out for /analytics's several
+ *  "go trade this" links. */
+export function tradingHref(symbol: string, isAuthenticated: boolean): string {
+  const destination = `/trading?symbol=${symbol}`;
+  return isAuthenticated
+    ? destination
+    : `/login?redirect=${encodeURIComponent(destination)}`;
+}
+
 /** Extracts a plain closing-price series from klines for the sparkline —
  *  the only shape the chart column needs, kept separate from the raw
  *  Candle type so it stays trivially testable. */

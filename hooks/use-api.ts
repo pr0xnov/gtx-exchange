@@ -200,6 +200,25 @@ export function useSparklines(symbols: readonly string[]): Record<string, number
   return bySymbol;
 }
 
+/**
+ * Full 24h hourly candle series for exactly one symbol — the same
+ * /api/markets/klines?symbol=..&interval=1h&limit=24 endpoint/params
+ * useSparklines already calls (Trading's own historical-data source),
+ * just returning the full {time, close, ...} shape instead of only
+ * closing prices, since /analytics's "Динамика рынка" chart needs real
+ * timestamps for its time axis. Cached by symbol (5 min staleTime, same
+ * as useSparklines) so switching back to a previously-viewed pair reuses
+ * the cached series instead of refetching.
+ */
+export function useKlines(symbol: string) {
+  return useQuery({
+    queryKey: ["markets", "klines", symbol],
+    queryFn: () =>
+      fetchJson<Candle[]>(`/api/markets/klines?symbol=${symbol}&interval=1h&limit=24`),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export interface TransactionDto {
   id: string;
   type:

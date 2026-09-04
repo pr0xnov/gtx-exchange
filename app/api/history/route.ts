@@ -5,10 +5,18 @@ import { apiSuccess, handleApiError } from "@/lib/api-response";
 import { TransactionType } from "@prisma/client";
 
 const FILTER_MAP: Record<string, TransactionType[]> = {
-  all: ["DEPOSIT", "WITHDRAWAL", "BONUS", "TRADE_SETTLEMENT", "ADMIN_BALANCE_ADJUSTMENT"],
+  all: [
+    "DEPOSIT",
+    "WITHDRAWAL",
+    "BONUS",
+    "TRADE_SETTLEMENT",
+    "ADMIN_BALANCE_ADJUSTMENT",
+    "REFERRAL_BONUS",
+    "FIRST_DEPOSIT_BONUS",
+  ],
   deposits: ["DEPOSIT"],
   withdrawals: ["WITHDRAWAL"],
-  bonuses: ["BONUS"],
+  bonuses: ["BONUS", "REFERRAL_BONUS", "FIRST_DEPOSIT_BONUS"],
   adjustments: ["ADMIN_BALANCE_ADJUSTMENT"],
 };
 

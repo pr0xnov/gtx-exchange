@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedAssets } from "../lib/markets/seed-assets";
 import { SPOT_CURRENCIES } from "../lib/spot/currencies";
+import { generateReferralCode } from "../lib/referral/code";
 
 const prisma = new PrismaClient();
 
@@ -23,6 +24,7 @@ async function seedDemoUser() {
         login: "87654321",
         accountType: "Standard",
         leverageMax: 100,
+        referralCode: generateReferralCode(),
         wallet: { create: { balance: 10_000, credit: 0, currency: "USDT" } },
         settings: { create: {} },
       },

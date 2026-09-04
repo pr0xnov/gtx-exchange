@@ -64,6 +64,8 @@ export interface CurrentUser {
   wallet: { balance: string; credit: string; currency: string } | null;
   createdAt: string;
   verification: "VERIFIED" | "PENDING" | "REJECTED" | "UNVERIFIED";
+  twoFactorOn: boolean;
+  referralCode: string;
 }
 
 export function useCurrentUser() {
@@ -226,7 +228,9 @@ export interface TransactionDto {
     | "WITHDRAWAL"
     | "BONUS"
     | "TRADE_SETTLEMENT"
-    | "ADMIN_BALANCE_ADJUSTMENT";
+    | "ADMIN_BALANCE_ADJUSTMENT"
+    | "REFERRAL_BONUS"
+    | "FIRST_DEPOSIT_BONUS";
   method: string | null;
   amount: string;
   asset: string;

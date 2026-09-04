@@ -21,6 +21,8 @@ const TYPE_LABEL_KEY: Record<string, DictionaryKey> = {
   WITHDRAWAL: "history.typeWithdrawal",
   BONUS: "history.typeBonus",
   TRADE_SETTLEMENT: "history.typeTrade",
+  REFERRAL_BONUS: "history.typeReferralBonus",
+  FIRST_DEPOSIT_BONUS: "history.typeFirstDepositBonus",
 };
 
 // ADMIN_BALANCE_ADJUSTMENT stays the real TransactionType in the DB (the
@@ -48,6 +50,8 @@ const TYPE_SIGN: Record<string, 1 | -1> = {
   BONUS: 1,
   WITHDRAWAL: -1,
   TRADE_SETTLEMENT: 1,
+  REFERRAL_BONUS: 1,
+  FIRST_DEPOSIT_BONUS: 1,
 };
 
 const STATUS_VARIANT: Record<string, "success" | "pending" | "danger"> = {

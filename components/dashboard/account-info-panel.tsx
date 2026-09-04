@@ -1,7 +1,11 @@
 "use client";
 
+import Link from "next/link";
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
 import { useCurrentUser, type CurrentUser } from "@/hooks/use-api";
 import { Skeleton } from "@/components/shared/skeleton";
+import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { DictionaryKey } from "@/lib/i18n/dictionaries";
 
@@ -26,6 +30,12 @@ export function AccountInfoPanel() {
     },
   ];
 
+  async function handleCopyReferralCode() {
+    if (!user) return;
+    await navigator.clipboard.writeText(user.referralCode);
+    toast.success(t("account.referralCodeCopied"));
+  }
+
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <h3 className="mb-4 text-sm font-semibold text-foreground">
@@ -42,6 +52,43 @@ export function AccountInfoPanel() {
             )}
           </div>
         ))}
+
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted">{t("account.twoFactorAuth")}</span>
+          {isLoading ? (
+            <Skeleton className="h-4 w-24" />
+          ) : (
+            <Link
+              href="/settings"
+              className={cn(
+                "font-medium hover:underline",
+                user?.twoFactorOn ? "text-primary" : "text-muted"
+              )}
+            >
+              {t(
+                user?.twoFactorOn
+                  ? "account.twoFactorEnabled"
+                  : "account.twoFactorDisabled"
+              )}
+            </Link>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted">{t("account.referralCode")}</span>
+          {isLoading ? (
+            <Skeleton className="h-4 w-24" />
+          ) : (
+            <button
+              type="button"
+              onClick={handleCopyReferralCode}
+              className="flex items-center gap-1.5 font-medium text-foreground hover:text-primary"
+            >
+              <span className="font-tabular">{user?.referralCode}</span>
+              <Copy className="h-3.5 w-3.5 text-muted" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

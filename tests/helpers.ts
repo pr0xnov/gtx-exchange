@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { generateReferralCode } from "@/lib/referral/code";
 import type { User, Wallet } from "@prisma/client";
 
 /** Deletes all rows in FK-dependency order. Called between tests for full isolation. */
@@ -20,6 +21,10 @@ export async function resetDatabase() {
     // rule on adminId/transactionId — must go before those two.
     prisma.balanceAdjustment.deleteMany(),
     prisma.auditLog.deleteMany(),
+    // Both reference User with a RESTRICT delete rule — must go before
+    // user.deleteMany() below.
+    prisma.referralReward.deleteMany(),
+    prisma.firstDepositBonus.deleteMany(),
     prisma.transaction.deleteMany(),
     prisma.wallet.deleteMany(),
     prisma.user.deleteMany(),
@@ -42,6 +47,7 @@ export async function seedUserWithWallet(balance: number): Promise<UserWithWalle
       firstName: "Test",
       lastName: "User",
       email: `user-${id}@test.gtx`,
+      referralCode: generateReferralCode(),
       passwordHash: "not-used-in-tests",
       wallet: { create: { balance, currency: "USDT" } },
     },

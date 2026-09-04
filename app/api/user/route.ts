@@ -6,10 +6,16 @@ import { deriveVerificationStatus } from "@/lib/admin/user-summary";
 export async function GET() {
   try {
     const user = await requireUser();
-    const documents = await prisma.verificationDocument.findMany({
-      where: { userId: user.id },
-      select: { status: true, type: true },
-    });
+    const [documents, settings] = await Promise.all([
+      prisma.verificationDocument.findMany({
+        where: { userId: user.id },
+        select: { status: true, type: true },
+      }),
+      prisma.userSettings.findUnique({
+        where: { userId: user.id },
+        select: { twoFactorOn: true },
+      }),
+    ]);
 
     return apiSuccess({
       id: user.id,
@@ -23,6 +29,8 @@ export async function GET() {
       wallet: user.wallet,
       createdAt: user.createdAt,
       verification: deriveVerificationStatus(documents),
+      twoFactorOn: settings?.twoFactorOn ?? false,
+      referralCode: user.referralCode,
     });
   } catch (error) {
     return handleApiError(error);

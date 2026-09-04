@@ -17,13 +17,15 @@
  * never written anywhere in plain text, including this script's own
  * process memory beyond the single hashPassword() call.
  */
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { hashPassword } from "../lib/auth/password";
 import { maybeEncryptPassword } from "../lib/auth/password-crypto";
 import { generateLoginId } from "../lib/utils";
 import { SPOT_CURRENCIES } from "../lib/spot/currencies";
+import { generateReferralCode } from "../lib/referral/code";
 
 const prisma = new PrismaClient();
+const MAX_REFERRAL_CODE_GENERATION_ATTEMPTS = 5;
 
 const PASSWORD_RULES: [RegExp, string][] = [
   [/.{8,}/, "at least 8 characters"],
@@ -81,22 +83,39 @@ async function main() {
   const passwordHash = await hashPassword(password);
   const encryptedPassword = maybeEncryptPassword(password);
 
-  const user = await prisma.user.create({
-    data: {
-      firstName,
-      lastName,
-      email,
-      passwordHash,
-      encryptedPassword,
-      role,
-      login: generateLoginId(),
-      wallet: { create: { balance: 0, credit: 0, currency: "USDT" } },
-      settings: { create: {} },
-      spotWallets: {
-        create: SPOT_CURRENCIES.map((currency) => ({ currency, balance: 0 })),
-      },
-    },
-  });
+  let user;
+  for (let attempt = 0; attempt < MAX_REFERRAL_CODE_GENERATION_ATTEMPTS; attempt++) {
+    try {
+      user = await prisma.user.create({
+        data: {
+          firstName,
+          lastName,
+          email,
+          passwordHash,
+          encryptedPassword,
+          role,
+          login: generateLoginId(),
+          referralCode: generateReferralCode(),
+          wallet: { create: { balance: 0, credit: 0, currency: "USDT" } },
+          settings: { create: {} },
+          spotWallets: {
+            create: SPOT_CURRENCIES.map((currency) => ({ currency, balance: 0 })),
+          },
+        },
+      });
+      break;
+    } catch (err) {
+      const isReferralCodeCollision =
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002" &&
+        (err.meta?.target as string[] | undefined)?.includes("referralCode");
+      if (!isReferralCodeCollision) throw err;
+    }
+  }
+  if (!user) {
+    console.error("[create-admin] Could not generate a unique referral code, try again.");
+    process.exit(1);
+  }
 
   console.log(`[create-admin] Created ${role} account ${user.email} (id: ${user.id}).`);
 }

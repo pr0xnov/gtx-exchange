@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { ensureSpotWallet } from "@/lib/spot/wallet";
+import { tryAwardReferralSignupBonus } from "@/lib/referral/reward";
+import { tryAwardFirstDepositBonus } from "@/lib/bonus/first-deposit";
 import { transactionDecisionSchema } from "@/lib/validation/admin";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { createAuditLog } from "@/lib/audit/log";
@@ -71,6 +73,32 @@ export async function PATCH(
         // DEPOSIT + REJECT: balance was never touched — nothing to do.
         // WITHDRAWAL + APPROVE: balance was already debited on creation —
         // nothing to do (touching it again here would double-debit).
+
+        // Two independent, promotional wallet credits — evaluated ONLY on
+        // a DEPOSIT being approved (never on creation/PENDING, never on a
+        // WITHDRAWAL or a REJECT), only inside this same transaction, and
+        // both computed ONLY from `current.amount` (the original approved
+        // deposit) — never from each other, and neither ever recurses
+        // into itself (FIRST_DEPOSIT_BONUS/REFERRAL_BONUS transactions are
+        // never DEPOSIT rows, so neither bonus can ever trigger a bonus):
+        //  - the DEPOSITOR's own 20% first-deposit bonus (once per user,
+        //    ever — see lib/bonus/first-deposit.ts for the DB-enforced
+        //    idempotency guarantee), then
+        //  - their referrer's 10%-capped-at-100 referral reward (once per
+        //    referred user, ever — see lib/referral/reward.ts). Both can
+        //    apply to the same deposit since they credit different users.
+        if (current.type === "DEPOSIT" && input.decision === "APPROVE") {
+          await tryAwardFirstDepositBonus(tx, {
+            id: current.id,
+            userId: current.userId,
+            amount: current.amount,
+          });
+          await tryAwardReferralSignupBonus(tx, {
+            id: current.id,
+            userId: current.userId,
+            amount: current.amount,
+          });
+        }
 
         await tx.notification.create({
           data: {

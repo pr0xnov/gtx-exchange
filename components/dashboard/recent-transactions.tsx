@@ -13,6 +13,8 @@ const TYPE_SIGN: Record<string, 1 | -1> = {
   BONUS: 1,
   WITHDRAWAL: -1,
   TRADE_SETTLEMENT: 1,
+  REFERRAL_BONUS: 1,
+  FIRST_DEPOSIT_BONUS: 1,
 };
 
 const TYPE_LABEL_KEY: Record<string, DictionaryKey> = {
@@ -20,6 +22,8 @@ const TYPE_LABEL_KEY: Record<string, DictionaryKey> = {
   WITHDRAWAL: "account.transactionType.withdrawal",
   BONUS: "account.transactionType.bonus",
   TRADE_SETTLEMENT: "account.transactionType.trade",
+  REFERRAL_BONUS: "account.transactionType.referralBonus",
+  FIRST_DEPOSIT_BONUS: "account.transactionType.firstDepositBonus",
 };
 
 // Same rule as the History page: ADMIN_BALANCE_ADJUSTMENT is still the

@@ -17,6 +17,7 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:studio": "prisma studio",
     "create-admin": "tsx scripts/create-admin.ts",
+    "backfill-referral-codes": "tsx scripts/backfill-referral-codes.ts",
     "postinstall": "prisma generate",
     "prepare": "husky"
   },

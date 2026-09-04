@@ -138,7 +138,9 @@ describe("Deposit — create then Approve", () => {
     loginAs(admin);
     const approveRes = await decide(created.id, "APPROVE");
     expect(approveRes.status).toBe(200);
-    expect(await usdtBalance(user.id)).toBe(100);
+    // 100 deposit + 100*20% first-deposit bonus (their first-ever approved
+    // deposit) — see lib/bonus/first-deposit.ts.
+    expect(await usdtBalance(user.id)).toBe(120);
 
     const tx = await prisma.transaction.findUniqueOrThrow({ where: { id: created.id } });
     expect(tx.status).toBe("COMPLETED");
@@ -178,11 +180,11 @@ describe("Deposit — double Approve protection", () => {
     const admin = await seedAdmin();
     loginAs(admin);
     await decide(created.id, "APPROVE");
-    expect(await usdtBalance(user.id)).toBe(100);
+    expect(await usdtBalance(user.id)).toBe(120); // 100 deposit + 20 first-deposit bonus
 
     const secondApprove = await decide(created.id, "APPROVE");
     expect(secondApprove.status).toBe(400);
-    expect(await usdtBalance(user.id)).toBe(100); // unchanged, not 200
+    expect(await usdtBalance(user.id)).toBe(120); // unchanged, not 240
   });
 
   it("Approve then Reject on the same transaction is rejected — no refund/second decision", async () => {
@@ -199,7 +201,7 @@ describe("Deposit — double Approve protection", () => {
 
     const rejectAfterApprove = await decide(created.id, "REJECT");
     expect(rejectAfterApprove.status).toBe(400);
-    expect(await usdtBalance(user.id)).toBe(100); // still the approved credit, nothing extra
+    expect(await usdtBalance(user.id)).toBe(120); // still just the approved credit + its bonus, nothing extra
   });
 });
 

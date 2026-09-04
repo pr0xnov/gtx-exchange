@@ -12,6 +12,15 @@ export const registerSchema = z.object({
   agreeToTerms: z.literal(true, {
     errorMap: () => ({ message: "You must agree to the Privacy Policy" }),
   }),
+  // Optional — a blank/whitespace-only value means "no referral code",
+  // never a validation error (only a non-empty code that doesn't match
+  // any existing user's is rejected, in the route itself).
+  referralCode: z
+    .string()
+    .trim()
+    .max(20)
+    .optional()
+    .transform((v) => (v ? v : undefined)),
 });
 
 export const loginSchema = z.object({

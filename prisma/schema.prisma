@@ -80,6 +80,22 @@ model User {
   dateOfBirth DateTime?
   address     String?
 
+  // Referral program: generated once server-side at registration (see
+  // app/api/auth/register/route.ts + lib/referral/code.ts), permanent —
+  // no route ever regenerates or edits it after creation.
+  referralCode String @unique
+
+  // Who referred this user, set ONLY at registration from an optional,
+  // validated referral code (see registerSchema) — never null-to-non-null
+  // afterward, so the relationship is immutable once created. Self-
+  // referral is structurally impossible here (the referrer must already
+  // exist; a brand-new user can't yet know its own not-yet-generated
+  // code) and app/lib/referral/reward.ts additionally refuses to reward a
+  // referrer that equals the referred user, as defense in depth.
+  referredById String?
+  referredBy   User?   @relation("ReferralInvite", fields: [referredById], references: [id])
+  referrals    User[]  @relation("ReferralInvite")
+
   wallet        Wallet?
   orders        Order[]
   positions     Position[]
@@ -99,8 +115,17 @@ model User {
   balanceAdjustmentsMade     BalanceAdjustment[] @relation("BalanceAdjustmentAdmin")
   auditLogEntries            AuditLog[]          @relation("AuditLogAdmin")
 
+  // See ReferralReward below — a User can be the referrer on many reward
+  // rows but the referred party on at most one (its referredUserId is
+  // @unique, enforcing "one signup reward per referred user" at the DB
+  // level).
+  referralRewardsGiven   ReferralReward[] @relation("ReferralRewardReferrer")
+  referralRewardReceived ReferralReward?  @relation("ReferralRewardReferred")
+  firstDepositBonus      FirstDepositBonus?
+
   @@index([email])
   @@index([role])
+  @@index([referredById])
 }
 
 model UserSettings {
@@ -222,6 +247,8 @@ enum TransactionType {
   BONUS
   TRADE_SETTLEMENT
   ADMIN_BALANCE_ADJUSTMENT
+  REFERRAL_BONUS
+  FIRST_DEPOSIT_BONUS
 }
 
 enum TransactionStatus {
@@ -233,6 +260,57 @@ enum TransactionStatus {
 enum TransactionDirection {
   CREDIT
   DEBIT
+}
+
+/**
+ * One row per referred user who has EVER triggered the signup referral
+ * reward — at most one, ever, enforced by referredUserId's @unique
+ * constraint (see lib/referral/reward.ts, which relies on this exact
+ * constraint for idempotency: creating this row is the atomic "claim" a
+ * second qualifying deposit or a retried/duplicate deposit approval
+ * cannot win twice). depositTransactionId records which of the referred
+ * user's deposits triggered it; rewardTransactionId links to the
+ * REFERRAL_BONUS Transaction credited to the referrer — nullable only for
+ * the instant between this row being created (the atomic claim) and that
+ * Transaction being created and linked back, both inside the same Prisma
+ * $transaction as the deposit approval itself, so it is never observably
+ * null outside that transaction.
+ */
+model ReferralReward {
+  id                   String   @id @default(cuid())
+  referrerId           String
+  referrer             User     @relation("ReferralRewardReferrer", fields: [referrerId], references: [id])
+  referredUserId       String   @unique
+  referredUser         User     @relation("ReferralRewardReferred", fields: [referredUserId], references: [id])
+  depositTransactionId String   @unique
+  depositAmount        Decimal  @db.Decimal(20, 8)
+  rewardAmount         Decimal  @db.Decimal(20, 8)
+  rewardTransactionId  String?
+  createdAt            DateTime @default(now())
+
+  @@index([referrerId])
+}
+
+/**
+ * One row per user who has EVER triggered the 20% first-deposit bonus —
+ * at most one, ever, enforced by userId's @unique constraint (see
+ * lib/bonus/first-deposit.ts, which relies on this exact constraint for
+ * idempotency the same way ReferralReward.referredUserId does: creating
+ * this row is the atomic "claim" a second approved deposit or a
+ * retried/duplicate deposit approval cannot win twice). No cap on
+ * bonusAmount — the 20% first-deposit bonus is currently uncapped, unlike
+ * the referral reward. rewardTransactionId mirrors ReferralReward's own
+ * nullable-until-linked field for the same reason (see its comment).
+ */
+model FirstDepositBonus {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id])
+  depositTransactionId String   @unique
+  depositAmount        Decimal  @db.Decimal(20, 8)
+  bonusAmount          Decimal  @db.Decimal(20, 8)
+  bonusTransactionId   String?
+  createdAt            DateTime @default(now())
 }
 
 // ---------------------------------------------------------------------------

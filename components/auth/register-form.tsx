@@ -16,6 +16,7 @@ interface FieldErrors {
   email?: string;
   password?: string;
   agreeToTerms?: string;
+  referralCode?: string;
 }
 
 export function RegisterForm() {
@@ -30,6 +31,7 @@ export function RegisterForm() {
     email: "",
     password: "",
     agreeToTerms: false,
+    referralCode: "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -49,7 +51,14 @@ export function RegisterForm() {
         if (json.details) {
           const fieldErrors: FieldErrors = {};
           for (const [key, msgs] of Object.entries(json.details)) {
-            fieldErrors[key as keyof FieldErrors] = (msgs as string[])[0];
+            const raw = (msgs as string[])[0];
+            // The server sends a stable sentinel (not a display string)
+            // for this one field so the client can show it in the
+            // viewer's own locale rather than a hardcoded server string.
+            fieldErrors[key as keyof FieldErrors] =
+              key === "referralCode" && raw === "INVALID_REFERRAL_CODE"
+                ? t("auth.register.invalidReferralCode")
+                : raw;
           }
           setErrors(fieldErrors);
         } else {
@@ -128,6 +137,18 @@ export function RegisterForm() {
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="referralCode">{t("auth.register.referralCodeLabel")}</Label>
+        <Input
+          id="referralCode"
+          className="mt-1.5"
+          placeholder={t("auth.register.referralCodePlaceholder")}
+          value={form.referralCode}
+          error={errors.referralCode}
+          onChange={(e) => setForm({ ...form, referralCode: e.target.value })}
+        />
       </div>
 
       <div className="flex items-start gap-2 pt-1">

@@ -73,22 +73,23 @@ export function TradingTerminal() {
   const displayName = DISPLAY_NAMES[symbol] ?? symbol;
 
   return (
-    // Nested under the shared Navbar (h-16) via the (dashboard) layout, so
-    // it fills the remaining viewport height instead of the full screen.
-    // The chart's own container resizes via lightweight-charts' autoSize
-    // ResizeObserver — nothing here needs to touch the chart directly.
-    <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
-      <div className="flex min-h-0 flex-1 overflow-hidden">
+    // Nested under the shared Navbar (h-16) via the (dashboard) layout.
+    // No outer height cap here on purpose — the top workspace row below
+    // gets its own explicit height, and OrdersWorkspace stacks under it
+    // at its natural height, so the page (not this container) scrolls
+    // once the two combined exceed one viewport, exactly the way
+    // (dashboard)/layout.tsx's own min-h-screen/no-overflow-clip main
+    // already expects any page under it to behave.
+    <div className="flex flex-col bg-background">
+      {/* Top trading workspace (sidebar/chart/Spot panel) — fixed at
+          exactly the height it had before Open Orders/History moved out
+          from inside it (100vh-4rem minus the 13rem/h-52 that panel used
+          to occupy in this column), so the chart's own flex-1 resolves
+          to the exact same pixel height as before. shrink-0 keeps that
+          height fixed regardless of anything below it. */}
+      <div className="flex h-[calc(100vh-4rem-13rem)] shrink-0 overflow-hidden">
         <AssetWatchlist prices={prices} selected={symbol} onSelect={setSymbol} />
 
-        {/* SpotOrdersPanel below has its own fixed height and internal
-            scroll (it never grows with row count), so the chart's
-            flex-1/min-h-0 always resolves to the exact same remaining
-            space regardless of tab or order count — no elastic squeeze,
-            no resize on tab switch. overflow-y-auto here is just a
-            fallback for viewports too short to fit chart + orders at
-            all, so that case degrades to a scrollbar instead of clipped,
-            unreachable content — it doesn't engage in the normal case. */}
         <div className="flex flex-1 flex-col overflow-y-auto">
           <TerminalTopbar />
           {timeframeReady ? (
@@ -131,7 +132,6 @@ export function TradingTerminal() {
               </div>
             </>
           )}
-          <SpotOrdersPanel />
         </div>
 
         <div className="flex h-full w-80 shrink-0 flex-col border-l border-border">
@@ -142,6 +142,14 @@ export function TradingTerminal() {
           />
         </div>
       </div>
+
+      {/* OrdersWorkspace — full-width row below the entire top workspace
+          (spans market sidebar + chart + Spot panel's combined width, not
+          just the chart column), same single SpotOrdersPanel instance
+          moved here rather than duplicated. Its own root already carries
+          border-t border-border, which is exactly the "subtle top
+          border" seam this needs — no extra wrapper required. */}
+      <SpotOrdersPanel />
     </div>
   );
 }

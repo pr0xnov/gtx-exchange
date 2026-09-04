@@ -173,14 +173,15 @@ describe("TradingTerminal — Spot-only", () => {
   });
 });
 
-describe("TradingTerminal — chart height is stable regardless of Open Orders row count/tab", () => {
+describe("TradingTerminal — chart dimensions are unaffected by Open Orders/History", () => {
   // Regression coverage: the chart wrapper must stay a plain
   // min-h-0/flex-1 flex item (i.e. "take exactly what's left after
   // fixed-size siblings"), never an elastic floor or anything else that
-  // would make its size depend on how many order rows are below it.
-  // Open Orders/History themselves must own a fixed height + their own
-  // scroll (asserted in tests/spot-orders-panel.test.ts) so they never
-  // compete with the chart for space in the first place.
+  // would make its size depend on how many order rows exist. Open
+  // Orders/History now lives entirely OUTSIDE the top workspace row (see
+  // the OrdersWorkspace describe block below) — it can't compete with
+  // the chart for space even in principle, since it's no longer even a
+  // descendant of the column the chart sits in.
   // CandlestickChart's own root (`<div className="relative h-full w-full">`,
   // see components/trading/candlestick-chart.tsx) is real, unmocked markup
   // — its parent is trading-terminal.tsx's chart wrapper. Locating it this
@@ -203,26 +204,84 @@ describe("TradingTerminal — chart height is stable regardless of Open Orders r
     expect(chartWrapper.className).toContain("flex-1");
   });
 
-  it("the center column (chart + Open Orders) has a scroll fallback, not a hard clip", () => {
+  it("the center column (topbar + chart) has a scroll fallback, not a hard clip", () => {
     renderTerminal();
     const centerColumn = chartWrapperEl().parentElement as HTMLElement;
     expect(centerColumn.className).toContain("overflow-y-auto");
   });
 
-  it("the row above the center column still clips (so the watchlist sidebar keeps its own fixed height/scroll)", () => {
+  it("the top workspace row clips, and its height is the viewport minus the navbar minus exactly what Open Orders/History used to occupy inside it — the same budget as before, so the chart's own flex-1 pixel height is unchanged", () => {
     renderTerminal();
     const centerColumn = chartWrapperEl().parentElement as HTMLElement;
     const row = centerColumn.parentElement as HTMLElement;
     expect(row.className).toContain("overflow-hidden");
+    expect(row.className).toContain("shrink-0");
+    expect(row.className).toMatch(/h-\[calc\(100vh-4rem-13rem\)\]/);
   });
+});
 
-  it("Open Orders carries its own fixed height, not an auto height competing with the chart", () => {
-    renderTerminal();
+describe("TradingTerminal — OrdersWorkspace: Open Orders/History as a full-width row below the top workspace", () => {
+  function ordersPanelRoot(): HTMLElement {
     const ordersHeading = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.startsWith("Open orders")
     )!;
-    // Panel root is the tab bar's parent.
-    const panel = ordersHeading.parentElement!.parentElement as HTMLElement;
-    expect(panel.className).toMatch(/\bh-52\b/);
+    expect(ordersHeading, "expected to find the Open orders tab button").toBeTruthy();
+    return ordersHeading.parentElement!.parentElement as HTMLElement;
+  }
+
+  function topWorkspaceRow(): HTMLElement {
+    const chartRoot = container.querySelector<HTMLElement>(".relative.h-full.w-full")!;
+    // chartRoot -> chart wrapper (min-h-0/flex-1) -> center column
+    // (overflow-y-auto) -> the row itself.
+    return chartRoot.parentElement!.parentElement!.parentElement as HTMLElement;
+  }
+
+  it("exactly one Open Orders/History instance exists — never duplicated", () => {
+    renderTerminal();
+    const matches = Array.from(container.querySelectorAll("button")).filter((b) =>
+      b.textContent?.startsWith("Open orders")
+    );
+    expect(matches).toHaveLength(1);
+  });
+
+  it("still carries its own fixed height (unchanged — only its position in the tree moved)", () => {
+    renderTerminal();
+    expect(ordersPanelRoot().className).toMatch(/\bh-52\b/);
+  });
+
+  it("is a SIBLING of the top workspace row, not nested inside it (so it isn't constrained to the chart column's width)", () => {
+    renderTerminal();
+    const row = topWorkspaceRow();
+    const orders = ordersPanelRoot();
+    expect(row.contains(orders)).toBe(false);
+    expect(orders.parentElement).toBe(row.parentElement);
+  });
+
+  it("shares the same left/right edges as the top workspace (same parent, block-level full width — spans market sidebar + chart + Spot panel combined)", () => {
+    renderTerminal();
+    const row = topWorkspaceRow();
+    const orders = ordersPanelRoot();
+    expect(orders.parentElement).toBe(row.parentElement);
+    // A block-level sibling with no width/margin constraint of its own
+    // naturally spans the same content width as `row` (a flex item that
+    // already fills that same parent) — asserting the shared parent (and
+    // that `orders` carries no independent width-limiting class) is the
+    // meaningful, resolution-independent check in jsdom (no real layout
+    // engine to read computed pixel widths from).
+    expect(orders.className).not.toMatch(/\bw-(\d+|px|screen|\[.*\])\b/);
+  });
+
+  it("comes AFTER the top workspace in document order (below it, not above)", () => {
+    renderTerminal();
+    const row = topWorkspaceRow();
+    const orders = ordersPanelRoot();
+    expect(
+      row.compareDocumentPosition(orders) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("keeps its existing top border as the seam between the two workspaces", () => {
+    renderTerminal();
+    expect(ordersPanelRoot().className).toContain("border-t");
   });
 });

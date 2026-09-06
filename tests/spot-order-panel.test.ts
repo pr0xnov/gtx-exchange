@@ -19,22 +19,26 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mutateAsync = vi.fn().mockResolvedValue({});
+let walletData = [
+  { currency: "USDT", balance: 65.94, locked: 0 },
+  { currency: "BTC", balance: 0.027464, locked: 0 },
+];
 vi.mock("@/hooks/use-api", () => ({
   useCreateSpotOrder: () => ({ mutateAsync, isPending: false }),
-  useSpotWallet: () => ({
-    data: [
-      { currency: "USDT", balance: 65.94, locked: 0 },
-      { currency: "BTC", balance: 0.027464, locked: 0 },
-    ],
-    isLoading: false,
-  }),
+  useSpotWallet: () => ({ data: walletData, isLoading: false }),
 }));
+
+const DEFAULT_WALLET = [
+  { currency: "USDT", balance: 65.94, locked: 0 },
+  { currency: "BTC", balance: 0.027464, locked: 0 },
+];
 
 let container: HTMLDivElement;
 let root: Root;
 
 beforeEach(() => {
   mutateAsync.mockClear();
+  walletData = DEFAULT_WALLET;
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
@@ -45,7 +49,9 @@ afterEach(() => {
   container.remove();
 });
 
-function render() {
+function render(
+  overrides: Partial<{ symbol: string; displayName: string; livePrice: number }> = {}
+) {
   act(() => {
     root.render(
       React.createElement(
@@ -55,6 +61,7 @@ function render() {
           symbol: "BTCUSDT",
           displayName: "BTC/USD",
           livePrice: 63620,
+          ...overrides,
         })
       )
     );
@@ -62,7 +69,15 @@ function render() {
 }
 
 function quantityInput(): HTMLInputElement {
-  return container.querySelector('input[type="number"]') as HTMLInputElement;
+  return container.querySelector("#spot-order-quantity") as HTMLInputElement;
+}
+
+function quoteAmountInput(): HTMLInputElement | null {
+  return container.querySelector("#spot-order-quote-amount");
+}
+
+function limitPriceInput(): HTMLInputElement | null {
+  return container.querySelector("#spot-order-limit-price");
 }
 
 function sliderInput(): HTMLInputElement {
@@ -196,6 +211,158 @@ describe("SpotOrderPanel — submit", () => {
     clickButton("Sell BTC");
     expect(mutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ side: "SELL", type: "MARKET", quantity: qty })
+    );
+  });
+});
+
+describe("SpotOrderPanel — BUY by exact USDT amount", () => {
+  it("shows an Amount (USDT) field for BUY, hidden for SELL", () => {
+    render();
+    expect(quoteAmountInput()).not.toBeNull();
+    clickButton("Sell");
+    expect(quoteAmountInput()).toBeNull();
+  });
+
+  it("MARKET: entering 400 USDT at a price of 80,000 computes 0.005 BTC", () => {
+    walletData = [
+      { currency: "USDT", balance: 10_000, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+    render({ livePrice: 80000 });
+    setValue(quoteAmountInput()!, "400");
+    expect(parseFloat(quantityInput().value)).toBeCloseTo(0.005, 8);
+  });
+
+  it("MARKET: entering 0.01 BTC at a price of 80,000 computes 800 USDT", () => {
+    walletData = [
+      { currency: "USDT", balance: 10_000, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+    render({ livePrice: 80000 });
+    setValue(quantityInput(), "0.01");
+    expect(parseFloat(quoteAmountInput()!.value)).toBeCloseTo(800, 2);
+  });
+
+  it("LIMIT: uses the entered limit price, not the live market price, for the USDT<->quantity link", () => {
+    walletData = [
+      { currency: "USDT", balance: 10_000, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+    render({ livePrice: 999999 }); // deliberately far from the limit price
+    clickButton("Limit");
+    setValue(limitPriceInput()!, "70000");
+    setValue(quoteAmountInput()!, "700");
+    expect(parseFloat(quantityInput().value)).toBeCloseTo(0.01, 8);
+  });
+
+  it("changing the limit price recalculates quantity from the preserved USDT amount", () => {
+    walletData = [
+      { currency: "USDT", balance: 10_000, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+    render();
+    clickButton("Limit");
+    setValue(limitPriceInput()!, "70000");
+    setValue(quoteAmountInput()!, "700");
+    expect(parseFloat(quantityInput().value)).toBeCloseTo(0.01, 8);
+
+    setValue(limitPriceInput()!, "35000");
+    expect(quoteAmountInput()!.value).toBe("700"); // preserved, not overwritten
+    expect(parseFloat(quantityInput().value)).toBeCloseTo(0.02, 8); // recalculated
+  });
+
+  it("a live MARKET price change preserves the USDT amount the user typed and updates quantity", () => {
+    walletData = [
+      { currency: "USDT", balance: 10_000, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+    render({ livePrice: 80000 });
+    setValue(quoteAmountInput()!, "800");
+    expect(parseFloat(quantityInput().value)).toBeCloseTo(0.01, 8);
+
+    render({ livePrice: 40000 }); // price ticks down
+    expect(quoteAmountInput()!.value).toBe("800"); // preserved
+    expect(parseFloat(quantityInput().value)).toBeCloseTo(0.02, 8); // recomputed
+  });
+
+  it("a live MARKET price change preserves a directly-typed quantity and updates the USDT estimate", () => {
+    walletData = [
+      { currency: "USDT", balance: 10_000, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+    render({ livePrice: 80000 });
+    setValue(quantityInput(), "0.01");
+    expect(parseFloat(quoteAmountInput()!.value)).toBeCloseTo(800, 2);
+
+    render({ livePrice: 40000 });
+    expect(quantityInput().value).toBe("0.01"); // preserved
+    expect(parseFloat(quoteAmountInput()!.value)).toBeCloseTo(400, 2); // recomputed
+  });
+
+  it("the quantity field's unit label matches the selected pair — ETH, not BTC", () => {
+    render({ symbol: "ETHUSDT", displayName: "ETH/USDT", livePrice: 2500 });
+    expect(container.textContent).toContain("ETH");
+    expect(container.textContent).not.toContain("(BTC)");
+  });
+
+  it("the quantity field's unit label matches the selected pair — SOL, not BTC", () => {
+    render({ symbol: "SOLUSDT", displayName: "SOL/USDT", livePrice: 150 });
+    expect(container.textContent).toContain("SOL");
+    expect(container.textContent).not.toContain("(BTC)");
+  });
+});
+
+describe("SpotOrderPanel — BUY slider represents percentage of available USDT", () => {
+  beforeEach(() => {
+    walletData = [
+      { currency: "USDT", balance: 4000, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+  });
+
+  it("25% -> 1,000 USDT", () => {
+    render({ livePrice: 80000 });
+    setValue(sliderInput(), "25");
+    expect(parseFloat(quoteAmountInput()!.value)).toBeCloseTo(1000, 2);
+  });
+
+  it("50% -> 2,000 USDT", () => {
+    render({ livePrice: 80000 });
+    setValue(sliderInput(), "50");
+    expect(parseFloat(quoteAmountInput()!.value)).toBeCloseTo(2000, 2);
+  });
+
+  it("100% -> 4,000 USDT", () => {
+    render({ livePrice: 80000 });
+    setValue(sliderInput(), "100");
+    expect(parseFloat(quoteAmountInput()!.value)).toBeCloseTo(4000, 2);
+  });
+});
+
+describe("SpotOrderPanel — a BUY can never submit for more than the available USDT", () => {
+  // The Amount (USDT) input clamps itself to the real available balance
+  // as the user types (handleQuoteAmountChange), so entering 600 against
+  // a 500 USDT balance never reaches the submit handler as 600 at all —
+  // it's already 500 by the time Buy is clicked. This is a STRONGER
+  // guarantee than a submit-time rejection: the order can never even be
+  // built with an over-large amount. The submit-time
+  // trading.orderPanel.errors.insufficientUsdt ("Недостаточно USDT")
+  // branch in spot-order-panel.tsx remains as defense-in-depth for a
+  // quantity that somehow bypasses the input handlers; the backend's own
+  // atomic balance check (app/api/spot/orders/route.ts) is what actually
+  // guards this regardless of what the UI does.
+  it("entering more USDT than available clamps down to the real balance before it can ever be submitted", () => {
+    walletData = [
+      { currency: "USDT", balance: 500, locked: 0 },
+      { currency: "BTC", balance: 0, locked: 0 },
+    ];
+    render({ livePrice: 1 }); // price=1 so USDT amount == BTC quantity, for a simple assertion
+    setValue(quoteAmountInput()!, "600");
+    expect(parseFloat(quoteAmountInput()!.value)).toBe(500);
+
+    clickButton("Buy BTC");
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ side: "BUY", quantity: 500 })
     );
   });
 });

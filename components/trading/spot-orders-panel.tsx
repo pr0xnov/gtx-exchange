@@ -4,8 +4,10 @@ import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useSpotOrders, useCancelSpotOrder, type SpotOrderDto } from "@/hooks/use-api";
 import { PairCell } from "@/components/trading/pair-cell";
+import { DISPLAY_NAMES } from "@/components/trading/asset-watchlist";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/i18n/locale-context";
 
@@ -24,13 +26,13 @@ function OrdersTable({
   isLoading,
   emptyMessage,
   cancelPending,
-  onCancel,
+  onRequestCancel,
 }: {
   rows: SpotOrderDto[];
   isLoading: boolean;
   emptyMessage: string;
   cancelPending: boolean;
-  onCancel: (id: string) => void;
+  onRequestCancel: (id: string, symbol: string) => void;
 }) {
   const { t } = useLocale();
   return (
@@ -86,12 +88,23 @@ function OrdersTable({
             </td>
             <td className="font-tabular px-2 py-2.5 text-foreground">
               {o.quantity}
-              {o.status !== "OPEN" && (
-                <span className="text-muted">
-                  {" "}
-                  ({o.filledQuantity} {t("trading.orders.filledSuffix")})
-                </span>
-              )}
+              {/* Only shown for a genuine, nonzero partial fill (0 <
+                  filled < ordered) — zero filled is never worth echoing
+                  (whether OPEN, still untouched, or CANCELLED before any
+                  fill), and a fully FILLED order's filledQuantity always
+                  equals its quantity, so both cases were pure noise;
+                  Status already says Open/Filled/Исполнен for those.
+                  Stays visible for a CANCELLED order that partially
+                  filled first, or an OPEN order that's partially filled
+                  so far — genuinely new information neither the quantity
+                  nor the status column already conveys. */}
+              {parseFloat(o.filledQuantity) > 0 &&
+                parseFloat(o.filledQuantity) !== parseFloat(o.quantity) && (
+                  <span className="text-muted">
+                    {" "}
+                    ({o.filledQuantity} {t("trading.orders.filledSuffix")})
+                  </span>
+                )}
             </td>
             <td className="px-2 py-2.5">
               <Badge
@@ -113,7 +126,7 @@ function OrdersTable({
             <td className="px-4 py-2.5 text-right">
               {o.status === "OPEN" && (
                 <button
-                  onClick={() => onCancel(o.id)}
+                  onClick={() => onRequestCancel(o.id, o.symbol)}
                   disabled={cancelPending}
                   className="rounded-md p-1 text-muted hover:bg-danger/10 hover:text-danger"
                   aria-label={t("trading.orders.cancelAria")}
@@ -136,13 +149,20 @@ function OrdersTable({
 export function SpotOrdersPanel() {
   const { t } = useLocale();
   const [tab, setTab] = useState<"open" | "history">("open");
+  const [pendingCancel, setPendingCancel] = useState<{
+    id: string;
+    symbol: string;
+  } | null>(null);
   const { data: orders, isLoading } = useSpotOrders();
   const cancelOrder = useCancelSpotOrder();
 
   const openOrders = orders?.filter((o) => o.status === "OPEN") ?? [];
   const historyOrders = orders?.filter((o) => o.status !== "OPEN") ?? [];
 
-  async function handleCancel(id: string) {
+  async function handleConfirmCancel() {
+    if (!pendingCancel) return;
+    const { id } = pendingCancel;
+    setPendingCancel(null);
     try {
       await cancelOrder.mutateAsync(id);
       toast.success(t("trading.orders.cancelSuccess"));
@@ -152,7 +172,7 @@ export function SpotOrdersPanel() {
   }
 
   return (
-    <div className="flex h-52 flex-col border-t border-border">
+    <div className="flex flex-col border-t border-border">
       <div className="flex items-center gap-6 border-b border-border px-4">
         <button
           onClick={() => setTab("open")}
@@ -179,39 +199,78 @@ export function SpotOrdersPanel() {
         </button>
       </div>
 
-      {/* Fixed-height (h-52 above) scroll box, independent of the chart —
-          min-h-0 is required so this flex child can actually shrink to
-          that fixed box instead of growing to fit every row (the classic
-          flex/overflow trap); overscroll-contain stops wheel scroll from
-          chaining into the chart/page once the list hits its top/bottom. */}
-      <div
-        className={cn(
-          "min-h-0 flex-1 overflow-y-auto overscroll-contain",
-          tab !== "open" && "hidden"
-        )}
-      >
+      {/* Natural height, normal document flow — deliberately no fixed
+          height/overflow-y-auto scroll box here. As many rows as exist
+          render in full; the PAGE scrolls once this (plus everything
+          above it) exceeds one viewport, rather than a cramped internal
+          mini-scrollbar. */}
+      <div className={cn(tab !== "open" && "hidden")}>
         <OrdersTable
           rows={openOrders}
           isLoading={isLoading}
           emptyMessage={t("trading.orders.emptyOpen")}
           cancelPending={cancelOrder.isPending}
-          onCancel={handleCancel}
+          onRequestCancel={(id, symbol) => setPendingCancel({ id, symbol })}
         />
       </div>
-      <div
-        className={cn(
-          "min-h-0 flex-1 overflow-y-auto overscroll-contain",
-          tab !== "history" && "hidden"
-        )}
-      >
+      <div className={cn(tab !== "history" && "hidden")}>
         <OrdersTable
           rows={historyOrders}
           isLoading={isLoading}
           emptyMessage={t("trading.orders.emptyHistory")}
           cancelPending={cancelOrder.isPending}
-          onCancel={handleCancel}
+          onRequestCancel={(id, symbol) => setPendingCancel({ id, symbol })}
         />
       </div>
+
+      {/* Confirmation modal — z-50, the same layer every other modal in
+          this codebase uses (see components/shared/document-list.tsx),
+          which is deliberately above MarketTicker's z-40 fixed strip so
+          it's never covered by it. */}
+      {pendingCancel && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => !cancelOrder.isPending && setPendingCancel(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold text-foreground">
+              {t("trading.orders.cancelConfirmTitle")}
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              {t("trading.orders.cancelConfirmBodyPrefix")}{" "}
+              <span className="font-medium text-foreground">
+                {DISPLAY_NAMES[pendingCancel.symbol] ?? pendingCancel.symbol}
+              </span>
+              {t("trading.orders.cancelConfirmBodySuffix")}
+            </p>
+            <div className="mt-4 flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setPendingCancel(null)}
+                disabled={cancelOrder.isPending}
+              >
+                {t("trading.orders.cancelConfirmBack")}
+              </Button>
+              <Button
+                variant="danger"
+                className="flex-1"
+                onClick={handleConfirmCancel}
+                disabled={cancelOrder.isPending}
+              >
+                {cancelOrder.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  t("trading.orders.cancelConfirmConfirm")
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

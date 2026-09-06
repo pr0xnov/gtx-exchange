@@ -12,6 +12,7 @@ import {
 } from "@/components/trading/candlestick-chart";
 import { SpotOrderPanel } from "@/components/trading/spot-order-panel";
 import { SpotOrdersPanel } from "@/components/trading/spot-orders-panel";
+import { MarketTicker } from "@/components/trading/market-ticker";
 import { useLivePrices } from "@/hooks/use-live-prices";
 import { useLocale } from "@/lib/i18n/locale-context";
 
@@ -80,7 +81,14 @@ export function TradingTerminal() {
     // once the two combined exceed one viewport, exactly the way
     // (dashboard)/layout.tsx's own min-h-screen/no-overflow-clip main
     // already expects any page under it to behave.
-    <div className="flex flex-col bg-background">
+    //
+    // pb-8 reserves exactly MarketTicker's own height (h-8) at the very
+    // end of the page — MarketTicker itself is `fixed` (removed from
+    // flow, pinned to the viewport bottom), so without this the true
+    // last Order History row would end up permanently hidden behind it
+    // once scrolled all the way down, with no way to scroll further to
+    // reveal it.
+    <div className="flex flex-col bg-background pb-8">
       {/* Top trading workspace (sidebar/chart/Spot panel) — fixed at
           exactly the height it had before Open Orders/History moved out
           from inside it (100vh-4rem minus the 13rem/h-52 that panel used
@@ -148,8 +156,16 @@ export function TradingTerminal() {
           just the chart column), same single SpotOrdersPanel instance
           moved here rather than duplicated. Its own root already carries
           border-t border-border, which is exactly the "subtle top
-          border" seam this needs — no extra wrapper required. */}
+          border" seam this needs — no extra wrapper required. Renders at
+          its natural height (no internal scrollbox) — the page itself
+          scrolls once this plus the top workspace exceed one viewport. */}
       <SpotOrdersPanel />
+
+      {/* MarketTicker — after the complete OrdersWorkspace, in normal
+          document flow (not sticky/fixed). Same `prices` map already
+          subscribed to above via useLivePrices(), not a second
+          connection. */}
+      <MarketTicker prices={prices} onSelect={setSymbol} />
     </div>
   );
 }

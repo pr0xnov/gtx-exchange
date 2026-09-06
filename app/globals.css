@@ -123,3 +123,21 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Trading's MarketTicker (components/trading/market-ticker.tsx) — a
+ * continuous, seamless right-to-left scroll. Translates by exactly one
+ * rendered sequence's own measured width (--gtx-ticker-distance, set
+ * inline per-render from a real getBoundingClientRect() call) rather
+ * than a hardcoded -50%, so it never drifts/jumps even if content width
+ * changes (locale, symbol count, font). The genuinely reduced-motion
+ * case is handled by the component itself switching to a static,
+ * manually-scrollable list — the global rule above still independently
+ * guards this specific animation too. */
+@keyframes gtx-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--gtx-ticker-distance, -50%));
+  }
+}

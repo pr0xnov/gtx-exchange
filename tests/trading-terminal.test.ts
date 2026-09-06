@@ -244,9 +244,11 @@ describe("TradingTerminal — OrdersWorkspace: Open Orders/History as a full-wid
     expect(matches).toHaveLength(1);
   });
 
-  it("still carries its own fixed height (unchanged — only its position in the tree moved)", () => {
+  it("renders at its natural height — no internal fixed-height scrollbox — so the page scrolls instead of a cramped inner one", () => {
     renderTerminal();
-    expect(ordersPanelRoot().className).toMatch(/\bh-52\b/);
+    const root = ordersPanelRoot();
+    expect(root.className).not.toMatch(/\bh-52\b/);
+    expect(root.className).not.toContain("overflow-y-auto");
   });
 
   it("is a SIBLING of the top workspace row, not nested inside it (so it isn't constrained to the chart column's width)", () => {
@@ -283,5 +285,52 @@ describe("TradingTerminal — OrdersWorkspace: Open Orders/History as a full-wid
   it("keeps its existing top border as the seam between the two workspaces", () => {
     renderTerminal();
     expect(ordersPanelRoot().className).toContain("border-t");
+  });
+});
+
+describe("TradingTerminal — MarketTicker: actually mounted, after OrdersWorkspace, wired to pair selection", () => {
+  it("is genuinely rendered (not just imported) — real pair symbols appear in the DOM", () => {
+    renderTerminal();
+    expect(container.textContent).toContain("ETH/USDT");
+    expect(container.textContent).toContain("BNB/USDT");
+  });
+
+  it("comes after OrdersWorkspace in document order (bottom of the page)", () => {
+    renderTerminal();
+    const ordersHeading = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.startsWith("Open orders")
+    )!;
+    const ordersRoot = ordersHeading.parentElement!.parentElement as HTMLElement;
+    const tickerButton = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("ETH/USDT")
+    )!;
+    expect(
+      ordersRoot.compareDocumentPosition(tickerButton) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("clicking a ticker pair selects it in the chart — same pair-selection mechanism as the sidebar", () => {
+    renderTerminal();
+    const h2Texts = () =>
+      Array.from(container.querySelectorAll("h2")).map((h) => h.textContent);
+    expect(h2Texts()).toContain("BTC/USDT");
+
+    const ethTickerButton = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("ETH/USDT")
+    )!;
+    act(() => {
+      ethTickerButton.click();
+    });
+
+    expect(h2Texts()).toContain("ETH/USDT");
+  });
+
+  it("reserves bottom padding matching the ticker's own height, so the fixed ticker never permanently covers the last Order History row", () => {
+    renderTerminal();
+    // MarketTicker is `fixed` (removed from flow) — the page root must
+    // carry its own compensating padding-bottom, since nothing else
+    // pushes content up out from under it.
+    const pageRoot = container.firstElementChild as HTMLElement;
+    expect(pageRoot.className).toContain("pb-8");
   });
 });

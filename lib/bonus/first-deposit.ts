@@ -36,12 +36,31 @@ export function computeFirstDepositBonus(depositAmount: Prisma.Decimal): Prisma.
  * after this, the deposit approval's own notification write) would
  * error too until a ROLLBACK happens. Rolling back to a savepoint undoes
  * only this claim attempt.
+ *
+ * IP-based anti-abuse (free, no third-party service): before crediting
+ * anything, checks whether another account has already been PAID this
+ * same bonus from the depositor's own lastKnownIp (see User.lastKnownIp
+ * — captured server-side at registration/login, never client-supplied).
+ * A match doesn't touch the deposit itself (it's already credited by the
+ * caller) and doesn't block the claim row from being created (the
+ * idempotency guarantee above must still hold — a user gets at most one
+ * FirstDepositBonus row, paid or not) — it just leaves this one
+ * unpaid/flagged for manual review instead of auto-crediting. IP is
+ * intentionally a soft signal, not an identity check: it's null whenever
+ * unverifiable (see lib/security/client-ip.ts), in which case the check
+ * is skipped and the bonus pays normally — an absent signal must never
+ * itself deny a legitimate user their bonus.
  */
 export async function tryAwardFirstDepositBonus(
   tx: TxClient,
   deposit: { id: string; userId: string; amount: Prisma.Decimal }
 ): Promise<void> {
   const bonusAmount = computeFirstDepositBonus(deposit.amount);
+
+  const depositor = await tx.user.findUniqueOrThrow({
+    where: { id: deposit.userId },
+    select: { lastKnownIp: true, lastKnownDeviceHash: true },
+  });
 
   await tx.$executeRaw`SAVEPOINT first_deposit_bonus_claim`;
 
@@ -53,6 +72,8 @@ export async function tryAwardFirstDepositBonus(
         depositTransactionId: deposit.id,
         depositAmount: deposit.amount,
         bonusAmount,
+        claimIp: depositor.lastKnownIp,
+        claimDeviceHash: depositor.lastKnownDeviceHash,
       },
     });
   } catch (err) {
@@ -64,6 +85,28 @@ export async function tryAwardFirstDepositBonus(
     throw err;
   }
   await tx.$executeRaw`RELEASE SAVEPOINT first_deposit_bonus_claim`;
+
+  if (depositor.lastKnownIp) {
+    const priorPayoutFromSameIp = await tx.firstDepositBonus.findFirst({
+      where: {
+        claimIp: depositor.lastKnownIp,
+        userId: { not: deposit.userId },
+        bonusTransactionId: { not: null },
+      },
+      select: { id: true },
+    });
+    if (priorPayoutFromSameIp) {
+      // Claim row stays (idempotency is preserved — this user can never
+      // trigger a second attempt), but bonusTransactionId is never set,
+      // so nothing is credited. Not exposed to the user; an admin can
+      // find these via FirstDepositBonus.reviewReason.
+      await tx.firstDepositBonus.update({
+        where: { id: bonus.id },
+        data: { reviewReason: "DUPLICATE_IP" },
+      });
+      return;
+    }
+  }
 
   await ensureSpotWallet(tx, deposit.userId, "USDT");
   await tx.spotWallet.update({

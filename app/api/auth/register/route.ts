@@ -12,6 +12,7 @@ import { setAuthCookies } from "@/lib/auth/cookies";
 import { registerSchema } from "@/lib/validation/auth";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { getTrustedClientIp, getDeviceHash } from "@/lib/security/client-ip";
 import { generateLoginId } from "@/lib/utils";
 import { SPOT_CURRENCIES } from "@/lib/spot/currencies";
 import { generateReferralCode, normalizeReferralCode } from "@/lib/referral/code";
@@ -24,8 +25,18 @@ function createUser(params: {
   encryptedPassword: string | null;
   referrerId: string | null;
   referralCode: string;
+  lastKnownIp: string | null;
+  lastKnownDeviceHash: string | null;
 }) {
-  const { input, passwordHash, encryptedPassword, referrerId, referralCode } = params;
+  const {
+    input,
+    passwordHash,
+    encryptedPassword,
+    referrerId,
+    referralCode,
+    lastKnownIp,
+    lastKnownDeviceHash,
+  } = params;
   return prisma.user.create({
     data: {
       firstName: input.firstName,
@@ -36,6 +47,8 @@ function createUser(params: {
       login: generateLoginId(),
       referralCode,
       referredById: referrerId,
+      lastKnownIp,
+      lastKnownDeviceHash,
       wallet: { create: { balance: 0, credit: 0, currency: "USDT" } },
       settings: { create: {} },
       // Spot wallet is a separate ledger from the futures margin wallet
@@ -91,6 +104,9 @@ export async function POST(req: NextRequest) {
     const passwordHash = await hashPassword(input.password);
     const encryptedPassword = maybeEncryptPassword(input.password);
 
+    const lastKnownIp = getTrustedClientIp(req.headers);
+    const lastKnownDeviceHash = getDeviceHash(req.headers);
+
     let user: Awaited<ReturnType<typeof createUser>> | undefined;
     for (let attempt = 0; attempt < MAX_REFERRAL_CODE_GENERATION_ATTEMPTS; attempt++) {
       try {
@@ -100,6 +116,8 @@ export async function POST(req: NextRequest) {
           encryptedPassword,
           referrerId,
           referralCode: generateReferralCode(),
+          lastKnownIp,
+          lastKnownDeviceHash,
         });
         break;
       } catch (err) {

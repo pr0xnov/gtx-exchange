@@ -7,6 +7,7 @@ import { verifyTotpCode } from "@/lib/auth/totp";
 import { decryptSecret } from "@/lib/auth/crypto";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { getTrustedClientIp, getDeviceHash } from "@/lib/security/client-ip";
 import { createAuditLog } from "@/lib/audit/log";
 
 const verify2faLoginSchema = z.object({
@@ -63,6 +64,16 @@ export async function POST(req: NextRequest) {
     }
 
     await establishSession(user);
+
+    // See app/api/auth/login/route.ts for why this is captured here too —
+    // the 2FA step is the one that actually completes a login when it's on.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastKnownIp: getTrustedClientIp(req.headers),
+        lastKnownDeviceHash: getDeviceHash(req.headers),
+      },
+    });
 
     if (user.role !== "USER") {
       await createAuditLog({

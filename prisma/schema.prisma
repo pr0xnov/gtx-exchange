@@ -96,6 +96,17 @@ model User {
   referredBy   User?   @relation("ReferralInvite", fields: [referredById], references: [id])
   referrals    User[]  @relation("ReferralInvite")
 
+  // Anti-abuse signal for the first-deposit bonus (see
+  // lib/bonus/first-deposit.ts) — NOT an identity mechanism, just a
+  // fraud-detection input. Updated on every successful registration/login
+  // (see lib/security/client-ip.ts) so it reflects the most recent known
+  // connection, not just the one at signup. lastKnownIp is null whenever
+  // it couldn't be verified (no trusted reverse proxy configured — see
+  // TRUST_PROXY_HEADERS); lastKnownDeviceHash is a hash of the browser's
+  // own User-Agent header, never a fingerprint.
+  lastKnownIp         String?
+  lastKnownDeviceHash String?
+
   wallet        Wallet?
   orders        Order[]
   positions     Position[]
@@ -119,8 +130,8 @@ model User {
   // rows but the referred party on at most one (its referredUserId is
   // @unique, enforcing "one signup reward per referred user" at the DB
   // level).
-  referralRewardsGiven   ReferralReward[] @relation("ReferralRewardReferrer")
-  referralRewardReceived ReferralReward?  @relation("ReferralRewardReferred")
+  referralRewardsGiven   ReferralReward[]   @relation("ReferralRewardReferrer")
+  referralRewardReceived ReferralReward?    @relation("ReferralRewardReferred")
   firstDepositBonus      FirstDepositBonus?
 
   @@index([email])
@@ -185,18 +196,18 @@ model Wallet {
 }
 
 model Transaction {
-  id        String                @id @default(cuid())
-  userId    String
-  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      TransactionType
-  method    String?
+  id                 String                @id @default(cuid())
+  userId             String
+  user               User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type               TransactionType
+  method             String?
   // Only meaningful for a USDT DEPOSIT — which of the three fixed
   // networks (BSC/TRX/ETH — see lib/deposit/usdt-networks.ts) the user
   // was shown as the receiving address. The address itself is NOT
   // duplicated here — it's derived from this code via that same static
   // config, both on the Deposit page and in Admin's per-user Deposits
   // tab, so there is exactly one place to change an address.
-  network   String?
+  network            String?
   // Only meaningful for a USDT DEPOSIT — the payment-confirmation
   // screenshot required before a deposit request can be created (see
   // app/api/deposit/route.ts). Same storage technique as
@@ -205,36 +216,36 @@ model Transaction {
   // just placed directly on Transaction rather than a separate table,
   // matching the existing precedent of type-specific nullable columns
   // already here (method/network/direction).
-  proofFileName String?
-  proofData     Bytes?
-  proofMimeType String?
+  proofFileName      String?
+  proofData          Bytes?
+  proofMimeType      String?
   // Only meaningful for a USDT WITHDRAWAL — the user-entered destination
   // wallet address for the chosen `network`, unlike Deposit's fixed
   // addresses above (see lib/deposit/usdt-networks.ts) there is no static
   // config to derive this from, so it has to be persisted per-request for
   // Admin to see and pay out to.
   destinationAddress String?
-  amount    Decimal               @db.Decimal(20, 8)
+  amount             Decimal               @db.Decimal(20, 8)
   // Every pre-existing TransactionType (DEPOSIT/WITHDRAWAL/BONUS/
   // TRADE_SETTLEMENT) only ever moved the futures-margin Wallet, which is
   // implicitly USDT-only — this default backfills that for every row that
   // predates ADMIN_BALANCE_ADJUSTMENT (the first type that can touch any
   // SpotWallet currency) without a data migration.
-  asset     String                @default("USDT")
+  asset              String                @default("USDT")
   // Only meaningful for ADMIN_BALANCE_ADJUSTMENT so far — the older types
   // each have a fixed, implied sign already baked into how the UI reads
   // `type` (see components/dashboard/history-table.tsx's TYPE_SIGN), so
   // backfilling this for them would be redundant, not corrective.
-  direction TransactionDirection?
-  status    TransactionStatus     @default(COMPLETED)
-  createdAt DateTime              @default(now())
+  direction          TransactionDirection?
+  status             TransactionStatus     @default(COMPLETED)
+  createdAt          DateTime              @default(now())
   // Unused. Was an admin-review "seen" marker for an earlier unread-
   // messages framing of the Admin Panel's request badges; that framing
   // was dropped (badges now mean "still PENDING", not "not yet opened" —
   // see lib/admin/user-summary.ts) so nothing reads or writes this column
   // anymore. Left in place rather than migrated out, since removing it
   // isn't needed for anything currently broken.
-  adminViewedAt DateTime?
+  adminViewedAt      DateTime?
 
   balanceAdjustment BalanceAdjustment?
 
@@ -311,6 +322,20 @@ model FirstDepositBonus {
   bonusAmount          Decimal  @db.Decimal(20, 8)
   bonusTransactionId   String?
   createdAt            DateTime @default(now())
+
+  // Anti-abuse audit trail — the depositor's lastKnownIp/lastKnownDeviceHash
+  // (see User above) AT THE MOMENT this claim was made, frozen here so a
+  // later change to the user's own recorded IP never rewrites history.
+  // reviewReason is non-null exactly when the claim was withheld instead of
+  // paid (bonusTransactionId stays null forever in that case, unlike the
+  // brief in-transaction gap before it's normally linked) — e.g.
+  // "DUPLICATE_IP" when another account already collected this bonus from
+  // the same recorded IP. Never surfaced to end users; for admin review only.
+  claimIp         String?
+  claimDeviceHash String?
+  reviewReason    String?
+
+  @@index([claimIp])
 }
 
 // ---------------------------------------------------------------------------
@@ -581,7 +606,7 @@ model VerificationDocument {
   // resubmission clears it (the whole row is replaced, not patched).
   rejectionReason String?
 
-  uploadedAt DateTime @default(now())
+  uploadedAt    DateTime  @default(now())
   // Unused — see Transaction.adminViewedAt's comment for why.
   adminViewedAt DateTime?
 }

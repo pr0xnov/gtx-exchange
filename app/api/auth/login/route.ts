@@ -6,6 +6,7 @@ import { establishSession } from "@/lib/auth/session";
 import { loginSchema } from "@/lib/validation/auth";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { getTrustedClientIp, getDeviceHash } from "@/lib/security/client-ip";
 import { createAuditLog } from "@/lib/audit/log";
 
 export async function POST(req: NextRequest) {
@@ -51,6 +52,18 @@ export async function POST(req: NextRequest) {
     }
 
     await establishSession(user);
+
+    // Anti-abuse signal for the first-deposit bonus (lib/bonus/first-
+    // deposit.ts) — refreshed on every login so it reflects the most
+    // recent known connection, not just the one at signup. Best-effort:
+    // never blocks or delays the login response.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastKnownIp: getTrustedClientIp(req.headers),
+        lastKnownDeviceHash: getDeviceHash(req.headers),
+      },
+    });
 
     // Only admin logins, not every routine user sign-in — an
     // administrative event log, not a general access log (see

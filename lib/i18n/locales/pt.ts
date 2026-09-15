@@ -28,7 +28,7 @@ export const pt: Dictionary = {
   "nav.wallet": "Carteira",
   "nav.about": "Sobre nós",
   "nav.analytics": "Análises",
-  "nav.contacts": "Contactos",
+  "nav.bonuses": "Bónus",
   "nav.account": "Conta",
   "nav.deposit": "Depósito",
   "nav.withdrawal": "Retirada",
@@ -133,31 +133,6 @@ export const pt: Dictionary = {
   "settings.toastTwoFactorDisabled": "2FA desativado com sucesso",
   "settings.toastInvalidCode": "Código de verificação inválido",
   "settings.toastTwoFactorSetupFailed": "Falha ao iniciar a configuração do 2FA",
-
-  // Support
-  "support.title": "Suporte",
-  "support.contactUs": "Contacte-nos",
-  "support.subject": "Assunto",
-  "support.subjectPlaceholder": "Em que podemos ajudar?",
-  "support.message": "Mensagem",
-  "support.messagePlaceholder": "Descreva o seu problema...",
-  "support.sendMessage": "Enviar mensagem",
-  "support.toastMessageSent": "A sua mensagem foi enviada. Responderemos em 24 horas.",
-  "support.getInTouch": "Fale connosco",
-  "support.liveChat": "Chat ao vivo, 24 horas por dia",
-  "support.faq": "Perguntas frequentes",
-  "support.faqRealExchangeQ": "A GTX é uma exchange de criptomoedas real?",
-  "support.faqRealExchangeA":
-    "Não. A GTX é um simulador de negociação. Todos os saldos são virtuais e nenhum dinheiro real é depositado, negociado ou levantado.",
-  "support.faqResetBalanceQ": "Como reponho o meu saldo virtual?",
-  "support.faqResetBalanceA":
-    "Contacte o suporte e reporemos a sua conta ao saldo inicial de 10.000 USDT.",
-  "support.faqPriceSourceQ": "De onde vêm os preços?",
-  "support.faqPriceSourceA":
-    "Os preços em tempo real são transmitidos diretamente do feed público de dados de mercado da Binance, pelo que os gráficos refletem condições reais de mercado.",
-  "support.faqLeverageQ": "Que alavancagem está disponível?",
-  "support.faqLeverageA":
-    "Pode negociar com alavancagem até 1:100 nos pares suportados, tal como em condições reais de negociação tipo CFD.",
 
   // Deposit
   "deposit.pageTitle": "Depósito",
@@ -296,6 +271,7 @@ export const pt: Dictionary = {
 
   // Wallet
   "wallet.page.title": "Carteira",
+  "wallet.page.subtitle": "Faça a gestão dos seus ativos num só lugar",
   "wallet.summary.availableBalance": "Saldo disponível",
   "wallet.summary.lockedInOrders": "Em ordens",
   "wallet.summary.assetsValue": "Valor dos ativos",
@@ -434,7 +410,6 @@ export const pt: Dictionary = {
   "marketing.home.benefits.support.description": "Estamos sempre disponíveis para ajudar",
 
   // Marketing — About
-  "marketing.about.hero.badge": "GTX • Cripto, sem complicações",
   "marketing.about.hero.titleLine1": "Estamos a construir um espaço",
   "marketing.about.hero.titleLine2": "onde as criptomoedas se tornam",
   "marketing.about.hero.titleHighlight": "mais simples.",
@@ -733,6 +708,94 @@ export const pt: Dictionary = {
   "supportChat.errors.createFailed":
     "Não foi possível iniciar a conversa. Tente novamente.",
   "supportChat.errors.sendFailed": "Mensagem não enviada. Tente novamente.",
+
+  // /bonuses
+  "marketing.bonuses.hero.heading": "Obtenha mais com a GTX",
+  "marketing.bonuses.hero.subtitle":
+    "Aproveite o bónus do primeiro depósito e convide amigos para ganhar recompensas adicionais.",
+  "marketing.bonuses.firstDeposit.badge": "+20%",
+  "marketing.bonuses.firstDeposit.title": "Mais valor no seu primeiro depósito",
+  "marketing.bonuses.firstDeposit.description":
+    "Receba +20% sobre o valor do seu primeiro depósito bem-sucedido.",
+  "marketing.bonuses.firstDeposit.examplesLabel": "Exemplos",
+  "marketing.bonuses.firstDeposit.example1From": "250 USDT",
+  "marketing.bonuses.firstDeposit.example1To": "+50 USDT",
+  "marketing.bonuses.firstDeposit.example2From": "500 USDT",
+  "marketing.bonuses.firstDeposit.example2To": "+100 USDT",
+  "marketing.bonuses.firstDeposit.example3From": "1000 USDT",
+  "marketing.bonuses.firstDeposit.example3To": "+200 USDT",
+  "marketing.bonuses.firstDeposit.rule1": "Bónus único",
+  "marketing.bonuses.firstDeposit.rule2":
+    "Apenas conta o seu primeiro depósito confirmado",
+  "marketing.bonuses.firstDeposit.rule3": "Não é aplicado a depósitos posteriores",
+  "marketing.bonuses.referral.badge": "10%",
+  "marketing.bonuses.referral.title": "Convide amigos, ganhe recompensas",
+  "marketing.bonuses.referral.description":
+    "Convide amigos para a GTX e ganhe 10% do valor do primeiro depósito bem-sucedido deles.",
+  "marketing.bonuses.referral.maxNote": "Até 100 USDT por cada utilizador convidado",
+  "marketing.bonuses.referral.registrationNote":
+    "O registo por si só não gera qualquer recompensa — o utilizador convidado tem de efetuar o seu primeiro depósito bem-sucedido.",
+  "marketing.bonuses.referral.rule2":
+    "Creditado após o primeiro depósito bem-sucedido dele",
+  "marketing.bonuses.referral.examplesLabel": "Exemplos de recompensas",
+  "marketing.bonuses.referral.example1From": "250 USDT",
+  "marketing.bonuses.referral.example1To": "25 USDT",
+  "marketing.bonuses.referral.example2From": "500 USDT",
+  "marketing.bonuses.referral.example2To": "50 USDT",
+  "marketing.bonuses.referral.example3From": "1000 USDT",
+  "marketing.bonuses.referral.example3To": "100 USDT",
+  "marketing.bonuses.referral.example4From": "2000 USDT",
+  "marketing.bonuses.referral.example4To": "100 USDT",
+  "marketing.bonuses.referral.maxLabel": "máximo",
+  "marketing.bonuses.personal.title": "O seu código de referência",
+  "marketing.bonuses.personal.explanation":
+    "Partilhe este código com um amigo. Ele deve indicá-lo durante o registo.",
+  "marketing.bonuses.personal.copyButton": "Copiar código",
+  "marketing.bonuses.personal.copiedFeedback": "Copiado",
+  "marketing.bonuses.guestCta.title": "Inicie sessão para ver o seu código de referência",
+  "marketing.bonuses.guestCta.description":
+    "Crie uma conta ou inicie sessão para convidar amigos e acompanhar os seus bónus.",
+  "marketing.bonuses.guestCta.registerButton": "Criar conta",
+  "marketing.bonuses.guestCta.loginButton": "Iniciar sessão",
+  "marketing.bonuses.stats.invited": "Amigos convidados",
+  "marketing.bonuses.stats.activated": "Ativaram o bónus",
+  "marketing.bonuses.stats.earned": "Bónus de referência recebidos",
+  "marketing.bonuses.howItWorks.title": "Como funciona o programa de referência",
+  "marketing.bonuses.howItWorks.step1Title": "Partilhe o código",
+  "marketing.bonuses.howItWorks.step1Description":
+    "Envie o seu código de referência a um amigo.",
+  "marketing.bonuses.howItWorks.step2Title": "O seu amigo regista-se",
+  "marketing.bonuses.howItWorks.step2Description":
+    "Durante o registo, ele introduz o seu código.",
+  "marketing.bonuses.howItWorks.step3Title": "O seu amigo deposita",
+  "marketing.bonuses.howItWorks.step3Description":
+    "Após o primeiro depósito bem-sucedido dele, recebe 10% do valor, até um máximo de 100 USDT.",
+  "marketing.bonuses.faq.title": "Perguntas frequentes",
+  "marketing.bonuses.faq.q1": "Quando recebo o bónus de +20%?",
+  "marketing.bonuses.faq.a1": "Após a confirmação do seu primeiro depósito bem-sucedido.",
+  "marketing.bonuses.faq.q2": "Recebo +20% no meu segundo depósito?",
+  "marketing.bonuses.faq.a2":
+    "Não. O bónus é atribuído apenas uma vez — no primeiro depósito bem-sucedido.",
+  "marketing.bonuses.faq.q3": "Quando é creditado o bónus de referência?",
+  "marketing.bonuses.faq.a3":
+    "Depois de o utilizador que convidou efetuar o seu primeiro depósito bem-sucedido.",
+  "marketing.bonuses.faq.q4": "Recebo um bónus só por registar um amigo?",
+  "marketing.bonuses.faq.a4":
+    "Não. O registo por si só não é suficiente. O utilizador convidado tem de efetuar o primeiro depósito bem-sucedido.",
+  "marketing.bonuses.faq.q5": "Quanto posso ganhar por cada amigo?",
+  "marketing.bonuses.faq.a5":
+    "10% do valor do primeiro depósito bem-sucedido dele, até um máximo de 100 USDT.",
+  "marketing.bonuses.faq.q6":
+    "E se o primeiro pedido de depósito do meu amigo for rejeitado?",
+  "marketing.bonuses.faq.a6":
+    "Um depósito rejeitado não ativa o bónus de referência. Conta o primeiro depósito que foi confirmado com sucesso.",
+  "marketing.bonuses.faq.q7": "Recebo 10% de todos os depósitos futuros do meu amigo?",
+  "marketing.bonuses.faq.a7":
+    "Não. O bónus de referência é creditado apenas uma vez — a partir do primeiro depósito bem-sucedido do utilizador convidado.",
+  "marketing.bonuses.faq.q8":
+    "O bónus de primeiro depósito e o bónus de referência podem ser ativados ao mesmo tempo?",
+  "marketing.bonuses.faq.a8":
+    "Sim. O utilizador convidado pode receber o seu próprio bónus de +20%, enquanto quem o convidou recebe o seu bónus de referência.",
   "marketing.footer.platform": "Plataforma",
   "marketing.footer.company": "Empresa",
   "marketing.footer.legal": "Legal",
@@ -794,6 +857,7 @@ export const pt: Dictionary = {
 
   // Markets
   "markets.title": "Mercados",
+  "markets.subtitle": "Preços em tempo real e pares de negociação",
   "markets.tabs.all": "Todas as Criptomoedas",
   "markets.tabs.favorites": "Favoritos",
   "markets.tabs.popular": "Populares",

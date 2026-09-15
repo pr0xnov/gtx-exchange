@@ -365,12 +365,30 @@ describe("Navbar — guest", () => {
 });
 
 describe("Navbar — main navigation links unchanged", () => {
-  it("keeps Trading/Markets/About us/Analytics/Contacts", () => {
+  it("keeps Trading/Markets/About us/Analytics/Bonuses/Contacts", () => {
     renderNavbar(USER);
-    const hrefs = ["/trading", "/markets", "/about", "/analytics", "/contacts"];
+    const hrefs = [
+      "/trading",
+      "/markets",
+      "/about",
+      "/analytics",
+      "/bonuses",
+      "/contacts",
+    ];
     for (const href of hrefs) {
       expect(container.querySelector(`a[href="${href}"]`)).not.toBeNull();
     }
+  });
+
+  it("places Bonuses after Analytics and before Contacts", () => {
+    renderNavbar(USER);
+    const nav = container.querySelector("nav") as HTMLElement;
+    const html = nav.innerHTML;
+    const analyticsIndex = html.indexOf('href="/analytics"');
+    const bonusesIndex = html.indexOf('href="/bonuses"');
+    const contactsIndex = html.indexOf('href="/contacts"');
+    expect(analyticsIndex).toBeLessThan(bonusesIndex);
+    expect(bonusesIndex).toBeLessThan(contactsIndex);
   });
 });
 

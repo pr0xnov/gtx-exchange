@@ -26,7 +26,7 @@ export const uk: Dictionary = {
   "nav.wallet": "Гаманець",
   "nav.about": "Про нас",
   "nav.analytics": "Аналітика",
-  "nav.contacts": "Контакти",
+  "nav.bonuses": "Бонуси",
   "nav.account": "Акаунт",
   "nav.deposit": "Поповнення",
   "nav.withdrawal": "Виведення",
@@ -130,31 +130,6 @@ export const uk: Dictionary = {
   "settings.toastTwoFactorDisabled": "2FA успішно вимкнена",
   "settings.toastInvalidCode": "Невірний код підтвердження",
   "settings.toastTwoFactorSetupFailed": "Не вдалося розпочати налаштування 2FA",
-
-  "support.title": "Підтримка",
-  "support.contactUs": "Зв'язатися з нами",
-  "support.subject": "Тема",
-  "support.subjectPlaceholder": "Чим ми можемо допомогти?",
-  "support.message": "Повідомлення",
-  "support.messagePlaceholder": "Опишіть вашу проблему...",
-  "support.sendMessage": "Надіслати повідомлення",
-  "support.toastMessageSent":
-    "Ваше повідомлення надіслано. Ми відповімо протягом 24 годин.",
-  "support.getInTouch": "Зв'яжіться з нами",
-  "support.liveChat": "Онлайн-чат, цілодобово",
-  "support.faq": "Часті запитання",
-  "support.faqRealExchangeQ": "Чи є GTX справжньою криптобіржею?",
-  "support.faqRealExchangeA":
-    "Ні. GTX — це симулятор навчальної торгівлі. Усі баланси віртуальні, реальні гроші ніколи не вносяться, не торгуються і не виводяться.",
-  "support.faqResetBalanceQ": "Як скинути віртуальний баланс?",
-  "support.faqResetBalanceA":
-    "Зв'яжіться з підтримкою, і ми скинемо ваш акаунт до стартового балансу в 10 000 USDT.",
-  "support.faqPriceSourceQ": "Звідки беруться ціни?",
-  "support.faqPriceSourceA":
-    "Актуальні ціни транслюються безпосередньо з публічного каналу ринкових даних Binance, тому графіки відображають реальну ринкову ситуацію.",
-  "support.faqLeverageQ": "Яке кредитне плече доступне?",
-  "support.faqLeverageA":
-    "Ви можете торгувати з плечем до 1:100 за підтримуваними парами — як у реальних умовах CFD-торгівлі.",
 
   "deposit.pageTitle": "Поповнення",
   "deposit.infoTitle": "Важлива інформація",
@@ -287,6 +262,7 @@ export const uk: Dictionary = {
   "account.verification": "Верифікація",
 
   "wallet.page.title": "Гаманець",
+  "wallet.page.subtitle": "Керуйте своїми активами в одному місці",
   "wallet.summary.availableBalance": "Доступний баланс",
   "wallet.summary.lockedInOrders": "В ордерах",
   "wallet.summary.assetsValue": "Вартість активів",
@@ -423,7 +399,6 @@ export const uk: Dictionary = {
   "marketing.home.benefits.support.title": "Підтримка 24/7",
   "marketing.home.benefits.support.description": "Ми завжди на зв'язку",
 
-  "marketing.about.hero.badge": "GTX • Криптовалюта без зайвого",
   "marketing.about.hero.titleLine1": "Ми створюємо простір,",
   "marketing.about.hero.titleLine2": "де криптовалюта стає",
   "marketing.about.hero.titleHighlight": "простішою.",
@@ -713,6 +688,92 @@ export const uk: Dictionary = {
   "supportChat.input.send": "Надіслати",
   "supportChat.errors.createFailed": "Не вдалося розпочати звернення. Спробуйте ще раз.",
   "supportChat.errors.sendFailed": "Повідомлення не надіслано. Спробуйте ще раз.",
+
+  // /bonuses
+  "marketing.bonuses.hero.heading": "Отримуйте більше разом із GTX",
+  "marketing.bonuses.hero.subtitle":
+    "Скористайтеся бонусом за перший депозит та запрошуйте друзів, щоб отримувати додаткові винагороди.",
+  "marketing.bonuses.firstDeposit.badge": "+20%",
+  "marketing.bonuses.firstDeposit.title": "Більше вигоди з першого депозиту",
+  "marketing.bonuses.firstDeposit.description":
+    "Отримайте +20% до суми вашого першого успішного депозиту.",
+  "marketing.bonuses.firstDeposit.examplesLabel": "Приклади",
+  "marketing.bonuses.firstDeposit.example1From": "250 USDT",
+  "marketing.bonuses.firstDeposit.example1To": "+50 USDT",
+  "marketing.bonuses.firstDeposit.example2From": "500 USDT",
+  "marketing.bonuses.firstDeposit.example2To": "+100 USDT",
+  "marketing.bonuses.firstDeposit.example3From": "1000 USDT",
+  "marketing.bonuses.firstDeposit.example3To": "+200 USDT",
+  "marketing.bonuses.firstDeposit.rule1": "Одноразовий бонус",
+  "marketing.bonuses.firstDeposit.rule2":
+    "Враховується лише перший підтверджений депозит",
+  "marketing.bonuses.firstDeposit.rule3": "Не нараховується на наступні депозити",
+  "marketing.bonuses.referral.badge": "10%",
+  "marketing.bonuses.referral.title": "Запрошуйте друзів, отримуйте винагороду",
+  "marketing.bonuses.referral.description":
+    "Запрошуйте друзів до GTX та отримуйте 10% від суми їхнього першого успішного депозиту.",
+  "marketing.bonuses.referral.maxNote": "До 100 USDT за одного запрошеного користувача",
+  "marketing.bonuses.referral.registrationNote":
+    "Сама реєстрація не створює винагороду — запрошений користувач повинен здійснити свій перший успішний депозит.",
+  "marketing.bonuses.referral.rule2": "Нараховується після першого успішного депозиту",
+  "marketing.bonuses.referral.examplesLabel": "Приклади винагород",
+  "marketing.bonuses.referral.example1From": "250 USDT",
+  "marketing.bonuses.referral.example1To": "25 USDT",
+  "marketing.bonuses.referral.example2From": "500 USDT",
+  "marketing.bonuses.referral.example2To": "50 USDT",
+  "marketing.bonuses.referral.example3From": "1000 USDT",
+  "marketing.bonuses.referral.example3To": "100 USDT",
+  "marketing.bonuses.referral.example4From": "2000 USDT",
+  "marketing.bonuses.referral.example4To": "100 USDT",
+  "marketing.bonuses.referral.maxLabel": "максимум",
+  "marketing.bonuses.personal.title": "Ваш реферальний код",
+  "marketing.bonuses.personal.explanation":
+    "Поділіться цим кодом із другом. Він має вказати його під час реєстрації.",
+  "marketing.bonuses.personal.copyButton": "Скопіювати код",
+  "marketing.bonuses.personal.copiedFeedback": "Скопійовано",
+  "marketing.bonuses.guestCta.title": "Увійдіть, щоб побачити свій реферальний код",
+  "marketing.bonuses.guestCta.description":
+    "Створіть акаунт або увійдіть, щоб запрошувати друзів і відстежувати свої бонуси.",
+  "marketing.bonuses.guestCta.registerButton": "Створити акаунт",
+  "marketing.bonuses.guestCta.loginButton": "Увійти",
+  "marketing.bonuses.stats.invited": "Запрошено друзів",
+  "marketing.bonuses.stats.activated": "Активували бонус",
+  "marketing.bonuses.stats.earned": "Отримано реферальних бонусів",
+  "marketing.bonuses.howItWorks.title": "Як працює реферальна програма",
+  "marketing.bonuses.howItWorks.step1Title": "Поділіться кодом",
+  "marketing.bonuses.howItWorks.step1Description":
+    "Надішліть свій реферальний код другу.",
+  "marketing.bonuses.howItWorks.step2Title": "Друг реєструється",
+  "marketing.bonuses.howItWorks.step2Description":
+    "Під час реєстрації він вводить ваш код.",
+  "marketing.bonuses.howItWorks.step3Title": "Друг поповнює рахунок",
+  "marketing.bonuses.howItWorks.step3Description":
+    "Після його першого успішного депозиту ви отримуєте 10% від суми, але не більше 100 USDT.",
+  "marketing.bonuses.faq.title": "Часті запитання",
+  "marketing.bonuses.faq.q1": "Коли я отримаю бонус +20%?",
+  "marketing.bonuses.faq.a1": "Після підтвердження вашого першого успішного депозиту.",
+  "marketing.bonuses.faq.q2": "Чи отримаю я +20% на другий депозит?",
+  "marketing.bonuses.faq.a2":
+    "Ні. Бонус нараховується лише один раз — на перший успішний депозит.",
+  "marketing.bonuses.faq.q3": "Коли нараховується реферальний бонус?",
+  "marketing.bonuses.faq.a3":
+    "Після того, як запрошений вами користувач здійснить свій перший успішний депозит.",
+  "marketing.bonuses.faq.q4": "Чи отримаю я бонус просто за реєстрацію друга?",
+  "marketing.bonuses.faq.a4":
+    "Ні. Самої реєстрації недостатньо. Запрошений користувач повинен здійснити перший успішний депозит.",
+  "marketing.bonuses.faq.q5": "Скільки я можу отримати за одного друга?",
+  "marketing.bonuses.faq.a5":
+    "10% від суми його першого успішного депозиту, але не більше 100 USDT.",
+  "marketing.bonuses.faq.q6": "Якщо перший запит на депозит друга відхилили?",
+  "marketing.bonuses.faq.a6":
+    "Відхилений депозит не активує реферальний бонус. Враховується перший депозит, який був успішно підтверджений.",
+  "marketing.bonuses.faq.q7": "Чи отримую я 10% з усіх майбутніх депозитів друга?",
+  "marketing.bonuses.faq.a7":
+    "Ні. Реферальний бонус нараховується один раз — з першого успішного депозиту запрошеного користувача.",
+  "marketing.bonuses.faq.q8":
+    "Чи може бонус за перший депозит і реферальний бонус спрацювати одночасно?",
+  "marketing.bonuses.faq.a8":
+    "Так. Запрошений користувач може отримати свій +20% бонус, а користувач, який його запросив, — свій реферальний бонус.",
   "marketing.footer.platform": "Платформа",
   "marketing.footer.company": "Компанія",
   "marketing.footer.legal": "Правова інформація",
@@ -769,6 +830,7 @@ export const uk: Dictionary = {
   "auth.resetPassword.missingTokenMessage": "У цьому посиланні відсутній токен скидання.",
 
   "markets.title": "Ринки",
+  "markets.subtitle": "Актуальні ціни та торгові пари",
   "markets.tabs.all": "Всі криптовалюти",
   "markets.tabs.favorites": "Обране",
   "markets.tabs.popular": "Популярні",

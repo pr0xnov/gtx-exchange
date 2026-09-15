@@ -41,7 +41,7 @@ export const en = {
   "nav.wallet": "Wallet",
   "nav.about": "About us",
   "nav.analytics": "Analytics",
-  "nav.contacts": "Contacts",
+  "nav.bonuses": "Bonuses",
   "nav.account": "Account",
   "nav.deposit": "Deposit",
   "nav.withdrawal": "Withdrawal",
@@ -146,31 +146,6 @@ export const en = {
   "settings.toastTwoFactorDisabled": "2FA disabled successfully",
   "settings.toastInvalidCode": "Invalid verification code",
   "settings.toastTwoFactorSetupFailed": "Failed to start 2FA setup",
-
-  // Support
-  "support.title": "Support",
-  "support.contactUs": "Contact us",
-  "support.subject": "Subject",
-  "support.subjectPlaceholder": "What can we help with?",
-  "support.message": "Message",
-  "support.messagePlaceholder": "Describe your issue...",
-  "support.sendMessage": "Send message",
-  "support.toastMessageSent": "Your message has been sent. We'll reply within 24 hours.",
-  "support.getInTouch": "Get in touch",
-  "support.liveChat": "Live chat, 24/7",
-  "support.faq": "Frequently asked questions",
-  "support.faqRealExchangeQ": "Is GTX a real cryptocurrency exchange?",
-  "support.faqRealExchangeA":
-    "No. GTX is a paper trading simulator. All balances are virtual and no real money is ever deposited, traded, or withdrawn.",
-  "support.faqResetBalanceQ": "How do I reset my virtual balance?",
-  "support.faqResetBalanceA":
-    "Contact support and we'll reset your account back to the starting 10,000 USDT balance.",
-  "support.faqPriceSourceQ": "Where do the prices come from?",
-  "support.faqPriceSourceA":
-    "Live prices are streamed directly from Binance's public market data feed, so charts reflect real market conditions.",
-  "support.faqLeverageQ": "What leverage is available?",
-  "support.faqLeverageA":
-    "You can trade with up to 1:100 leverage on supported pairs, matching real CFD-style trading conditions.",
 
   // Deposit
   "deposit.pageTitle": "Deposit",
@@ -306,6 +281,7 @@ export const en = {
 
   // Wallet
   "wallet.page.title": "Wallet",
+  "wallet.page.subtitle": "Manage your assets in one place",
   "wallet.summary.availableBalance": "Available Balance",
   "wallet.summary.lockedInOrders": "In Orders",
   "wallet.summary.assetsValue": "Assets Value",
@@ -444,7 +420,6 @@ export const en = {
   "marketing.home.benefits.support.description": "We're always here to help",
 
   // Marketing — About
-  "marketing.about.hero.badge": "GTX • Crypto, without the clutter",
   "marketing.about.hero.titleLine1": "We're building a space",
   "marketing.about.hero.titleLine2": "where crypto becomes",
   "marketing.about.hero.titleHighlight": "simpler.",
@@ -736,6 +711,91 @@ export const en = {
   "supportChat.input.send": "Send",
   "supportChat.errors.createFailed": "Couldn't start the conversation. Please try again.",
   "supportChat.errors.sendFailed": "Message not sent. Please try again.",
+
+  // /bonuses
+  "marketing.bonuses.hero.heading": "Get more with GTX",
+  "marketing.bonuses.hero.subtitle":
+    "Claim your first-deposit bonus and invite friends to earn extra rewards.",
+  "marketing.bonuses.firstDeposit.badge": "+20%",
+  "marketing.bonuses.firstDeposit.title": "More value from your first deposit",
+  "marketing.bonuses.firstDeposit.description":
+    "Get +20% added to the amount of your first successful deposit.",
+  "marketing.bonuses.firstDeposit.examplesLabel": "Examples",
+  "marketing.bonuses.firstDeposit.example1From": "250 USDT",
+  "marketing.bonuses.firstDeposit.example1To": "+50 USDT",
+  "marketing.bonuses.firstDeposit.example2From": "500 USDT",
+  "marketing.bonuses.firstDeposit.example2To": "+100 USDT",
+  "marketing.bonuses.firstDeposit.example3From": "1000 USDT",
+  "marketing.bonuses.firstDeposit.example3To": "+200 USDT",
+  "marketing.bonuses.firstDeposit.rule1": "One-time bonus",
+  "marketing.bonuses.firstDeposit.rule2": "Only your first confirmed deposit qualifies",
+  "marketing.bonuses.firstDeposit.rule3": "Not credited on later deposits",
+  "marketing.bonuses.referral.badge": "10%",
+  "marketing.bonuses.referral.title": "Invite friends, earn rewards",
+  "marketing.bonuses.referral.description":
+    "Invite friends to GTX and earn 10% of the amount of their first successful deposit.",
+  "marketing.bonuses.referral.maxNote": "Up to 100 USDT per invited user",
+  "marketing.bonuses.referral.registrationNote":
+    "Registration alone does not create a reward — the invited user must make their first successful deposit.",
+  "marketing.bonuses.referral.rule2": "Credited after their first successful deposit",
+  "marketing.bonuses.referral.examplesLabel": "Reward examples",
+  "marketing.bonuses.referral.example1From": "250 USDT",
+  "marketing.bonuses.referral.example1To": "25 USDT",
+  "marketing.bonuses.referral.example2From": "500 USDT",
+  "marketing.bonuses.referral.example2To": "50 USDT",
+  "marketing.bonuses.referral.example3From": "1000 USDT",
+  "marketing.bonuses.referral.example3To": "100 USDT",
+  "marketing.bonuses.referral.example4From": "2000 USDT",
+  "marketing.bonuses.referral.example4To": "100 USDT",
+  "marketing.bonuses.referral.maxLabel": "max",
+  "marketing.bonuses.personal.title": "Your referral code",
+  "marketing.bonuses.personal.explanation":
+    "Share this code with a friend. They must enter it during registration.",
+  "marketing.bonuses.personal.copyButton": "Copy code",
+  "marketing.bonuses.personal.copiedFeedback": "Copied",
+  "marketing.bonuses.guestCta.title": "Log in to see your referral code",
+  "marketing.bonuses.guestCta.description":
+    "Create an account or log in to invite friends and track your bonuses.",
+  "marketing.bonuses.guestCta.registerButton": "Create account",
+  "marketing.bonuses.guestCta.loginButton": "Log in",
+  "marketing.bonuses.stats.invited": "Friends invited",
+  "marketing.bonuses.stats.activated": "Activated the bonus",
+  "marketing.bonuses.stats.earned": "Referral bonuses earned",
+  "marketing.bonuses.howItWorks.title": "How the referral program works",
+  "marketing.bonuses.howItWorks.step1Title": "Share your code",
+  "marketing.bonuses.howItWorks.step1Description": "Send your referral code to a friend.",
+  "marketing.bonuses.howItWorks.step2Title": "Your friend registers",
+  "marketing.bonuses.howItWorks.step2Description":
+    "They enter your code during registration.",
+  "marketing.bonuses.howItWorks.step3Title": "Your friend deposits",
+  "marketing.bonuses.howItWorks.step3Description":
+    "After their first successful deposit you receive 10% of it, up to 100 USDT.",
+  "marketing.bonuses.faq.title": "Frequently asked questions",
+  "marketing.bonuses.faq.q1": "When do I get the +20% bonus?",
+  "marketing.bonuses.faq.a1": "After your first successful deposit is confirmed.",
+  "marketing.bonuses.faq.q2": "Do I get +20% on my second deposit?",
+  "marketing.bonuses.faq.a2":
+    "No. The bonus is credited only once — on your first successful deposit.",
+  "marketing.bonuses.faq.q3": "When is the referral bonus credited?",
+  "marketing.bonuses.faq.a3":
+    "After the user you invited makes their first successful deposit.",
+  "marketing.bonuses.faq.q4": "Do I get a bonus just for a friend registering?",
+  "marketing.bonuses.faq.a4":
+    "No. Registration alone isn't enough. The invited user must make their first successful deposit.",
+  "marketing.bonuses.faq.q5": "How much can I earn per friend?",
+  "marketing.bonuses.faq.a5": "10% of their first successful deposit, up to 100 USDT.",
+  "marketing.bonuses.faq.q6": "What if my friend's first deposit request was rejected?",
+  "marketing.bonuses.faq.a6":
+    "A rejected deposit does not activate the referral bonus. Only the first deposit that was successfully confirmed counts.",
+  "marketing.bonuses.faq.q7":
+    "Do I get 10% from every deposit my friend makes after that?",
+  "marketing.bonuses.faq.a7":
+    "No. The referral bonus is credited once — from the invited user's first successful deposit.",
+  "marketing.bonuses.faq.q8":
+    "Can the first-deposit bonus and the referral bonus trigger at the same time?",
+  "marketing.bonuses.faq.a8":
+    "Yes. The invited user can receive their own +20% bonus, while the user who invited them receives their referral bonus.",
+
   "marketing.footer.platform": "Platform",
   "marketing.footer.company": "Company",
   "marketing.footer.legal": "Legal",
@@ -795,6 +855,7 @@ export const en = {
 
   // Markets
   "markets.title": "Markets",
+  "markets.subtitle": "Live prices and trading pairs",
   "markets.tabs.all": "All Cryptocurrencies",
   "markets.tabs.favorites": "Favorites",
   "markets.tabs.popular": "Popular",

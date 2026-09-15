@@ -125,9 +125,7 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("markets.title")}</h1>
-
-        <nav className="mt-4 flex gap-1 overflow-x-auto border-b border-border">
+        <nav className="flex gap-1 overflow-x-auto border-b border-border">
           {visibleTabs.map((tab) => (
             <button
               key={tab.id}

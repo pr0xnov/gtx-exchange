@@ -23,6 +23,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // The old user-facing /support page (contact form + outdated FAQ)
+      // was removed in favor of /contacts, which already has the real
+      // support experience (online chat, Telegram, current FAQ). Never
+      // /admin/support or /api/support/** — those are unrelated routes
+      // that happen to share the "support" word, not aliases of this one.
+      { source: "/support", destination: "/contacts", permanent: false },
+    ];
+  },
   output: "standalone",
 };
 

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getOptionalUser } from "@/lib/auth/session";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { AboutDashboardPreview } from "@/components/marketing/about-dashboard-preview";
 import { Footer } from "@/components/marketing/footer";
 import { getServerTranslator } from "@/lib/i18n/get-locale";
@@ -114,10 +113,7 @@ export default async function AboutPage() {
         <div className="absolute inset-0 bg-grid-fade bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,black,transparent)]" />
         <div className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
         <div className="container relative animate-fade-up py-20 text-center sm:py-28">
-          <Badge variant="success" className="rounded-full px-3 py-1.5">
-            {t("marketing.about.hero.badge")}
-          </Badge>
-          <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-extrabold leading-[1.15] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+          <h1 className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.15] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             {t("marketing.about.hero.titleLine1")}
             <br />
             {t("marketing.about.hero.titleLine2")}{" "}

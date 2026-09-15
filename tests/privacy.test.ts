@@ -140,16 +140,23 @@ describe("Privacy — support CTA", () => {
   it("guest sees only the support button, not the account button", async () => {
     mockUser = null;
     await renderPrivacy();
-    const supportLink = container.querySelector('a[href="/support"]');
-    expect(supportLink).not.toBeNull();
-    expect(supportLink!.textContent).toBe(t("privacy.support.primaryCta"));
+    // Not scoped by href alone — the Navbar's own "Support" nav item (see
+    // navbar.tsx) now also points to /contacts since the old /support page
+    // was removed, so this looks the CTA up by its actual button text.
+    const supportLink = Array.from(
+      container.querySelectorAll('a[href="/contacts"]')
+    ).find((a) => a.textContent === t("privacy.support.primaryCta"));
+    expect(supportLink).not.toBeUndefined();
     expect(container.querySelector('a[href="/account"]')).toBeNull();
   });
 
   it("authenticated user sees both the support and account buttons", async () => {
     mockUser = { id: "u1", firstName: "Demo", lastName: "Trader", email: "demo@gtx.com" };
     await renderPrivacy();
-    expect(container.querySelector('a[href="/support"]')).not.toBeNull();
+    const supportLink = Array.from(
+      container.querySelectorAll('a[href="/contacts"]')
+    ).find((a) => a.textContent === t("privacy.support.primaryCta"));
+    expect(supportLink).not.toBeUndefined();
     // Not scoped by href alone — an authenticated Navbar's own logo also
     // links to /account (see navbar.tsx's logoHref), so this looks it up
     // by its actual button text instead.

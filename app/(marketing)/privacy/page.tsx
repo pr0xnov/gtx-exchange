@@ -282,7 +282,7 @@ export default async function PrivacyPage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/support">{t("privacy.support.primaryCta")}</Link>
+                <Link href="/contacts">{t("privacy.support.primaryCta")}</Link>
               </Button>
               {user && (
                 <Button size="lg" variant="outline" asChild>

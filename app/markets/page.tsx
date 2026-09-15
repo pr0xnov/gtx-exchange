@@ -1,9 +1,14 @@
 import { getOptionalUserAllowingRefresh } from "@/lib/auth/session";
 import { Navbar } from "@/components/layout/navbar";
 import { MarketsClient } from "@/components/markets/markets-client";
+import { PageHero } from "@/components/shared/page-hero";
+import { getServerTranslator } from "@/lib/i18n/get-locale";
 
 export default async function MarketsPage() {
-  const user = await getOptionalUserAllowingRefresh();
+  const [user, t] = await Promise.all([
+    getOptionalUserAllowingRefresh(),
+    getServerTranslator(),
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -14,6 +19,7 @@ export default async function MarketsPage() {
             : null
         }
       />
+      <PageHero title={t("markets.title")} subtitle={t("markets.subtitle")} compact />
       <MarketsClient isAuthenticated={Boolean(user)} />
     </div>
   );

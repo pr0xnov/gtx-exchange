@@ -26,7 +26,7 @@ export const ru: Dictionary = {
   "nav.wallet": "Кошелёк",
   "nav.about": "О нас",
   "nav.analytics": "Аналитика",
-  "nav.contacts": "Контакты",
+  "nav.bonuses": "Бонусы",
   "nav.account": "Аккаунт",
   "nav.deposit": "Пополнение",
   "nav.withdrawal": "Вывод",
@@ -130,30 +130,6 @@ export const ru: Dictionary = {
   "settings.toastTwoFactorDisabled": "2FA успешно отключена",
   "settings.toastInvalidCode": "Неверный код подтверждения",
   "settings.toastTwoFactorSetupFailed": "Не удалось начать настройку 2FA",
-
-  "support.title": "Поддержка",
-  "support.contactUs": "Связаться с нами",
-  "support.subject": "Тема",
-  "support.subjectPlaceholder": "Чем мы можем помочь?",
-  "support.message": "Сообщение",
-  "support.messagePlaceholder": "Опишите вашу проблему...",
-  "support.sendMessage": "Отправить сообщение",
-  "support.toastMessageSent": "Ваше сообщение отправлено. Мы ответим в течение 24 часов.",
-  "support.getInTouch": "Свяжитесь с нами",
-  "support.liveChat": "Онлайн-чат, круглосуточно",
-  "support.faq": "Часто задаваемые вопросы",
-  "support.faqRealExchangeQ": "Является ли GTX настоящей криптобиржей?",
-  "support.faqRealExchangeA":
-    "Нет. GTX — это симулятор учебной торговли. Все балансы виртуальны, реальные деньги никогда не вносятся, не торгуются и не выводятся.",
-  "support.faqResetBalanceQ": "Как сбросить виртуальный баланс?",
-  "support.faqResetBalanceA":
-    "Свяжитесь с поддержкой, и мы сбросим ваш аккаунт до стартового баланса в 10 000 USDT.",
-  "support.faqPriceSourceQ": "Откуда берутся цены?",
-  "support.faqPriceSourceA":
-    "Актуальные цены транслируются напрямую из публичного канала рыночных данных Binance, поэтому графики отражают реальную рыночную ситуацию.",
-  "support.faqLeverageQ": "Какое кредитное плечо доступно?",
-  "support.faqLeverageA":
-    "Вы можете торговать с плечом до 1:100 по поддерживаемым парам — как в реальных условиях CFD-торговли.",
 
   "deposit.pageTitle": "Пополнение",
   "deposit.infoTitle": "Важная информация",
@@ -286,6 +262,7 @@ export const ru: Dictionary = {
   "account.verification": "Верификация",
 
   "wallet.page.title": "Кошелёк",
+  "wallet.page.subtitle": "Управляйте своими активами в одном месте",
   "wallet.summary.availableBalance": "Доступный баланс",
   "wallet.summary.lockedInOrders": "В ордерах",
   "wallet.summary.assetsValue": "Стоимость активов",
@@ -422,7 +399,6 @@ export const ru: Dictionary = {
   "marketing.home.benefits.support.title": "Поддержка 24/7",
   "marketing.home.benefits.support.description": "Мы всегда на связи",
 
-  "marketing.about.hero.badge": "GTX • Криптовалюта без лишнего",
   "marketing.about.hero.titleLine1": "Мы создаём пространство,",
   "marketing.about.hero.titleLine2": "где криптовалюта становится",
   "marketing.about.hero.titleHighlight": "проще.",
@@ -714,6 +690,92 @@ export const ru: Dictionary = {
   "supportChat.input.send": "Отправить",
   "supportChat.errors.createFailed": "Не удалось начать обращение. Попробуйте ещё раз.",
   "supportChat.errors.sendFailed": "Сообщение не отправлено. Попробуйте ещё раз.",
+
+  // /bonuses
+  "marketing.bonuses.hero.heading": "Получайте больше вместе с GTX",
+  "marketing.bonuses.hero.subtitle":
+    "Воспользуйтесь бонусом за первый депозит и приглашайте друзей, чтобы получать дополнительные вознаграждения.",
+  "marketing.bonuses.firstDeposit.badge": "+20%",
+  "marketing.bonuses.firstDeposit.title": "Больше выгоды с первого депозита",
+  "marketing.bonuses.firstDeposit.description":
+    "Получите +20% к сумме вашего первого успешного депозита.",
+  "marketing.bonuses.firstDeposit.examplesLabel": "Примеры",
+  "marketing.bonuses.firstDeposit.example1From": "250 USDT",
+  "marketing.bonuses.firstDeposit.example1To": "+50 USDT",
+  "marketing.bonuses.firstDeposit.example2From": "500 USDT",
+  "marketing.bonuses.firstDeposit.example2To": "+100 USDT",
+  "marketing.bonuses.firstDeposit.example3From": "1000 USDT",
+  "marketing.bonuses.firstDeposit.example3To": "+200 USDT",
+  "marketing.bonuses.firstDeposit.rule1": "Одноразовый бонус",
+  "marketing.bonuses.firstDeposit.rule2":
+    "Учитывается только первый подтверждённый депозит",
+  "marketing.bonuses.firstDeposit.rule3": "Не начисляется на последующие депозиты",
+  "marketing.bonuses.referral.badge": "10%",
+  "marketing.bonuses.referral.title": "Приглашайте друзей, получайте вознаграждение",
+  "marketing.bonuses.referral.description":
+    "Приглашайте друзей в GTX и получайте 10% от суммы их первого успешного депозита.",
+  "marketing.bonuses.referral.maxNote":
+    "До 100 USDT за одного приглашённого пользователя",
+  "marketing.bonuses.referral.registrationNote":
+    "Сама регистрация не создаёт вознаграждение — приглашённый пользователь должен совершить свой первый успешный депозит.",
+  "marketing.bonuses.referral.rule2": "Начисляется после первого успешного депозита",
+  "marketing.bonuses.referral.examplesLabel": "Примеры вознаграждений",
+  "marketing.bonuses.referral.example1From": "250 USDT",
+  "marketing.bonuses.referral.example1To": "25 USDT",
+  "marketing.bonuses.referral.example2From": "500 USDT",
+  "marketing.bonuses.referral.example2To": "50 USDT",
+  "marketing.bonuses.referral.example3From": "1000 USDT",
+  "marketing.bonuses.referral.example3To": "100 USDT",
+  "marketing.bonuses.referral.example4From": "2000 USDT",
+  "marketing.bonuses.referral.example4To": "100 USDT",
+  "marketing.bonuses.referral.maxLabel": "максимум",
+  "marketing.bonuses.personal.title": "Ваш реферальный код",
+  "marketing.bonuses.personal.explanation":
+    "Поделитесь этим кодом с другом. Он должен указать его при регистрации.",
+  "marketing.bonuses.personal.copyButton": "Скопировать код",
+  "marketing.bonuses.personal.copiedFeedback": "Скопировано",
+  "marketing.bonuses.guestCta.title": "Войдите, чтобы увидеть свой реферальный код",
+  "marketing.bonuses.guestCta.description":
+    "Создайте аккаунт или войдите, чтобы приглашать друзей и отслеживать свои бонусы.",
+  "marketing.bonuses.guestCta.registerButton": "Создать аккаунт",
+  "marketing.bonuses.guestCta.loginButton": "Войти",
+  "marketing.bonuses.stats.invited": "Приглашено друзей",
+  "marketing.bonuses.stats.activated": "Активировали бонус",
+  "marketing.bonuses.stats.earned": "Получено реферальных бонусов",
+  "marketing.bonuses.howItWorks.title": "Как работает реферальная программа",
+  "marketing.bonuses.howItWorks.step1Title": "Поделитесь кодом",
+  "marketing.bonuses.howItWorks.step1Description":
+    "Отправьте свой реферальный код другу.",
+  "marketing.bonuses.howItWorks.step2Title": "Друг регистрируется",
+  "marketing.bonuses.howItWorks.step2Description": "При регистрации он вводит ваш код.",
+  "marketing.bonuses.howItWorks.step3Title": "Друг пополняет счёт",
+  "marketing.bonuses.howItWorks.step3Description":
+    "После его первого успешного депозита вы получаете 10% от суммы, но не более 100 USDT.",
+  "marketing.bonuses.faq.title": "Частые вопросы",
+  "marketing.bonuses.faq.q1": "Когда я получу бонус +20%?",
+  "marketing.bonuses.faq.a1": "После подтверждения вашего первого успешного депозита.",
+  "marketing.bonuses.faq.q2": "Получу ли я +20% на второй депозит?",
+  "marketing.bonuses.faq.a2":
+    "Нет. Бонус начисляется только один раз — на первый успешный депозит.",
+  "marketing.bonuses.faq.q3": "Когда начисляется реферальный бонус?",
+  "marketing.bonuses.faq.a3":
+    "После того как приглашённый вами пользователь совершит свой первый успешный депозит.",
+  "marketing.bonuses.faq.q4": "Получу ли я бонус просто за регистрацию друга?",
+  "marketing.bonuses.faq.a4":
+    "Нет. Одной регистрации недостаточно. Приглашённый пользователь должен совершить первый успешный депозит.",
+  "marketing.bonuses.faq.q5": "Сколько я могу получить за одного друга?",
+  "marketing.bonuses.faq.a5":
+    "10% от суммы его первого успешного депозита, но не более 100 USDT.",
+  "marketing.bonuses.faq.q6": "Что если первый запрос на депозит друга отклонили?",
+  "marketing.bonuses.faq.a6":
+    "Отклонённый депозит не активирует реферальный бонус. Учитывается первый депозит, который был успешно подтверждён.",
+  "marketing.bonuses.faq.q7": "Получаю ли я 10% со всех будущих депозитов друга?",
+  "marketing.bonuses.faq.a7":
+    "Нет. Реферальный бонус начисляется один раз — с первого успешного депозита приглашённого пользователя.",
+  "marketing.bonuses.faq.q8":
+    "Может ли бонус за первый депозит и реферальный бонус сработать одновременно?",
+  "marketing.bonuses.faq.a8":
+    "Да. Приглашённый пользователь может получить свой бонус +20%, а пользователь, который его пригласил, — свой реферальный бонус.",
   "marketing.footer.platform": "Платформа",
   "marketing.footer.company": "Компания",
   "marketing.footer.legal": "Правовая информация",
@@ -770,6 +832,7 @@ export const ru: Dictionary = {
   "auth.resetPassword.missingTokenMessage": "В этой ссылке отсутствует токен сброса.",
 
   "markets.title": "Рынки",
+  "markets.subtitle": "Актуальные цены и торговые пары",
   "markets.tabs.all": "Все криптовалюты",
   "markets.tabs.favorites": "Избранные",
   "markets.tabs.popular": "Популярные",

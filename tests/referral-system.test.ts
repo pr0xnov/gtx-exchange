@@ -391,3 +391,75 @@ describe("Referral relationship — never USDT deposit/withdrawal itself", () =>
     expect(await prisma.referralReward.count()).toBe(0);
   });
 });
+
+/** Directly inserts a COMPLETED deposit Transaction row, bypassing the
+ *  approval API entirely — simulates a deposit that completed before this
+ *  exact code path (or before the referral feature) ever ran for this
+ *  referred user, which is exactly the historical-first-deposit bug
+ *  scenario: an old COMPLETED deposit with no ReferralReward row, since
+ *  tryAwardReferralSignupBonus was never invoked for it. Mirrors
+ *  tests/first-deposit-bonus-history.test.ts's own seedHistoricalCompletedDeposit
+ *  for the equivalent first-deposit-bonus fix. */
+async function seedHistoricalCompletedDeposit(
+  userId: string,
+  amount: number,
+  createdAt: Date
+) {
+  return prisma.transaction.create({
+    data: { userId, type: "DEPOSIT", amount, status: "COMPLETED", createdAt },
+  });
+}
+
+describe("Deposit reward — historical first deposit (re-derived from Transaction history, not from 'no ReferralReward row yet')", () => {
+  it("a referred user with an old COMPLETED deposit already on record gets NO referral reward on a later approved deposit", async () => {
+    const { referrer, referred } = await seedReferralPair();
+    // Old deposit, long before this test's "new" one — never went through
+    // tryAwardReferralSignupBonus, so no ReferralReward row exists yet.
+    await seedHistoricalCompletedDeposit(
+      referred.id,
+      250,
+      new Date("2026-08-31T00:00:00Z")
+    );
+
+    await depositAndApprove(referred, 100000);
+
+    expect(await usdtBalance(referrer.id)).toBe(0);
+    expect(await prisma.referralReward.count()).toBe(0);
+  });
+
+  it("does NOT retroactively reward the historical deposit's own amount either — the slot is simply never claimed", async () => {
+    const { referrer, referred } = await seedReferralPair();
+    await seedHistoricalCompletedDeposit(
+      referred.id,
+      250,
+      new Date("2026-08-31T00:00:00Z")
+    );
+    await depositAndApprove(referred, 500);
+
+    expect(await usdtBalance(referrer.id)).toBe(0); // never 25 (10% of the 250 historical one)
+    expect(await prisma.referralReward.count()).toBe(0);
+  });
+});
+
+describe("Deposit reward — concurrent approval requests", () => {
+  it("two simultaneous APPROVE requests for the same deposit pay the referral reward at most once", async () => {
+    const { referrer, referred } = await seedReferralPair();
+    const created = await depositAs(referred, 500);
+
+    const admin = await seedAdmin();
+    loginAs(admin);
+
+    const [first, second] = await Promise.all([
+      decide(created.id, "APPROVE"),
+      decide(created.id, "APPROVE"),
+    ]);
+    const statuses = [first.status, second.status].sort();
+    // Exactly one of the two concurrent requests wins the PENDING->COMPLETED
+    // transition (the guarded updateMany in the approval route); the other
+    // finds zero rows still PENDING and gets the 400 NotDecidableError.
+    expect(statuses).toEqual([200, 400]);
+
+    expect(await usdtBalance(referrer.id)).toBe(50); // not 100
+    expect(await prisma.referralReward.count()).toBe(1);
+  });
+});

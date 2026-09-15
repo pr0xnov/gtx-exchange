@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -21,17 +21,23 @@ interface FieldErrors {
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useLocale();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  // Prefills from a referral link's ?ref=CODE (see
+  // components/marketing/bonuses/referral-code-card.tsx) — read once at
+  // mount, same as any other initial form state; the field stays a normal
+  // editable Input afterward, so a typo'd/shared link is still correctable
+  // by hand exactly like a manually typed code always was.
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     agreeToTerms: false,
-    referralCode: "",
+    referralCode: searchParams.get("ref") ?? "",
   });
 
   async function handleSubmit(e: React.FormEvent) {

@@ -34,7 +34,7 @@ describe.each([
   ["uk" as Locale, "Усі права захищені", "Симулятор"],
   ["ru" as Locale, "Все права защищены", "Симулятор"],
 ])("Footer — %s", (locale, rightsReserved, oldWord) => {
-  it("shows the new description and '© <year> GTX' + rights-reserved on two lines, with the old text gone", async () => {
+  it("shows the new description and the '© <year> GTX · rights-reserved' line, with the old text gone", async () => {
     currentLocale = locale;
     const { container, root } = await renderFooter();
 
@@ -42,10 +42,8 @@ describe.each([
     expect(container.textContent).toContain(t("marketing.footer.description"));
 
     const year = new Date().getFullYear();
-    const lines = container.querySelectorAll(".border-t.border-border.py-6 p");
-    expect(lines.length).toBe(2);
-    expect(lines[0]!.textContent).toBe(`© ${year} GTX`);
-    expect(lines[1]!.textContent).toBe(rightsReserved);
+    const legalRow = container.querySelector(".border-t.border-border.py-6 p")!;
+    expect(legalRow.textContent).toBe(`© ${year} GTX · ${rightsReserved}`);
 
     expect(container.textContent).not.toContain(oldWord);
     expect(container.textContent).not.toContain("TradingView");
@@ -56,24 +54,70 @@ describe.each([
   });
 });
 
-describe("Footer — links/columns are unchanged", () => {
-  it("still has Platform/Company/Legal columns with all their original links", async () => {
+describe("Footer — centered brand + single evenly-spaced nav row", () => {
+  it("centers the logo and description above one flat nav row (no more separate Platform/Company columns)", async () => {
+    currentLocale = "uk";
+    const { container, root } = await renderFooter();
+
+    const brandWrapper = container.querySelector(
+      ".flex.flex-col.items-center.text-center"
+    )!;
+    expect(brandWrapper.querySelector("svg")).not.toBeNull(); // Logo
+    expect(brandWrapper.textContent).toContain(
+      translate("uk", "marketing.footer.description")
+    );
+
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it("has every public nav destination exactly once, with Support/Contacts collapsed into a single /contacts link", async () => {
     currentLocale = "uk";
     const { container, root } = await renderFooter();
 
     const expectedHrefs = [
       "/trading",
       "/markets",
-      "/analytics",
       "/about",
+      "/analytics",
+      "/bonuses",
       "/contacts",
-      "/support",
       "/privacy",
-      "/terms",
     ];
     for (const href of expectedHrefs) {
-      expect(container.querySelector(`a[href="${href}"]`)).not.toBeNull();
+      const matches = container.querySelectorAll(`a[href="${href}"]`);
+      expect(matches.length).toBe(1);
     }
+
+    // The old page is gone — nothing in the footer should still link there.
+    expect(container.querySelector('a[href="/support"]')).toBeNull();
+    // Terms of Service was dropped from the footer entirely (the /terms
+    // route itself is untouched, just no longer linked from here).
+    expect(container.querySelector('a[href="/terms"]')).toBeNull();
+
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it("places Privacy Policy in the main content area, directly after the nav row and above the bottom separator — never in a bottom-left/right split", async () => {
+    currentLocale = "uk";
+    const { container, root } = await renderFooter();
+
+    const nav = container.querySelector("nav")!;
+    const privacyLink = container.querySelector('a[href="/privacy"]')!;
+    const bottomRow = container.querySelector(".border-t.border-border.py-6")!;
+
+    // DOM order: nav comes before the privacy link...
+    expect(
+      nav.compareDocumentPosition(privacyLink) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    // ...and the privacy link is not inside the bottom copyright row.
+    expect(bottomRow.contains(privacyLink)).toBe(false);
+
+    // The bottom row contains only the centered copyright text — no
+    // left-column/right-column split, no legal links alongside it.
+    expect(bottomRow.querySelectorAll("a").length).toBe(0);
+    expect(bottomRow.className).not.toContain("justify-between");
 
     act(() => root.unmount());
     container.remove();

@@ -27,7 +27,7 @@ export const tr: Dictionary = {
   "nav.wallet": "Cüzdan",
   "nav.about": "Hakkımızda",
   "nav.analytics": "Analiz",
-  "nav.contacts": "İletişim",
+  "nav.bonuses": "Bonuslar",
   "nav.account": "Hesap",
   "nav.deposit": "Para Yatır",
   "nav.withdrawal": "Para Çek",
@@ -132,31 +132,6 @@ export const tr: Dictionary = {
   "settings.toastTwoFactorDisabled": "2FA başarıyla devre dışı bırakıldı",
   "settings.toastInvalidCode": "Geçersiz doğrulama kodu",
   "settings.toastTwoFactorSetupFailed": "2FA kurulumu başlatılamadı",
-
-  // Support
-  "support.title": "Destek",
-  "support.contactUs": "Bize ulaşın",
-  "support.subject": "Konu",
-  "support.subjectPlaceholder": "Size nasıl yardımcı olabiliriz?",
-  "support.message": "Mesaj",
-  "support.messagePlaceholder": "Sorununuzu açıklayın...",
-  "support.sendMessage": "Mesaj gönder",
-  "support.toastMessageSent": "Mesajınız gönderildi. 24 saat içinde yanıtlayacağız.",
-  "support.getInTouch": "İletişime geçin",
-  "support.liveChat": "Canlı destek, 7/24",
-  "support.faq": "Sıkça sorulan sorular",
-  "support.faqRealExchangeQ": "GTX gerçek bir kripto para borsası mı?",
-  "support.faqRealExchangeA":
-    "Hayır. GTX bir kağıt işlem simülatörüdür. Tüm bakiyeler sanaldır ve hiçbir zaman gerçek para yatırılmaz, işlem görmez veya çekilmez.",
-  "support.faqResetBalanceQ": "Sanal bakiyemi nasıl sıfırlarım?",
-  "support.faqResetBalanceA":
-    "Destek ile iletişime geçin, hesabınızı başlangıç bakiyesi olan 10.000 USDT'ye sıfırlayalım.",
-  "support.faqPriceSourceQ": "Fiyatlar nereden geliyor?",
-  "support.faqPriceSourceA":
-    "Canlı fiyatlar doğrudan Binance'in herkese açık piyasa veri akışından aktarılır, bu nedenle grafikler gerçek piyasa koşullarını yansıtır.",
-  "support.faqLeverageQ": "Hangi kaldıraç kullanılabilir?",
-  "support.faqLeverageA":
-    "Desteklenen paritelerde 1:100'e kadar kaldıraçla işlem yapabilir, gerçek CFD tarzı işlem koşullarını deneyimleyebilirsiniz.",
 
   // Deposit
   "deposit.pageTitle": "Para Yatırma",
@@ -291,6 +266,7 @@ export const tr: Dictionary = {
 
   // Wallet
   "wallet.page.title": "Cüzdan",
+  "wallet.page.subtitle": "Varlıklarınızı tek bir yerden yönetin",
   "wallet.summary.availableBalance": "Kullanılabilir Bakiye",
   "wallet.summary.lockedInOrders": "Emirlerde",
   "wallet.summary.assetsValue": "Varlık Değeri",
@@ -433,7 +409,6 @@ export const tr: Dictionary = {
   "marketing.home.benefits.support.description": "Her zaman yardımcı olmaya hazırız",
 
   // Marketing — About
-  "marketing.about.hero.badge": "GTX • Karmaşadan uzak kripto",
   "marketing.about.hero.titleLine1": "Kriptonun daha basit",
   "marketing.about.hero.titleLine2": "hale geldiği bir",
   "marketing.about.hero.titleHighlight": "alan yaratıyoruz.",
@@ -730,6 +705,92 @@ export const tr: Dictionary = {
   "supportChat.input.send": "Gönder",
   "supportChat.errors.createFailed": "Görüşme başlatılamadı. Lütfen tekrar deneyin.",
   "supportChat.errors.sendFailed": "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
+
+  // /bonuses
+  "marketing.bonuses.hero.heading": "GTX ile daha fazlasını kazanın",
+  "marketing.bonuses.hero.subtitle":
+    "İlk yatırım bonusunuzdan yararlanın ve arkadaşlarınızı davet ederek ek ödüller kazanın.",
+  "marketing.bonuses.firstDeposit.badge": "+%20",
+  "marketing.bonuses.firstDeposit.title": "İlk yatırımınızdan daha fazla değer",
+  "marketing.bonuses.firstDeposit.description":
+    "İlk başarılı yatırımınızın tutarına +%20 ekstra kazanın.",
+  "marketing.bonuses.firstDeposit.examplesLabel": "Örnekler",
+  "marketing.bonuses.firstDeposit.example1From": "250 USDT",
+  "marketing.bonuses.firstDeposit.example1To": "+50 USDT",
+  "marketing.bonuses.firstDeposit.example2From": "500 USDT",
+  "marketing.bonuses.firstDeposit.example2To": "+100 USDT",
+  "marketing.bonuses.firstDeposit.example3From": "1000 USDT",
+  "marketing.bonuses.firstDeposit.example3To": "+200 USDT",
+  "marketing.bonuses.firstDeposit.rule1": "Tek seferlik bonus",
+  "marketing.bonuses.firstDeposit.rule2":
+    "Yalnızca ilk onaylanmış yatırımınız geçerlidir",
+  "marketing.bonuses.firstDeposit.rule3": "Sonraki yatırımlarda uygulanmaz",
+  "marketing.bonuses.referral.badge": "%10",
+  "marketing.bonuses.referral.title": "Arkadaşlarınızı davet edin, ödül kazanın",
+  "marketing.bonuses.referral.description":
+    "Arkadaşlarınızı GTX'e davet edin ve ilk başarılı yatırımlarının tutarının %10'unu kazanın.",
+  "marketing.bonuses.referral.maxNote":
+    "Davet edilen her kullanıcı için en fazla 100 USDT",
+  "marketing.bonuses.referral.registrationNote":
+    "Yalnızca kayıt olmak bir ödül oluşturmaz — davet edilen kullanıcının ilk başarılı yatırımını yapması gerekir.",
+  "marketing.bonuses.referral.rule2": "İlk başarılı yatırımından sonra hesabınıza geçer",
+  "marketing.bonuses.referral.examplesLabel": "Ödül örnekleri",
+  "marketing.bonuses.referral.example1From": "250 USDT",
+  "marketing.bonuses.referral.example1To": "25 USDT",
+  "marketing.bonuses.referral.example2From": "500 USDT",
+  "marketing.bonuses.referral.example2To": "50 USDT",
+  "marketing.bonuses.referral.example3From": "1000 USDT",
+  "marketing.bonuses.referral.example3To": "100 USDT",
+  "marketing.bonuses.referral.example4From": "2000 USDT",
+  "marketing.bonuses.referral.example4To": "100 USDT",
+  "marketing.bonuses.referral.maxLabel": "maksimum",
+  "marketing.bonuses.personal.title": "Referans kodunuz",
+  "marketing.bonuses.personal.explanation":
+    "Bu kodu bir arkadaşınızla paylaşın. Kayıt sırasında bu kodu girmesi gerekir.",
+  "marketing.bonuses.personal.copyButton": "Kodu kopyala",
+  "marketing.bonuses.personal.copiedFeedback": "Kopyalandı",
+  "marketing.bonuses.guestCta.title": "Referans kodunuzu görmek için giriş yapın",
+  "marketing.bonuses.guestCta.description":
+    "Arkadaşlarınızı davet etmek ve bonuslarınızı takip etmek için hesap oluşturun veya giriş yapın.",
+  "marketing.bonuses.guestCta.registerButton": "Hesap oluştur",
+  "marketing.bonuses.guestCta.loginButton": "Giriş yap",
+  "marketing.bonuses.stats.invited": "Davet edilen arkadaşlar",
+  "marketing.bonuses.stats.activated": "Bonusu aktive edenler",
+  "marketing.bonuses.stats.earned": "Kazanılan referans bonusları",
+  "marketing.bonuses.howItWorks.title": "Referans programı nasıl çalışır",
+  "marketing.bonuses.howItWorks.step1Title": "Kodunuzu paylaşın",
+  "marketing.bonuses.howItWorks.step1Description":
+    "Referans kodunuzu bir arkadaşınıza gönderin.",
+  "marketing.bonuses.howItWorks.step2Title": "Arkadaşınız kaydolur",
+  "marketing.bonuses.howItWorks.step2Description": "Kayıt sırasında kodunuzu girer.",
+  "marketing.bonuses.howItWorks.step3Title": "Arkadaşınız yatırım yapar",
+  "marketing.bonuses.howItWorks.step3Description":
+    "İlk başarılı yatırımından sonra, tutarının %10'unu (en fazla 100 USDT) kazanırsınız.",
+  "marketing.bonuses.faq.title": "Sıkça sorulan sorular",
+  "marketing.bonuses.faq.q1": "+%20 bonusu ne zaman alırım?",
+  "marketing.bonuses.faq.a1": "İlk başarılı yatırımınız onaylandıktan sonra.",
+  "marketing.bonuses.faq.q2": "İkinci yatırımımda +%20 alır mıyım?",
+  "marketing.bonuses.faq.a2":
+    "Hayır. Bonus yalnızca bir kez, ilk başarılı yatırımınızda verilir.",
+  "marketing.bonuses.faq.q3": "Referans bonusu ne zaman hesabıma geçer?",
+  "marketing.bonuses.faq.a3":
+    "Davet ettiğiniz kullanıcı ilk başarılı yatırımını yaptıktan sonra.",
+  "marketing.bonuses.faq.q4": "Sadece bir arkadaşımı kaydettirerek bonus alır mıyım?",
+  "marketing.bonuses.faq.a4":
+    "Hayır. Yalnızca kayıt yeterli değildir. Davet edilen kullanıcının ilk başarılı yatırımını yapması gerekir.",
+  "marketing.bonuses.faq.q5": "Bir arkadaş için ne kadar kazanabilirim?",
+  "marketing.bonuses.faq.a5": "İlk başarılı yatırımının %10'u, en fazla 100 USDT.",
+  "marketing.bonuses.faq.q6": "Arkadaşımın ilk yatırım talebi reddedilirse ne olur?",
+  "marketing.bonuses.faq.a6":
+    "Reddedilen bir yatırım referans bonusunu etkinleştirmez. Yalnızca başarıyla onaylanan ilk yatırım sayılır.",
+  "marketing.bonuses.faq.q7":
+    "Arkadaşımın gelecekteki tüm yatırımlarından %10 alır mıyım?",
+  "marketing.bonuses.faq.a7":
+    "Hayır. Referans bonusu yalnızca bir kez, davet edilen kullanıcının ilk başarılı yatırımından verilir.",
+  "marketing.bonuses.faq.q8":
+    "İlk yatırım bonusu ile referans bonusu aynı anda tetiklenebilir mi?",
+  "marketing.bonuses.faq.a8":
+    "Evet. Davet edilen kullanıcı kendi +%20 bonusunu alabilirken, onu davet eden kullanıcı da referans bonusunu alır.",
   "marketing.footer.platform": "Platform",
   "marketing.footer.company": "Şirket",
   "marketing.footer.legal": "Yasal",
@@ -789,6 +850,7 @@ export const tr: Dictionary = {
 
   // Markets
   "markets.title": "Piyasalar",
+  "markets.subtitle": "Canlı fiyatlar ve işlem çiftleri",
   "markets.tabs.all": "Tüm Kripto Paralar",
   "markets.tabs.favorites": "Favoriler",
   "markets.tabs.popular": "Popüler",

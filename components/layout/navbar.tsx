@@ -32,7 +32,8 @@ const NAV_LINKS = [
   { key: "nav.markets", href: "/markets" },
   { key: "nav.about", href: "/about" },
   { key: "nav.analytics", href: "/analytics" },
-  { key: "nav.contacts", href: "/contacts" },
+  { key: "nav.bonuses", href: "/bonuses" },
+  { key: "nav.support", href: "/contacts" },
 ] satisfies { key: DictionaryKey; href: string }[];
 
 // Shown only to an authenticated user, immediately before Trading — guests
@@ -50,7 +51,7 @@ const ACCOUNT_LINKS = [
   { key: "nav.history", href: "/history", icon: History },
   { key: "nav.verification", href: "/verification", icon: ShieldCheck },
   { key: "nav.settings", href: "/settings", icon: Settings },
-  { key: "nav.support", href: "/support", icon: LifeBuoy },
+  { key: "nav.support", href: "/contacts", icon: LifeBuoy },
 ] satisfies { key: DictionaryKey; href: string; icon: typeof UserIcon }[];
 
 /**

@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard";
 import { MarketNewsCard } from "@/components/news/market-news-card";
+import { PageHero } from "@/components/shared/page-hero";
 import { fetchAllNews } from "@/lib/news/fetch";
 
 const MARKET_NEWS_COUNT = 3;
@@ -48,15 +49,10 @@ export default async function AnalyticsPage() {
         }
       />
 
-      <section className="container py-10 sm:py-14">
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            {t("analytics.title")}
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-muted">{t("analytics.subtitle")}</p>
-        </div>
+      <PageHero title={t("analytics.title")} subtitle={t("analytics.subtitle")} compact />
 
-        <div className="mx-auto mt-10 max-w-6xl">
+      <section className="container py-10 sm:py-14">
+        <div className="mx-auto max-w-6xl">
           <AnalyticsDashboard isAuthenticated={Boolean(user)} />
 
           {marketNews.length > 0 && (

@@ -76,6 +76,22 @@ export function useCurrentUser() {
   });
 }
 
+export interface ReferralStats {
+  invited: number;
+  activated: number;
+  earned: number;
+}
+
+/** Backs the personal stats section on /bonuses — see
+ *  app/api/account/referral-stats/route.ts for what each number means. */
+export function useReferralStats() {
+  return useQuery({
+    queryKey: ["referral-stats"],
+    queryFn: () => fetchJson<ReferralStats>("/api/account/referral-stats"),
+    retry: false,
+  });
+}
+
 export interface PortfolioSummary {
   balance: number;
   credit: number;

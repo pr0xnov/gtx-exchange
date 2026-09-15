@@ -13,6 +13,18 @@ type TxClient = Prisma.TransactionClient;
  * never from any bonus (this deposit's own first-deposit bonus, see
  * lib/bonus/first-deposit.ts, is never part of this base).
  *
+ * "FIRST approved deposit" means the referred user's actual earliest-ever
+ * APPROVED/COMPLETED deposit, full stop — re-derived from Transaction
+ * history on every call (the same fix lib/bonus/first-deposit.ts's own doc
+ * comment explains in full), never inferred from "no ReferralReward row
+ * exists for this referred user yet". Without this check, a referred user
+ * whose actual first deposit was approved before this exact code path ran
+ * (e.g. mid-rollout, or a future refactor that briefly skips this call)
+ * would silently let their NEXT deposit masquerade as "first" the moment
+ * this function next runs for them — this re-derivation makes that
+ * impossible: a real earliest-COMPLETED-deposit id never changes once it
+ * exists, so any later deposit permanently fails to match it.
+ *
  * Idempotency is enforced at the DATABASE level, not with an in-memory or
  * JavaScript-only check: ReferralReward.referredUserId is @unique, and
  * creating that row (with no wallet/transaction side effects yet) is the
@@ -41,6 +53,19 @@ export async function tryAwardReferralSignupBonus(
   // No inviter, or (structurally shouldn't happen, but never trust it)
   // somehow the referrer and the referred user are the same account.
   if (!referrerId || referrerId === deposit.userId) return;
+
+  const earliestCompletedDeposit = await tx.transaction.findFirst({
+    where: { userId: deposit.userId, type: "DEPOSIT", status: "COMPLETED" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (earliestCompletedDeposit?.id !== deposit.id) {
+    // A COMPLETED deposit already existed before this one — this is not
+    // actually the referred user's first deposit, regardless of whether a
+    // ReferralReward row has ever been created for them. Never pay, never
+    // retroactively reinterpret a later deposit as "the first".
+    return;
+  }
 
   const rewardAmount = computeReferralReward(deposit.amount);
 

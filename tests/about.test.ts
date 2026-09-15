@@ -82,9 +82,8 @@ async function renderAbout() {
 }
 
 describe("About — hero", () => {
-  it("shows the badge, the 3-line heading with the highlighted last line, and the subtitle", async () => {
+  it("shows the 3-line heading with the highlighted last line and the subtitle, with no small eyebrow/badge above it", async () => {
     await renderAbout();
-    expect(container.textContent).toContain(t("marketing.about.hero.badge"));
     expect(container.textContent).toContain(t("marketing.about.hero.titleLine1"));
     expect(container.textContent).toContain(t("marketing.about.hero.titleLine2"));
     expect(container.textContent).toContain(t("marketing.about.hero.subtitle"));
@@ -92,6 +91,12 @@ describe("About — hero", () => {
     const highlight = container.querySelector("h1 span") as HTMLElement | null;
     expect(highlight).not.toBeNull();
     expect(highlight!.textContent).toBe(t("marketing.about.hero.titleHighlight"));
+
+    // The small green pill/eyebrow above the heading was removed — the
+    // hero now starts directly with the main heading.
+    const heroSection = container.querySelector("h1")!.closest("section")!;
+    expect(heroSection.querySelector("h1")).toBe(container.querySelector("h1"));
+    expect(heroSection.textContent!.indexOf("GTX •")).toBe(-1);
   });
 });
 

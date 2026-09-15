@@ -10,7 +10,6 @@ const PROTECTED_PREFIXES = [
   "/withdrawal",
   "/history",
   "/settings",
-  "/support",
   "/verification",
   "/trading",
   "/wallet",

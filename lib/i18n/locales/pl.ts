@@ -28,14 +28,14 @@ export const pl: Dictionary = {
   "nav.wallet": "Portfel",
   "nav.about": "O nas",
   "nav.analytics": "Analityka",
-  "nav.contacts": "Kontakt",
+  "nav.bonuses": "Bonusy",
   "nav.account": "Konto",
   "nav.deposit": "Wpłata",
   "nav.withdrawal": "Wypłata",
   "nav.history": "Historia",
   "nav.verification": "Weryfikacja",
   "nav.settings": "Ustawienia",
-  "nav.support": "Pomoc",
+  "nav.support": "Wsparcie",
   "nav.accountMenu": "Menu konta",
   "nav.toggleMenu": "Otwórz/zamknij menu",
   "nav.language": "Język",
@@ -134,32 +134,6 @@ export const pl: Dictionary = {
   "settings.toastTwoFactorDisabled": "2FA zostało pomyślnie wyłączone",
   "settings.toastInvalidCode": "Nieprawidłowy kod weryfikacyjny",
   "settings.toastTwoFactorSetupFailed": "Nie udało się rozpocząć konfiguracji 2FA",
-
-  // Support
-  "support.title": "Pomoc",
-  "support.contactUs": "Skontaktuj się z nami",
-  "support.subject": "Temat",
-  "support.subjectPlaceholder": "W czym możemy pomóc?",
-  "support.message": "Wiadomość",
-  "support.messagePlaceholder": "Opisz swój problem...",
-  "support.sendMessage": "Wyślij wiadomość",
-  "support.toastMessageSent":
-    "Twoja wiadomość została wysłana. Odpowiemy w ciągu 24 godzin.",
-  "support.getInTouch": "Skontaktuj się",
-  "support.liveChat": "Czat na żywo, 24/7",
-  "support.faq": "Często zadawane pytania",
-  "support.faqRealExchangeQ": "Czy GTX to prawdziwa giełda kryptowalut?",
-  "support.faqRealExchangeA":
-    "Nie. GTX to symulator handlu wirtualnego. Wszystkie salda są wirtualne i żadne prawdziwe środki nigdy nie są wpłacane, wymieniane ani wypłacane.",
-  "support.faqResetBalanceQ": "Jak zresetować swoje wirtualne saldo?",
-  "support.faqResetBalanceA":
-    "Skontaktuj się z pomocą techniczną, a zresetujemy Twoje konto do początkowego salda 10 000 USDT.",
-  "support.faqPriceSourceQ": "Skąd pochodzą ceny?",
-  "support.faqPriceSourceA":
-    "Ceny na żywo są przesyłane bezpośrednio z publicznego kanału danych rynkowych Binance, dzięki czemu wykresy odzwierciedlają rzeczywiste warunki rynkowe.",
-  "support.faqLeverageQ": "Jaka dźwignia jest dostępna?",
-  "support.faqLeverageA":
-    "Możesz handlować z dźwignią do 1:100 na obsługiwanych parach, co odpowiada rzeczywistym warunkom handlu w stylu CFD.",
 
   // Deposit
   "deposit.pageTitle": "Wpłata",
@@ -296,6 +270,7 @@ export const pl: Dictionary = {
 
   // Wallet
   "wallet.page.title": "Portfel",
+  "wallet.page.subtitle": "Zarządzaj swoimi aktywami w jednym miejscu",
   "wallet.summary.availableBalance": "Dostępne saldo",
   "wallet.summary.lockedInOrders": "W zleceniach",
   "wallet.summary.assetsValue": "Wartość aktywów",
@@ -434,7 +409,6 @@ export const pl: Dictionary = {
   "marketing.home.benefits.support.description": "Zawsze jesteśmy tu, aby pomóc",
 
   // Marketing — About
-  "marketing.about.hero.badge": "GTX • Kryptowaluty bez zbędnych komplikacji",
   "marketing.about.hero.titleLine1": "Tworzymy przestrzeń,",
   "marketing.about.hero.titleLine2": "w której świat kryptowalut staje się",
   "marketing.about.hero.titleHighlight": "prostszy.",
@@ -730,6 +704,93 @@ export const pl: Dictionary = {
   "supportChat.input.send": "Wyślij",
   "supportChat.errors.createFailed": "Nie udało się rozpocząć rozmowy. Spróbuj ponownie.",
   "supportChat.errors.sendFailed": "Wiadomość nie została wysłana. Spróbuj ponownie.",
+
+  // /bonuses
+  "marketing.bonuses.hero.heading": "Zyskuj więcej z GTX",
+  "marketing.bonuses.hero.subtitle":
+    "Skorzystaj z bonusu za pierwszą wpłatę i zapraszaj znajomych, aby zdobywać dodatkowe nagrody.",
+  "marketing.bonuses.firstDeposit.badge": "+20%",
+  "marketing.bonuses.firstDeposit.title": "Więcej korzyści z pierwszej wpłaty",
+  "marketing.bonuses.firstDeposit.description":
+    "Otrzymaj +20% do kwoty swojej pierwszej udanej wpłaty.",
+  "marketing.bonuses.firstDeposit.examplesLabel": "Przykłady",
+  "marketing.bonuses.firstDeposit.example1From": "250 USDT",
+  "marketing.bonuses.firstDeposit.example1To": "+50 USDT",
+  "marketing.bonuses.firstDeposit.example2From": "500 USDT",
+  "marketing.bonuses.firstDeposit.example2To": "+100 USDT",
+  "marketing.bonuses.firstDeposit.example3From": "1000 USDT",
+  "marketing.bonuses.firstDeposit.example3To": "+200 USDT",
+  "marketing.bonuses.firstDeposit.rule1": "Jednorazowy bonus",
+  "marketing.bonuses.firstDeposit.rule2": "Liczy się tylko pierwsza potwierdzona wpłata",
+  "marketing.bonuses.firstDeposit.rule3": "Nie dotyczy kolejnych wpłat",
+  "marketing.bonuses.referral.badge": "10%",
+  "marketing.bonuses.referral.title": "Zapraszaj znajomych, zdobywaj nagrody",
+  "marketing.bonuses.referral.description":
+    "Zapraszaj znajomych do GTX i zdobywaj 10% kwoty ich pierwszej udanej wpłaty.",
+  "marketing.bonuses.referral.maxNote": "Do 100 USDT za jednego zaproszonego użytkownika",
+  "marketing.bonuses.referral.registrationNote":
+    "Sama rejestracja nie generuje nagrody — zaproszony użytkownik musi dokonać swojej pierwszej udanej wpłaty.",
+  "marketing.bonuses.referral.rule2": "Naliczane po jego pierwszej udanej wpłacie",
+  "marketing.bonuses.referral.examplesLabel": "Przykłady nagród",
+  "marketing.bonuses.referral.example1From": "250 USDT",
+  "marketing.bonuses.referral.example1To": "25 USDT",
+  "marketing.bonuses.referral.example2From": "500 USDT",
+  "marketing.bonuses.referral.example2To": "50 USDT",
+  "marketing.bonuses.referral.example3From": "1000 USDT",
+  "marketing.bonuses.referral.example3To": "100 USDT",
+  "marketing.bonuses.referral.example4From": "2000 USDT",
+  "marketing.bonuses.referral.example4To": "100 USDT",
+  "marketing.bonuses.referral.maxLabel": "maksimum",
+  "marketing.bonuses.personal.title": "Twój kod polecający",
+  "marketing.bonuses.personal.explanation":
+    "Udostępnij ten kod znajomemu. Musi go podać podczas rejestracji.",
+  "marketing.bonuses.personal.copyButton": "Kopiuj kod",
+  "marketing.bonuses.personal.copiedFeedback": "Skopiowano",
+  "marketing.bonuses.guestCta.title": "Zaloguj się, aby zobaczyć swój kod polecający",
+  "marketing.bonuses.guestCta.description":
+    "Załóż konto lub zaloguj się, aby zapraszać znajomych i śledzić swoje bonusy.",
+  "marketing.bonuses.guestCta.registerButton": "Załóż konto",
+  "marketing.bonuses.guestCta.loginButton": "Zaloguj się",
+  "marketing.bonuses.stats.invited": "Zaproszeni znajomi",
+  "marketing.bonuses.stats.activated": "Aktywowali bonus",
+  "marketing.bonuses.stats.earned": "Otrzymane bonusy polecające",
+  "marketing.bonuses.howItWorks.title": "Jak działa program poleceń",
+  "marketing.bonuses.howItWorks.step1Title": "Udostępnij kod",
+  "marketing.bonuses.howItWorks.step1Description":
+    "Wyślij swój kod polecający znajomemu.",
+  "marketing.bonuses.howItWorks.step2Title": "Znajomy się rejestruje",
+  "marketing.bonuses.howItWorks.step2Description":
+    "Podczas rejestracji wpisuje Twój kod.",
+  "marketing.bonuses.howItWorks.step3Title": "Znajomy wpłaca środki",
+  "marketing.bonuses.howItWorks.step3Description":
+    "Po jego pierwszej udanej wpłacie otrzymujesz 10% kwoty, nie więcej niż 100 USDT.",
+  "marketing.bonuses.faq.title": "Najczęstsze pytania",
+  "marketing.bonuses.faq.q1": "Kiedy otrzymam bonus +20%?",
+  "marketing.bonuses.faq.a1": "Po potwierdzeniu Twojej pierwszej udanej wpłaty.",
+  "marketing.bonuses.faq.q2": "Czy otrzymam +20% przy drugiej wpłacie?",
+  "marketing.bonuses.faq.a2":
+    "Nie. Bonus jest naliczany tylko raz — przy pierwszej udanej wpłacie.",
+  "marketing.bonuses.faq.q3": "Kiedy naliczany jest bonus polecający?",
+  "marketing.bonuses.faq.a3":
+    "Po tym, jak zaproszony przez Ciebie użytkownik dokona swojej pierwszej udanej wpłaty.",
+  "marketing.bonuses.faq.q4": "Czy otrzymam bonus tylko za rejestrację znajomego?",
+  "marketing.bonuses.faq.a4":
+    "Nie. Sama rejestracja nie wystarczy. Zaproszony użytkownik musi dokonać pierwszej udanej wpłaty.",
+  "marketing.bonuses.faq.q5": "Ile mogę zarobić za jednego znajomego?",
+  "marketing.bonuses.faq.a5":
+    "10% kwoty jego pierwszej udanej wpłaty, nie więcej niż 100 USDT.",
+  "marketing.bonuses.faq.q6":
+    "Co jeśli pierwsza prośba o wpłatę znajomego zostanie odrzucona?",
+  "marketing.bonuses.faq.a6":
+    "Odrzucona wpłata nie aktywuje bonusu polecającego. Liczy się pierwsza wpłata, która została pomyślnie potwierdzona.",
+  "marketing.bonuses.faq.q7":
+    "Czy otrzymuję 10% ze wszystkich przyszłych wpłat znajomego?",
+  "marketing.bonuses.faq.a7":
+    "Nie. Bonus polecający jest naliczany tylko raz — od pierwszej udanej wpłaty zaproszonego użytkownika.",
+  "marketing.bonuses.faq.q8":
+    "Czy bonus za pierwszą wpłatę i bonus polecający mogą zadziałać jednocześnie?",
+  "marketing.bonuses.faq.a8":
+    "Tak. Zaproszony użytkownik może otrzymać swój własny bonus +20%, a użytkownik, który go zaprosił — swój bonus polecający.",
   "marketing.footer.platform": "Platforma",
   "marketing.footer.company": "Firma",
   "marketing.footer.legal": "Informacje prawne",
@@ -790,6 +851,7 @@ export const pl: Dictionary = {
 
   // Markets
   "markets.title": "Rynki",
+  "markets.subtitle": "Aktualne ceny i pary handlowe",
   "markets.tabs.all": "Wszystkie kryptowaluty",
   "markets.tabs.favorites": "Ulubione",
   "markets.tabs.popular": "Popularne",

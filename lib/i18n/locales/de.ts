@@ -28,7 +28,7 @@ export const de: Dictionary = {
   "nav.wallet": "Wallet",
   "nav.about": "Über uns",
   "nav.analytics": "Analysen",
-  "nav.contacts": "Kontakt",
+  "nav.bonuses": "Boni",
   "nav.account": "Konto",
   "nav.deposit": "Einzahlung",
   "nav.withdrawal": "Auszahlung",
@@ -134,32 +134,6 @@ export const de: Dictionary = {
   "settings.toastTwoFactorDisabled": "2FA erfolgreich deaktiviert",
   "settings.toastInvalidCode": "Ungültiger Bestätigungscode",
   "settings.toastTwoFactorSetupFailed": "2FA-Einrichtung konnte nicht gestartet werden",
-
-  // Support
-  "support.title": "Support",
-  "support.contactUs": "Kontaktieren Sie uns",
-  "support.subject": "Betreff",
-  "support.subjectPlaceholder": "Wobei können wir helfen?",
-  "support.message": "Nachricht",
-  "support.messagePlaceholder": "Beschreiben Sie Ihr Anliegen...",
-  "support.sendMessage": "Nachricht senden",
-  "support.toastMessageSent":
-    "Ihre Nachricht wurde gesendet. Wir antworten innerhalb von 24 Stunden.",
-  "support.getInTouch": "Kontakt aufnehmen",
-  "support.liveChat": "Live-Chat, rund um die Uhr",
-  "support.faq": "Häufig gestellte Fragen",
-  "support.faqRealExchangeQ": "Ist GTX eine echte Kryptobörse?",
-  "support.faqRealExchangeA":
-    "Nein. GTX ist ein Paper-Trading-Simulator. Alle Guthaben sind virtuell, es werden niemals echte Gelder eingezahlt, gehandelt oder ausgezahlt.",
-  "support.faqResetBalanceQ": "Wie setze ich mein virtuelles Guthaben zurück?",
-  "support.faqResetBalanceA":
-    "Kontaktieren Sie den Support, und wir setzen Ihr Konto auf das Startguthaben von 10.000 USDT zurück.",
-  "support.faqPriceSourceQ": "Woher stammen die Kurse?",
-  "support.faqPriceSourceA":
-    "Live-Kurse werden direkt vom öffentlichen Marktdaten-Feed von Binance gestreamt, sodass die Charts reale Marktbedingungen widerspiegeln.",
-  "support.faqLeverageQ": "Welcher Hebel steht zur Verfügung?",
-  "support.faqLeverageA":
-    "Sie können unterstützte Paare mit bis zu 1:100 Hebel handeln, entsprechend realen CFD-Handelsbedingungen.",
 
   // Deposit
   "deposit.pageTitle": "Einzahlung",
@@ -298,6 +272,7 @@ export const de: Dictionary = {
 
   // Wallet
   "wallet.page.title": "Wallet",
+  "wallet.page.subtitle": "Verwalten Sie Ihre Vermögenswerte an einem Ort",
   "wallet.summary.availableBalance": "Verfügbares Guthaben",
   "wallet.summary.lockedInOrders": "In Orders gebunden",
   "wallet.summary.assetsValue": "Wert der Assets",
@@ -441,7 +416,6 @@ export const de: Dictionary = {
   "marketing.home.benefits.support.description": "Wir sind immer für Sie da",
 
   // Marketing — About
-  "marketing.about.hero.badge": "GTX • Krypto ohne Umwege",
   "marketing.about.hero.titleLine1": "Wir schaffen einen Ort,",
   "marketing.about.hero.titleLine2": "an dem Krypto",
   "marketing.about.hero.titleHighlight": "einfacher wird.",
@@ -742,6 +716,96 @@ export const de: Dictionary = {
     "Das Gespräch konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
   "supportChat.errors.sendFailed":
     "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+
+  // /bonuses
+  "marketing.bonuses.hero.heading": "Holen Sie mehr mit GTX heraus",
+  "marketing.bonuses.hero.subtitle":
+    "Sichern Sie sich den Bonus für Ihre erste Einzahlung und laden Sie Freunde ein, um zusätzliche Prämien zu erhalten.",
+  "marketing.bonuses.firstDeposit.badge": "+20 %",
+  "marketing.bonuses.firstDeposit.title": "Mehr Wert bei Ihrer ersten Einzahlung",
+  "marketing.bonuses.firstDeposit.description":
+    "Erhalten Sie +20 % zusätzlich auf den Betrag Ihrer ersten erfolgreichen Einzahlung.",
+  "marketing.bonuses.firstDeposit.examplesLabel": "Beispiele",
+  "marketing.bonuses.firstDeposit.example1From": "250 USDT",
+  "marketing.bonuses.firstDeposit.example1To": "+50 USDT",
+  "marketing.bonuses.firstDeposit.example2From": "500 USDT",
+  "marketing.bonuses.firstDeposit.example2To": "+100 USDT",
+  "marketing.bonuses.firstDeposit.example3From": "1000 USDT",
+  "marketing.bonuses.firstDeposit.example3To": "+200 USDT",
+  "marketing.bonuses.firstDeposit.rule1": "Einmaliger Bonus",
+  "marketing.bonuses.firstDeposit.rule2": "Nur Ihre erste bestätigte Einzahlung zählt",
+  "marketing.bonuses.firstDeposit.rule3": "Gilt nicht für spätere Einzahlungen",
+  "marketing.bonuses.referral.badge": "10 %",
+  "marketing.bonuses.referral.title": "Freunde einladen, Prämien erhalten",
+  "marketing.bonuses.referral.description":
+    "Laden Sie Freunde zu GTX ein und erhalten Sie 10 % des Betrags ihrer ersten erfolgreichen Einzahlung.",
+  "marketing.bonuses.referral.maxNote": "Bis zu 100 USDT pro eingeladenem Nutzer",
+  "marketing.bonuses.referral.registrationNote":
+    "Die Registrierung allein erzeugt noch keine Prämie — der eingeladene Nutzer muss seine erste erfolgreiche Einzahlung tätigen.",
+  "marketing.bonuses.referral.rule2":
+    "Wird nach seiner ersten erfolgreichen Einzahlung gutgeschrieben",
+  "marketing.bonuses.referral.examplesLabel": "Prämienbeispiele",
+  "marketing.bonuses.referral.example1From": "250 USDT",
+  "marketing.bonuses.referral.example1To": "25 USDT",
+  "marketing.bonuses.referral.example2From": "500 USDT",
+  "marketing.bonuses.referral.example2To": "50 USDT",
+  "marketing.bonuses.referral.example3From": "1000 USDT",
+  "marketing.bonuses.referral.example3To": "100 USDT",
+  "marketing.bonuses.referral.example4From": "2000 USDT",
+  "marketing.bonuses.referral.example4To": "100 USDT",
+  "marketing.bonuses.referral.maxLabel": "maximal",
+  "marketing.bonuses.personal.title": "Ihr Empfehlungscode",
+  "marketing.bonuses.personal.explanation":
+    "Teilen Sie diesen Code mit einem Freund. Er muss ihn bei der Registrierung angeben.",
+  "marketing.bonuses.personal.copyButton": "Code kopieren",
+  "marketing.bonuses.personal.copiedFeedback": "Kopiert",
+  "marketing.bonuses.guestCta.title":
+    "Melden Sie sich an, um Ihren Empfehlungscode zu sehen",
+  "marketing.bonuses.guestCta.description":
+    "Erstellen Sie ein Konto oder melden Sie sich an, um Freunde einzuladen und Ihre Boni zu verfolgen.",
+  "marketing.bonuses.guestCta.registerButton": "Konto erstellen",
+  "marketing.bonuses.guestCta.loginButton": "Anmelden",
+  "marketing.bonuses.stats.invited": "Eingeladene Freunde",
+  "marketing.bonuses.stats.activated": "Bonus aktiviert",
+  "marketing.bonuses.stats.earned": "Erhaltene Empfehlungsboni",
+  "marketing.bonuses.howItWorks.title": "So funktioniert das Empfehlungsprogramm",
+  "marketing.bonuses.howItWorks.step1Title": "Code teilen",
+  "marketing.bonuses.howItWorks.step1Description":
+    "Senden Sie Ihren Empfehlungscode an einen Freund.",
+  "marketing.bonuses.howItWorks.step2Title": "Ihr Freund registriert sich",
+  "marketing.bonuses.howItWorks.step2Description":
+    "Bei der Registrierung gibt er Ihren Code ein.",
+  "marketing.bonuses.howItWorks.step3Title": "Ihr Freund zahlt ein",
+  "marketing.bonuses.howItWorks.step3Description":
+    "Nach seiner ersten erfolgreichen Einzahlung erhalten Sie 10 % des Betrags, maximal 100 USDT.",
+  "marketing.bonuses.faq.title": "Häufig gestellte Fragen",
+  "marketing.bonuses.faq.q1": "Wann erhalte ich den +20 %-Bonus?",
+  "marketing.bonuses.faq.a1": "Nach Bestätigung Ihrer ersten erfolgreichen Einzahlung.",
+  "marketing.bonuses.faq.q2": "Erhalte ich +20 % auf meine zweite Einzahlung?",
+  "marketing.bonuses.faq.a2":
+    "Nein. Der Bonus wird nur einmal gutgeschrieben — bei der ersten erfolgreichen Einzahlung.",
+  "marketing.bonuses.faq.q3": "Wann wird der Empfehlungsbonus gutgeschrieben?",
+  "marketing.bonuses.faq.a3":
+    "Nachdem der von Ihnen eingeladene Nutzer seine erste erfolgreiche Einzahlung getätigt hat.",
+  "marketing.bonuses.faq.q4":
+    "Erhalte ich einen Bonus allein für die Registrierung eines Freundes?",
+  "marketing.bonuses.faq.a4":
+    "Nein. Die Registrierung allein reicht nicht aus. Der eingeladene Nutzer muss die erste erfolgreiche Einzahlung tätigen.",
+  "marketing.bonuses.faq.q5": "Wie viel kann ich pro Freund verdienen?",
+  "marketing.bonuses.faq.a5":
+    "10 % des Betrags seiner ersten erfolgreichen Einzahlung, maximal 100 USDT.",
+  "marketing.bonuses.faq.q6":
+    "Was, wenn die erste Einzahlungsanfrage meines Freundes abgelehnt wurde?",
+  "marketing.bonuses.faq.a6":
+    "Eine abgelehnte Einzahlung aktiviert den Empfehlungsbonus nicht. Es zählt die erste erfolgreich bestätigte Einzahlung.",
+  "marketing.bonuses.faq.q7":
+    "Erhalte ich 10 % von allen zukünftigen Einzahlungen meines Freundes?",
+  "marketing.bonuses.faq.a7":
+    "Nein. Der Empfehlungsbonus wird nur einmal gutgeschrieben — für die erste erfolgreiche Einzahlung des eingeladenen Nutzers.",
+  "marketing.bonuses.faq.q8":
+    "Können der Bonus für die erste Einzahlung und der Empfehlungsbonus gleichzeitig ausgelöst werden?",
+  "marketing.bonuses.faq.a8":
+    "Ja. Der eingeladene Nutzer kann seinen eigenen +20 %-Bonus erhalten, während der Nutzer, der ihn eingeladen hat, seinen Empfehlungsbonus erhält.",
   "marketing.footer.platform": "Plattform",
   "marketing.footer.company": "Unternehmen",
   "marketing.footer.legal": "Rechtliches",
@@ -805,6 +869,7 @@ export const de: Dictionary = {
 
   // Markets
   "markets.title": "Märkte",
+  "markets.subtitle": "Live-Preise und Handelspaare",
   "markets.tabs.all": "Alle Kryptowährungen",
   "markets.tabs.favorites": "Favoriten",
   "markets.tabs.popular": "Beliebt",

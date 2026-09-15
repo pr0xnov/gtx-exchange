@@ -134,6 +134,8 @@ model User {
   referralRewardReceived ReferralReward?    @relation("ReferralRewardReferred")
   firstDepositBonus      FirstDepositBonus?
 
+  supportConversations SupportConversation[]
+
   @@index([email])
   @@index([role])
   @@index([referredById])
@@ -621,4 +623,79 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@index([userId, read])
+}
+
+// ---------------------------------------------------------------------------
+// SUPPORT
+// ---------------------------------------------------------------------------
+
+enum SupportCategory {
+  DEPOSIT
+  WITHDRAWAL
+  TRADING
+  VERIFICATION
+  BONUSES
+  SECURITY
+  OTHER
+}
+
+enum SupportConversationStatus {
+  OPEN
+  CLOSED
+}
+
+enum SupportSenderType {
+  USER
+  ADMIN
+}
+
+/**
+ * The /contacts support-chat inbox — one row per help request a user has
+ * opened, picked from a fixed category list up front (see SupportCategory)
+ * so an admin working the queue always knows what it's about before
+ * opening it. A user is never restricted to exactly one conversation ever,
+ * but app/api/support/conversations/route.ts's POST reuses an existing
+ * OPEN one instead of creating a second — the queue is meant to hold at
+ * most one active thread per user at a time, not a pile of duplicates.
+ * Closing is admin-only (see app/api/admin/support/conversations/[id]);
+ * a user's own new message on a CLOSED conversation reopens it (see
+ * app/api/support/conversations/[id]/messages/route.ts) — the simplest
+ * way to let a resolved-but-not-really conversation come back without a
+ * separate "reopen" affordance in the user-facing UI.
+ */
+model SupportConversation {
+  id       String                    @id @default(cuid())
+  userId   String
+  user     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category SupportCategory
+  status   SupportConversationStatus @default(OPEN)
+  messages SupportMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+/**
+ * A single message within a SupportConversation. senderType is the whole
+ * authorization story for rendering (never trust a client-supplied
+ * "isAdmin" flag) — USER rows are always written by the conversation's own
+ * owner (see the ownership check in app/api/support/conversations/[id]/
+ * messages/route.ts), ADMIN rows only by an authenticated admin (see
+ * app/api/admin/support/conversations/[id]/messages/route.ts). No senderId
+ * on ADMIN rows on purpose — replies are shown as "GTX Support", not a
+ * named employee, matching the same principle behind never exposing a
+ * private employee Telegram account.
+ */
+model SupportMessage {
+  id             String              @id @default(cuid())
+  conversationId String
+  conversation   SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderType     SupportSenderType
+  message        String
+  createdAt      DateTime            @default(now())
+
+  @@index([conversationId])
 }

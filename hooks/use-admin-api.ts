@@ -359,6 +359,103 @@ export function useAdmins() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// SUPPORT
+// ---------------------------------------------------------------------------
+
+export interface AdminSupportConversationRow {
+  id: string;
+  category: string;
+  status: "OPEN" | "CLOSED";
+  createdAt: string;
+  updatedAt: string;
+  user: { firstName: string; lastName: string; email: string };
+  messageCount: number;
+  lastMessage: {
+    message: string;
+    senderType: "USER" | "ADMIN";
+    createdAt: string;
+  } | null;
+}
+
+/** The Admin Panel's support queue. `status` filters to just OPEN/CLOSED;
+ *  omit for everything. Polled the same way useAdminUnreadCount() is, so
+ *  a new user message shows up for every admin within a few seconds. */
+export function useAdminSupportConversations(status?: "OPEN" | "CLOSED") {
+  const query = status ? `?status=${status}` : "";
+  return useQuery({
+    queryKey: ["admin", "support", "conversations", status ?? "all"],
+    queryFn: () =>
+      fetchJson<AdminSupportConversationRow[]>(
+        `/api/admin/support/conversations${query}`
+      ),
+    refetchInterval: 15_000,
+  });
+}
+
+export interface AdminSupportMessageDto {
+  id: string;
+  senderType: "USER" | "ADMIN";
+  message: string;
+  createdAt: string;
+}
+
+export interface AdminSupportConversationDetail {
+  id: string;
+  category: string;
+  status: "OPEN" | "CLOSED";
+  createdAt: string;
+  updatedAt: string;
+  user: { id: string; firstName: string; lastName: string; email: string };
+  messages: AdminSupportMessageDto[];
+}
+
+/** A single conversation's full thread, for the reply panel. Polled while
+ *  open (5s) so a new user message appears without a manual refresh. */
+export function useAdminSupportConversation(id: string | null) {
+  return useQuery({
+    queryKey: ["admin", "support", "conversation", id],
+    queryFn: () =>
+      fetchJson<AdminSupportConversationDetail>(`/api/admin/support/conversations/${id}`),
+    enabled: Boolean(id),
+    refetchInterval: id ? 5000 : false,
+  });
+}
+
+export function useAdminSendSupportMessage(conversationId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (message: string) =>
+      fetchJson<AdminSupportMessageDto>(
+        `/api/admin/support/conversations/${conversationId}/messages`,
+        { method: "POST", body: JSON.stringify({ message }) }
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "support", "conversation", conversationId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin", "support", "conversations"] });
+    },
+  });
+}
+
+export function useAdminSetSupportConversationStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: "OPEN" | "CLOSED" }) =>
+      fetchJson(`/api/admin/support/conversations/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "support", "conversation", variables.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin", "support", "conversations"] });
+    },
+  });
+}
+
 export function useUpdateAdminRole() {
   const queryClient = useQueryClient();
   return useMutation({

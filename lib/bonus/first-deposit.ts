@@ -50,11 +50,41 @@ export function computeFirstDepositBonus(depositAmount: Prisma.Decimal): Prisma.
  * unverifiable (see lib/security/client-ip.ts), in which case the check
  * is skipped and the bonus pays normally — an absent signal must never
  * itself deny a legitimate user their bonus.
+ *
+ * "First deposit" means the user's actual earliest-ever APPROVED/
+ * COMPLETED deposit, full stop — never "the first deposit since this
+ * FirstDepositBonus.userId unique constraint existed for them", which is
+ * all the code used to check (a real bug: an account with older completed
+ * deposits from before this feature shipped would still pass that check
+ * on its next deposit, since it had never claimed a FirstDepositBonus row
+ * yet, and get paid on a deposit that was never actually its first). The
+ * fix re-derives "is this really the earliest completed deposit" from
+ * Transaction history on every call rather than trusting the absence of a
+ * FirstDepositBonus row as proof. This needs no extra "disqualified"
+ * flag/migration: a user's true earliest COMPLETED deposit's id never
+ * changes once it exists, so every later deposit's id will permanently
+ * fail to match it — the same re-derivation that disqualifies a
+ * pre-existing user on their very next deposit keeps disqualifying them
+ * on every deposit after that, forever, for free.
  */
 export async function tryAwardFirstDepositBonus(
   tx: TxClient,
   deposit: { id: string; userId: string; amount: Prisma.Decimal }
 ): Promise<void> {
+  const earliestCompletedDeposit = await tx.transaction.findFirst({
+    where: { userId: deposit.userId, type: "DEPOSIT", status: "COMPLETED" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (earliestCompletedDeposit?.id !== deposit.id) {
+    // A COMPLETED deposit already existed before this one — this is not
+    // actually the user's first deposit, regardless of whether they've
+    // ever claimed this bonus before. Never pay, never retroactively
+    // reinterpret a later deposit as "the first" (see this function's own
+    // doc comment above).
+    return;
+  }
+
   const bonusAmount = computeFirstDepositBonus(deposit.amount);
 
   const depositor = await tx.user.findUniqueOrThrow({

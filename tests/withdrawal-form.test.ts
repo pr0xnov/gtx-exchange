@@ -78,18 +78,28 @@ function render() {
   });
 }
 
+function amountInput(): HTMLInputElement {
+  return container.querySelector("#withdrawal-amount") as HTMLInputElement;
+}
+
+function addressInput(): HTMLInputElement {
+  return container.querySelector("#withdrawal-address") as HTMLInputElement;
+}
+
 function setAmount(value: string) {
-  const input = container.querySelector('input[type="number"]') as HTMLInputElement;
+  const input = amountInput();
   const setter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype,
     "value"
   )!.set!;
-  setter.call(input, value);
-  input.dispatchEvent(new Event("input", { bubbles: true }));
+  act(() => {
+    setter.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
 }
 
 function setAddress(value: string) {
-  const input = container.querySelector('input[type="text"]') as HTMLInputElement;
+  const input = addressInput();
   const setter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype,
     "value"
@@ -101,7 +111,7 @@ function setAddress(value: string) {
 }
 
 function addressValue(): string {
-  return (container.querySelector('input[type="text"]') as HTMLInputElement).value;
+  return addressInput().value;
 }
 
 function selectNetwork(code: string) {
@@ -126,8 +136,7 @@ describe("Amount has no default — the user must type it themselves", () => {
     mockSpotWallets = [{ currency: "USDT", balance: 1000, locked: 0 }];
     render();
 
-    const input = container.querySelector('input[type="number"]') as HTMLInputElement;
-    expect(input.value).toBe("");
+    expect(amountInput().value).toBe("");
     expect(container.textContent).toContain("0.00 USDT");
   });
 });
@@ -283,5 +292,190 @@ describe("Test E — changing the network clears whatever address was already ty
 
     selectNetwork("ETH");
     expect(addressValue()).toBe("");
+  });
+});
+
+/**
+ * Fix (v2): the amount field must never be able to CONTAIN a value
+ * greater than the available balance, not even momentarily with an
+ * inline error shown — an out-of-range edit is rejected the same way a
+ * malformed one (letters, scientific notation) always was, leaving the
+ * field at its last valid value. The MAX button from the previous
+ * iteration of this fix is removed entirely. Covers the test matrix this
+ * revision was built under, plus the original scientific-notation/huge-
+ * paste coverage (D/E/E2), now re-expressed as "rejected outright"
+ * rather than "accepted, then flagged".
+ */
+function submitButton(): HTMLButtonElement {
+  return container.querySelector('button[type="submit"]') as HTMLButtonElement;
+}
+
+describe("MAX button is removed", () => {
+  it("no button labelled MAX exists anywhere in the form", () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 28182.5, locked: 0 }];
+    render();
+
+    const hasMaxButton = Array.from(container.querySelectorAll("button")).some(
+      (b) => b.textContent?.trim() === "MAX"
+    );
+    expect(hasMaxButton).toBe(false);
+  });
+});
+
+describe("Amount can never exceed available balance (28182.50 USDT)", () => {
+  const AVAILABLE = 28182.5;
+
+  beforeEach(() => {
+    mockSpotWallets = [{ currency: "USDT", balance: AVAILABLE, locked: 0 }];
+  });
+
+  it("A: 250 is accepted — submit stays enabled once address/network are set", async () => {
+    render();
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    setAmount("250");
+
+    expect(amountInput().value).toBe("250");
+    expect(submitButton().disabled).toBe(false);
+  });
+
+  it("B: exactly the available balance (28182.50) is accepted", async () => {
+    render();
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    setAmount("28182.50");
+
+    expect(amountInput().value).toBe("28182.50");
+    expect(submitButton().disabled).toBe(false);
+  });
+
+  it("C: one cent over the available balance (28182.51) is rejected outright — field stays empty", async () => {
+    render();
+    setAmount("28182.51");
+
+    expect(amountInput().value).toBe(""); // never entered the field at all
+  });
+
+  it("C2: editing a valid amount to exceed the balance is rejected — the last valid value remains", async () => {
+    render();
+    setAmount("28182.5"); // the exact spec example: user currently has 28,182.5
+    expect(amountInput().value).toBe("28182.5");
+
+    setAmount("281825"); // tries to type another digit, pushing it over balance
+    expect(amountInput().value).toBe("28182.5"); // rejected, last valid value kept
+
+    setAmount("28182.55"); // also over balance by 5 cents
+    expect(amountInput().value).toBe("28182.5"); // still rejected
+  });
+
+  it("submit never fires for a value that would have exceeded balance, since it can't be entered", async () => {
+    render();
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    setAmount("30000"); // > available — rejected at entry
+
+    expect(amountInput().value).toBe("");
+    await act(async () => {
+      submit();
+      await Promise.resolve();
+    });
+    expect(withdrawMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("D: pasting a 15-digit value is rejected outright — field stays at its previous value", async () => {
+    render();
+    setAmount("250");
+    expect(amountInput().value).toBe("250");
+
+    setAmount("999999999999999"); // pasted in one go, replacing the field
+    expect(amountInput().value).toBe("250"); // rejected, previous value kept
+  });
+
+  it("D2: pasting a huge value into an empty field keeps it empty, never converts to MAX", async () => {
+    render();
+    setAmount("999999999999999");
+    expect(amountInput().value).toBe("");
+  });
+
+  it("E: '1e25' pasted as a whole is rejected outright — never silently reinterpreted as 125", async () => {
+    render();
+    setAmount("1e25");
+    expect(amountInput().value).toBe(""); // whole paste rejected, field untouched
+
+    setAmount("125"); // sanity: a genuinely valid value still works afterward
+    expect(amountInput().value).toBe("125");
+  });
+
+  it("E2: typing 'e' mid-entry never sticks — the field bounces back to the last valid value", async () => {
+    render();
+    setAmount("1");
+    expect(amountInput().value).toBe("1");
+
+    setAmount("1e"); // simulates the next keystroke landing on the current field value
+    expect(amountInput().value).toBe("1"); // "e" never committed — not "1e", not "125" later
+  });
+
+  it("F: a negative amount (-100) is rejected outright — never enters the field", async () => {
+    render();
+    setAmount("-100");
+    expect(amountInput().value).toBe("");
+  });
+
+  it("G: zero is a syntactically valid entry but leaves submit disabled (below minimum)", async () => {
+    render();
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    setAmount("0");
+
+    expect(amountInput().value).toBe("0");
+    expect(submitButton().disabled).toBe(true);
+  });
+});
+
+describe("Backend requests an amount over balance directly — still rejected server-side", () => {
+  it("useWithdraw is never called with an amount the frontend allowed to exceed balance", async () => {
+    // Belt-and-suspenders: this file only proves the frontend can't be
+    // made to submit an over-balance amount. Server-side authoritative
+    // rejection itself is covered independently in
+    // tests/withdraw-balance-validation.test.ts against the real route
+    // and database.
+    mockSpotWallets = [{ currency: "USDT", balance: 28182.5, locked: 0 }];
+    render();
+    selectNetwork("TRX");
+    setAddress("TXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    setAmount("30000");
+
+    await act(async () => {
+      submit();
+      await Promise.resolve();
+    });
+    expect(withdrawMutateAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('"You will receive" never renders scientific notation', () => {
+  it("stays at 0.00 USDT even after attempting to paste an absurdly large entry (it never enters the field)", () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 28182.5, locked: 0 }];
+    render();
+
+    setAmount("9999999999999999999999999");
+    expect(container.textContent).not.toContain("1e+");
+    expect(container.textContent).not.toMatch(/\de[+-]\d/i);
+    expect(container.textContent).toContain("0.00 USDT");
+  });
+
+  it("shows 0.00 USDT for an empty/invalid amount", () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 28182.5, locked: 0 }];
+    render();
+
+    expect(container.textContent).toContain("0.00 USDT");
+  });
+
+  it("formats a normal amount with thousands separators and 2 decimals", () => {
+    mockSpotWallets = [{ currency: "USDT", balance: 28182.5, locked: 0 }];
+    render();
+
+    setAmount("28182.5");
+    expect(container.textContent).toContain("28,182.50 USDT");
   });
 });

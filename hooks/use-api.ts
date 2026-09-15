@@ -550,6 +550,15 @@ export function useWithdraw() {
       queryClient.invalidateQueries({ queryKey: ["spot-wallet"] });
       queryClient.invalidateQueries({ queryKey: ["account-summary"] });
     },
+    // A rejected withdrawal (most notably "balance changed since this form
+    // loaded" — see app/api/withdraw/route.ts's atomic gte-guarded debit)
+    // must never leave a stale "Available" figure on screen — refresh the
+    // same two balance-bearing queries success already does, regardless of
+    // why the request failed. Harmless to refetch on any other error too.
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ["spot-wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["account-summary"] });
+    },
   });
 }
 

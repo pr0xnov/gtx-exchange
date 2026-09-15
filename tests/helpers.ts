@@ -17,6 +17,11 @@ export async function resetDatabase() {
     prisma.refreshToken.deleteMany(),
     prisma.session.deleteMany(),
     prisma.userSettings.deleteMany(),
+    // SupportMessage references SupportConversation (RESTRICT-equivalent
+    // ordering for clarity, even though both cascade from User) — must go
+    // before its parent conversation.
+    prisma.supportMessage.deleteMany(),
+    prisma.supportConversation.deleteMany(),
     // Both reference Transaction/User with a RESTRICT (not CASCADE) delete
     // rule on adminId/transactionId — must go before those two.
     prisma.balanceAdjustment.deleteMany(),

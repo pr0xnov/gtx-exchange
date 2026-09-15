@@ -11,20 +11,25 @@ import {
   Wallet,
   UserCog,
   ExternalLink,
+  MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/logo";
 import { Badge } from "@/components/ui/badge";
-import { useAdminUnreadCount } from "@/hooks/use-admin-api";
+import { useAdminUnreadCount, useAdminSupportConversations } from "@/hooks/use-admin-api";
 
-// Orders/Trades/Deposits/Withdrawals/Support were removed from this nav by
+// Orders/Trades/Deposits/Withdrawals were removed from this nav by
 // request — their pages/API routes still exist and still work (reachable
 // directly by URL, e.g. from a user detail page's own tabs), this only
 // drops them from the Admin Panel's left-hand navigation. Dashboard was
 // removed the same way — /admin now redirects straight to /admin/users
-// (see app/admin/page.tsx) instead of rendering a dashboard.
+// (see app/admin/page.tsx) instead of rendering a dashboard. Support was
+// re-added once it grew a real ticket-queue backend (see app/admin/
+// support/page.tsx) — it's the one page in this list an admin actually
+// needs to check regularly, unlike the others above.
 const NAV_LINKS = [
   { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Support", href: "/admin/support", icon: MessageCircle },
   { label: "Balance Adjustments", href: "/admin/balance-adjustments", icon: Wallet },
   { label: "Transactions", href: "/admin/transactions", icon: Receipt },
   { label: "Verification", href: "/admin/verification", icon: ShieldCheck },
@@ -39,6 +44,12 @@ export function AdminSidebar({ role }: { role: "ADMIN" | "SUPER_ADMIN" }) {
   // hooks/use-admin-api.ts's useAdminUnreadCount and its own doc comment
   // for what "unread" means here).
   const { data: unreadCount } = useAdminUnreadCount();
+  // Queue size, not "unread" in the read/unread sense the Users badge
+  // means — simply how many support conversations still need a reply,
+  // shown next to "Support" the same way. Reuses the list endpoint
+  // itself (filtered to OPEN) rather than a dedicated count endpoint,
+  // consistent with this feature's "keep v1 simple" scope.
+  const { data: openConversations } = useAdminSupportConversations("OPEN");
 
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-border bg-card">
@@ -72,6 +83,14 @@ export function AdminSidebar({ role }: { role: "ADMIN" | "SUPER_ADMIN" }) {
                   className="ml-auto rounded-full px-1.5 py-0.5 text-[10px] leading-none"
                 >
                   {unreadCount}
+                </Badge>
+              )}
+              {link.label === "Support" && Boolean(openConversations?.length) && (
+                <Badge
+                  variant="count"
+                  className="ml-auto rounded-full px-1.5 py-0.5 text-[10px] leading-none"
+                >
+                  {openConversations!.length}
                 </Badge>
               )}
             </Link>

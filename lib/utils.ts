@@ -68,6 +68,17 @@ export function formatDate(date: Date | string): string {
   }).format(d);
 }
 
+/** HH:MM only, for chat-style message timestamps (the support widget)
+ *  where a full date would be redundant — messages within one open
+ *  conversation are almost always same-day. */
+export function formatTime(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
+}
+
 /** For calendar-only dates (currently just date of birth) — deliberately
  *  does NOT go through Intl.DateTimeFormat with the viewer's local
  *  timezone the way formatDate() does. A date of birth is stored as a

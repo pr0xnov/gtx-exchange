@@ -57,8 +57,28 @@ export const depositSchema = z.object({
 // trimmed, bounded length) rather than a per-network format/checksum
 // check — no external blockchain API is wired up anywhere in this
 // project to actually verify an address belongs to its network.
+// The frontend (components/dashboard/withdrawal-form.tsx) already blocks
+// anything that isn't a plain, bounded, at-most-2-decimal-place number
+// from ever being typed, and separately checks amount <= available
+// balance — none of that is trusted here. This is the actual
+// authoritative gate: `.finite()` rejects Infinity/-Infinity (a raw
+// `1e400` in a direct JSON request overflows to Infinity in JS, which a
+// bare z.number() would otherwise accept), `.max()` reuses the same
+// absolute ceiling depositSchema already uses just above, and the
+// decimal-place refine reuses balanceAdjustmentSchema's own pattern
+// (see lib/validation/admin.ts) — sized to 2 places here to match this
+// form's own UI precision, not that schema's 8-decimal crypto-quantity
+// one. The amount <= available-balance check itself can only safely
+// happen inside the withdrawal transaction (app/api/withdraw/route.ts),
+// against the authoritative balance at that instant, atomically with the
+// deduction — never here against a value this schema has no access to.
 export const withdrawSchema = z.object({
-  amount: z.number().min(50, "Minimum withdrawal amount is 50 USD"),
+  amount: z
+    .number()
+    .finite("Amount must be a real number")
+    .min(50, "Minimum withdrawal amount is 50 USD")
+    .max(10_000_000, "Amount is too large")
+    .refine((n) => Number.isInteger(n * 100), "Amount has too many decimal places"),
   method: z.enum(["TETHER_USDT"]),
   network: z.enum(["BSC", "TRX", "ETH"]),
   destinationAddress: z.string().trim().min(1, "Wallet address is required").max(128),

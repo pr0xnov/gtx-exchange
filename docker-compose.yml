@@ -50,6 +50,10 @@ services:
       # "must be explicitly listed" gotcha the SMTP vars below already
       # document). Defaults to untrusted/off either way.
       TRUST_PROXY_HEADERS: ${TRUST_PROXY_HEADERS:-false}
+      # /contacts's Telegram support card — see .env.example. Left unset by
+      # default; the button disables itself rather than link to an
+      # invented username.
+      NEXT_PUBLIC_SUPPORT_TELEGRAM_URL: ${NEXT_PUBLIC_SUPPORT_TELEGRAM_URL:-}
       # Outbound email (password reset / password-changed / email-change
       # notices — see lib/email/mailer.ts). All optional and deliberately
       # WITHOUT a fallback: previously these weren't listed here at all, so

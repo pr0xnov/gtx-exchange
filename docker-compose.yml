@@ -44,6 +44,12 @@ services:
       PASSWORD_ENCRYPTION_KEY: ${PASSWORD_ENCRYPTION_KEY}
       NODE_ENV: production
       NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8080}
+      # Gates trusting proxy-supplied IP/country headers (see
+      # .env.example) — was missing from this list entirely, so setting
+      # it in .env alone could never actually reach the container (same
+      # "must be explicitly listed" gotcha the SMTP vars below already
+      # document). Defaults to untrusted/off either way.
+      TRUST_PROXY_HEADERS: ${TRUST_PROXY_HEADERS:-false}
       # Outbound email (password reset / password-changed / email-change
       # notices — see lib/email/mailer.ts). All optional and deliberately
       # WITHOUT a fallback: previously these weren't listed here at all, so

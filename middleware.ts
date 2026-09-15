@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LOCALE_COOKIE, resolveLocaleFromAcceptLanguage } from "@/lib/i18n/config";
+import { LOCALE_COOKIE, resolveAutoLocale } from "@/lib/i18n/config";
+import { getTrustedCountry } from "@/lib/security/geo";
 
 const ACCESS_COOKIE = "gtx_access_token";
 
@@ -48,12 +49,18 @@ export function middleware(req: NextRequest) {
     res = NextResponse.next();
   }
 
-  // Auto-detect locale from Accept-Language on first visit only. Once a
-  // locale cookie exists — set here, or by the manual switcher in
-  // components/layout/navbar.tsx — it's never overridden, so a manual
-  // choice always sticks across reloads/redirects/new tabs.
+  // Auto-detect locale (Accept-Language, then trusted-country fallback,
+  // then English) on first visit only. Once a locale cookie exists — set
+  // here, or by the manual switcher in components/layout/navbar.tsx, or
+  // synced from a returning user's saved account language at login (see
+  // lib/auth/session.ts's establishSession) — it's never overridden, so
+  // a manual (or account) choice always sticks across reloads/redirects/
+  // new tabs/IP changes.
   if (!req.cookies.get(LOCALE_COOKIE)?.value) {
-    const locale = resolveLocaleFromAcceptLanguage(req.headers.get("accept-language"));
+    const locale = resolveAutoLocale({
+      acceptLanguage: req.headers.get("accept-language"),
+      country: getTrustedCountry(req.headers),
+    });
     res.cookies.set(LOCALE_COOKIE, locale, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,

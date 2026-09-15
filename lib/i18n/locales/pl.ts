@@ -1,0 +1,854 @@
+import type { Dictionary } from "../dictionary-type";
+
+export const pl: Dictionary = {
+  // Shared across multiple pages
+  "common.login": "Zaloguj się",
+  "common.register": "Rejestracja",
+  "common.dashboard": "Panel",
+  "common.logout": "Wyloguj się",
+  "common.loading": "Ładowanie…",
+  "common.error": "Coś poszło nie tak. Spróbuj ponownie.",
+  "common.save": "Zapisz",
+  "common.cancel": "Anuluj",
+  "common.confirm": "Potwierdź",
+  "common.close": "Zamknij",
+  "common.copy": "Kopiuj",
+  "common.copied": "Skopiowano",
+  "common.back": "Wstecz",
+  "common.continue": "Dalej",
+  "common.submit": "Wyślij",
+  "common.search": "Szukaj",
+  "common.noData": "Brak dostępnych danych.",
+  "common.viewAll": "Zobacz wszystkie",
+  "common.optional": "Opcjonalnie",
+
+  // Navbar
+  "nav.trading": "Handel",
+  "nav.markets": "Rynki",
+  "nav.wallet": "Portfel",
+  "nav.about": "O nas",
+  "nav.analytics": "Analityka",
+  "nav.contacts": "Kontakt",
+  "nav.account": "Konto",
+  "nav.deposit": "Wpłata",
+  "nav.withdrawal": "Wypłata",
+  "nav.history": "Historia",
+  "nav.verification": "Weryfikacja",
+  "nav.settings": "Ustawienia",
+  "nav.support": "Pomoc",
+  "nav.accountMenu": "Menu konta",
+  "nav.toggleMenu": "Otwórz/zamknij menu",
+  "nav.language": "Język",
+  "nav.logoutSuccess": "Zostałeś wylogowany",
+  "nav.logoutError": "Nie udało się wylogować. Spróbuj ponownie.",
+  "nav.searchAria": "Szukaj kryptowalut",
+  "nav.searchPlaceholder": "Szukaj kryptowalut",
+  "nav.searchNoResults": "Nie znaleziono kryptowalut.",
+
+  // Account
+  "account.makeDeposit": "Wpłać środki",
+  "account.accountInfo": "Informacje o koncie",
+  "account.login": "Login",
+  "account.email": "E-mail",
+  "account.accountType": "Typ konta",
+  "account.leverage": "Dźwignia",
+  "account.recentTransactions": "Ostatnie transakcje",
+  "account.viewAll": "Zobacz wszystkie",
+  "account.noTransactions": "Brak transakcji.",
+  "account.transactionType.deposit": "Wpłata",
+  "account.transactionType.withdrawal": "Wypłata",
+  "account.transactionType.bonus": "Bonus",
+  "account.transactionType.trade": "Transakcja",
+  "account.transactionType.referralBonus": "Bonus polecający",
+  "account.transactionType.firstDepositBonus": "Bonus za pierwszą wpłatę",
+  "account.summary.weeklyProfitLoss": "Zysk / Strata (7 dni)",
+  "account.twoFactorAuth": "Uwierzytelnianie dwuskładnikowe",
+  "account.twoFactorEnabled": "Włączone",
+  "account.twoFactorDisabled": "Wyłączone",
+  "account.referralCode": "Kod polecający",
+  "account.referralCodeCopied": "Kod polecający skopiowany",
+
+  // Settings
+  "settings.title": "Ustawienia",
+  "settings.profile": "Profil",
+  "settings.firstName": "Imię",
+  "settings.lastName": "Nazwisko",
+  "settings.email": "E-mail",
+  "settings.saveChanges": "Zapisz zmiany",
+  "settings.toastProfileUpdated": "Profil zaktualizowany",
+  "settings.passwordSecurity": "Hasło i bezpieczeństwo",
+  "settings.currentPassword": "Obecne hasło",
+  "settings.newPassword": "Nowe hasło",
+  "settings.twoFactorAuth": "Uwierzytelnianie dwuskładnikowe (2FA)",
+  "settings.twoFactorAuthDesc": "Dodaj dodatkową warstwę zabezpieczeń do swojego konta",
+  "settings.updatePassword": "Zaktualizuj hasło",
+  "settings.toastPasswordUpdated": "Hasło zaktualizowane",
+  "settings.notifications": "Powiadomienia",
+  "settings.emailNotifications": "Powiadomienia e-mail",
+  "settings.emailNotificationsDesc":
+    "Otrzymuj aktualizacje o wpłatach, wypłatach i transakcjach",
+  "settings.pushNotifications": "Powiadomienia push",
+  "settings.pushNotificationsDesc":
+    "Otrzymuj powiadomienia w czasie rzeczywistym na tym urządzeniu",
+  "settings.marketAlerts": "Alerty rynkowe",
+  "settings.marketAlertsDesc": "Powiadamiaj mnie o istotnych zmianach cen",
+  "settings.languageTheme": "Język i motyw",
+  "settings.language": "Język",
+  "settings.theme": "Motyw",
+  "settings.themeDark": "Ciemny",
+  "settings.themeLight": "Jasny",
+
+  "settings.emailCurrentLabel": "Obecny e-mail",
+  "settings.emailChangeButton": "Zmień e-mail",
+  "settings.emailNewLabel": "Nowy e-mail",
+  "settings.emailCurrentPasswordLabel": "Obecne hasło",
+  "settings.emailSendConfirmation": "Wyślij e-mail potwierdzający",
+  "settings.emailCancelChange": "Anuluj",
+  "settings.emailPendingNotice":
+    "Link potwierdzający został wysłany na adres {email}. Kliknij go, aby dokończyć zmianę adresu e-mail.",
+  "settings.toastEmailChangeRequested": "E-mail potwierdzający wysłany",
+  "settings.toastEmailChangeConfirmed": "Twój adres e-mail został zaktualizowany",
+  "settings.toastEmailChangeExpired": "Ten link potwierdzający wygasł",
+  "settings.toastEmailChangeInvalid": "Ten link potwierdzający jest nieprawidłowy",
+  "settings.toastSaveFailed": "Nie udało się zapisać zmian",
+
+  "settings.confirmNewPassword": "Potwierdź nowe hasło",
+  "settings.toastPasswordChangeFailed": "Nie udało się zmienić hasła",
+  "settings.passwordMismatch": "Hasła nie są zgodne",
+
+  "settings.twoFactorEnabledLabel": "2FA włączone",
+  "settings.twoFactorDisabledLabel": "2FA wyłączone",
+  "settings.twoFactorEnableButton": "Włącz 2FA",
+  "settings.twoFactorDisableButton": "Wyłącz 2FA",
+  "settings.twoFactorSetupTitle": "Konfiguracja uwierzytelniania dwuskładnikowego",
+  "settings.twoFactorSetupInstructions":
+    "Zeskanuj ten kod QR aplikacją Google Authenticator, Microsoft Authenticator, Authy lub inną zgodną aplikacją TOTP.",
+  "settings.twoFactorManualEntry": "Lub wprowadź ten kod ręcznie:",
+  "settings.twoFactorCodeLabel": "6-cyfrowy kod",
+  "settings.twoFactorConfirmButton": "Potwierdź i włącz",
+  "settings.twoFactorCancelButton": "Anuluj",
+  "settings.twoFactorDisableTitle": "Wyłącz uwierzytelnianie dwuskładnikowe",
+  "settings.twoFactorDisableInstructions":
+    "Wprowadź aktualny kod z aplikacji uwierzytelniającej, aby potwierdzić.",
+  "settings.toastTwoFactorEnabled": "2FA zostało pomyślnie włączone",
+  "settings.toastTwoFactorDisabled": "2FA zostało pomyślnie wyłączone",
+  "settings.toastInvalidCode": "Nieprawidłowy kod weryfikacyjny",
+  "settings.toastTwoFactorSetupFailed": "Nie udało się rozpocząć konfiguracji 2FA",
+
+  // Support
+  "support.title": "Pomoc",
+  "support.contactUs": "Skontaktuj się z nami",
+  "support.subject": "Temat",
+  "support.subjectPlaceholder": "W czym możemy pomóc?",
+  "support.message": "Wiadomość",
+  "support.messagePlaceholder": "Opisz swój problem...",
+  "support.sendMessage": "Wyślij wiadomość",
+  "support.toastMessageSent":
+    "Twoja wiadomość została wysłana. Odpowiemy w ciągu 24 godzin.",
+  "support.getInTouch": "Skontaktuj się",
+  "support.liveChat": "Czat na żywo, 24/7",
+  "support.faq": "Często zadawane pytania",
+  "support.faqRealExchangeQ": "Czy GTX to prawdziwa giełda kryptowalut?",
+  "support.faqRealExchangeA":
+    "Nie. GTX to symulator handlu wirtualnego. Wszystkie salda są wirtualne i żadne prawdziwe środki nigdy nie są wpłacane, wymieniane ani wypłacane.",
+  "support.faqResetBalanceQ": "Jak zresetować swoje wirtualne saldo?",
+  "support.faqResetBalanceA":
+    "Skontaktuj się z pomocą techniczną, a zresetujemy Twoje konto do początkowego salda 10 000 USDT.",
+  "support.faqPriceSourceQ": "Skąd pochodzą ceny?",
+  "support.faqPriceSourceA":
+    "Ceny na żywo są przesyłane bezpośrednio z publicznego kanału danych rynkowych Binance, dzięki czemu wykresy odzwierciedlają rzeczywiste warunki rynkowe.",
+  "support.faqLeverageQ": "Jaka dźwignia jest dostępna?",
+  "support.faqLeverageA":
+    "Możesz handlować z dźwignią do 1:100 na obsługiwanych parach, co odpowiada rzeczywistym warunkom handlu w stylu CFD.",
+
+  // Deposit
+  "deposit.pageTitle": "Wpłata",
+  "deposit.infoTitle": "Ważne informacje",
+  "deposit.infoMinAmount": "Minimalna kwota wpłaty to 250 USDT.",
+  "deposit.infoCorrectDetails": "Upewnij się, że wszystkie dane płatności są poprawne.",
+  "deposit.infoNetworkCorrect": "Upewnij się, że sieć jest poprawna.",
+  "deposit.infoNoFee": "Nie pobieramy opłat za wpłaty.",
+  "deposit.selectPaymentMethod": "Wybierz metodę płatności",
+  "deposit.selectNetwork": "Wybierz sieć",
+  "deposit.selectNetworkPlaceholder": "Wybierz sieć",
+  "deposit.selectNetworkError": "Wybierz sieć",
+  "deposit.depositAddressLabel": "Adres wpłaty",
+  "deposit.addressLabel": "Adres",
+  "deposit.copyButton": "Kopiuj",
+  "deposit.addressCopied": "Adres skopiowany",
+  "deposit.amountLabel": "Kwota",
+  "deposit.proofModalTitle": "Potwierdzenie płatności",
+  "deposit.proofModalText":
+    "Załącz zrzut ekranu przelewu, abyśmy mogli potwierdzić Twoją wpłatę.",
+  "deposit.proofModalHint": "Zrzut ekranu powinien pokazywać kwotę i status przelewu.",
+  "deposit.proofFileLabel": "Zrzut ekranu płatności",
+  "deposit.proofUploadButton": "Prześlij zrzut ekranu",
+  "deposit.proofUploadedLabel": "Zrzut ekranu przesłany",
+  "deposit.proofRemoveAria": "Usuń zrzut ekranu",
+  "deposit.proofRequiredError": "Załącz zrzut ekranu przelewu.",
+  "deposit.proofSubmitButton": "Wyślij do weryfikacji",
+  "deposit.detailsLabel": "Szczegóły wpłaty",
+  "deposit.youWillGet": "Otrzymasz",
+  "deposit.submitButton": "Wpłać środki",
+  "deposit.minAmountError": "Minimalna kwota wpłaty to 250 USDT",
+  "deposit.pendingSubmittedTitle": "Płatność jest przetwarzana.",
+  "deposit.pendingSubmittedDescription": "Oczekiwanie na potwierdzenie.",
+  "deposit.failedFallback": "Wpłata nie powiodła się",
+  "deposit.paymentMethodCard": "Visa / Mastercard",
+  "deposit.paymentMethodBankTransfer": "Przelew bankowy",
+  "deposit.paymentMethodBitcoin": "Bitcoin",
+  "deposit.paymentMethodTether": "Tether (USDT)",
+  "deposit.paymentMethodDaysEstimate": "2-5 dni roboczych",
+  "deposit.paymentMethodHoursEstimate": "W ciągu 24 godzin",
+
+  // Withdrawal
+  "withdrawal.pageTitle": "Wypłata",
+  "withdrawal.verificationRequiredTitle": "Wymagana weryfikacja",
+  "withdrawal.verificationRequiredDesc":
+    "Aby wypłacić środki, najpierw ukończ weryfikację konta.",
+  "withdrawal.goToVerification": "Przejdź do weryfikacji",
+  "withdrawal.infoTitle": "Ważne informacje",
+  "withdrawal.infoProcessingTime": "Wypłaty są realizowane w ciągu 1-3 dni roboczych.",
+  "withdrawal.infoNetworkCorrect":
+    "Upewnij się, że wszystkie dane płatności oraz sieć są poprawne.",
+  "withdrawal.infoClosePositions":
+    "Upewnij się, że wszystkie pozycje handlowe są zamknięte przed dokonaniem wypłaty.",
+  "withdrawal.infoNoFee": "Wypłaty są bezpłatne.",
+  "withdrawal.selectPaymentMethod": "Wybierz metodę płatności",
+  "withdrawal.detailsLabel": "Szczegóły wypłaty",
+  "withdrawal.availableLabel": "Dostępne:",
+  "withdrawal.youWillGet": "Otrzymasz",
+  "withdrawal.submitButton": "Złóż wniosek o wypłatę",
+  "withdrawal.minAmountError": "Minimalna kwota wypłaty to 50 USDT",
+  "withdrawal.selectNetworkError": "Wybierz sieć",
+  "withdrawal.addressLabel": "Adres portfela",
+  "withdrawal.addressPlaceholder": "Wprowadź adres portfela",
+  "withdrawal.addressRequiredError": "Wprowadź adres portfela",
+  "withdrawal.serverInsufficientBalanceError": "Niewystarczające dostępne saldo",
+  "withdrawal.requestPrefix": "Wniosek o wypłatę na kwotę",
+  "withdrawal.requestSuffix": "został złożony",
+  "withdrawal.failedFallback": "Wypłata nie powiodła się",
+
+  // History
+  "history.pageTitle": "Historia",
+  "history.filterAll": "Wszystkie transakcje",
+  "history.filterDeposits": "Wpłaty",
+  "history.filterWithdrawals": "Wypłaty",
+  "history.filterBonuses": "Bonusy",
+  "history.filterAdjustments": "Korekty",
+  "history.typeDeposit": "Wpłata",
+  "history.typeWithdrawal": "Wypłata",
+  "history.typeBonus": "Bonus",
+  "history.typeTrade": "Transakcja",
+  "history.typeAdjustment": "Korekta salda",
+  "history.typeReferralBonus": "Bonus polecający",
+  "history.typeFirstDepositBonus": "Bonus za pierwszą wpłatę",
+  "history.columnId": "ID",
+  "history.columnType": "Typ",
+  "history.columnAmount": "Kwota",
+  "history.columnStatus": "Status",
+  "history.columnDate": "Data",
+  "history.emptyState": "Nie znaleziono transakcji.",
+  "history.statusCompleted": "Zakończone",
+  "history.statusPending": "Oczekujące",
+  "history.statusFailed": "Nieudane",
+
+  // Verification
+  "verification.pageTitle": "Weryfikacja konta",
+  "verification.pageDescription":
+    "Aby spełnić wymogi międzynarodowych przepisów, zweryfikuj swoje konto, przesyłając poniższe dokumenty.",
+  "verification.uploadDocumentsHeading": "Prześlij dokumenty",
+  "verification.infoTitle": "Wymagane dokumenty",
+  "verification.infoIdentityDoc":
+    "Dokument tożsamości (paszport, dowód osobisty lub prawo jazdy).",
+  "verification.infoProofOfAddress":
+    "Potwierdzenie adresu zamieszkania (rachunek za media, wyciąg bankowy lub podobny dokument).",
+  "verification.infoValidDocs":
+    "Wszystkie dokumenty muszą być ważne i wyraźnie widoczne.",
+  "verification.infoPrivacyPolicy":
+    "Przetwarzamy Twoje dane zgodnie z naszą Polityką prywatności.",
+  "verification.identityDocumentLabel": "Dokument tożsamości",
+  "verification.proofOfAddressLabel": "Potwierdzenie adresu",
+  "verification.missingDocsError": "Prześlij oba wymagane dokumenty",
+  "verification.submitSuccess": "Dokumenty przesłane do weryfikacji",
+  "verification.submitFailedFallback": "Przesłanie nie powiodło się",
+  "verification.submitButton": "Prześlij dokumenty",
+  "verification.chooseFile": "Wybierz plik",
+  "verification.missingInfoError": "Wypełnij wszystkie pola danych osobowych",
+  "verification.countryLabel": "Kraj",
+  "verification.countryPlaceholder": "np. Polska",
+  "verification.dateOfBirthLabel": "Data urodzenia",
+  "verification.addressLabel": "Adres",
+  "verification.addressPlaceholder": "Ulica, miasto, kod pocztowy",
+  "verification.personalInfoHeading": "Dane osobowe",
+  "verification.documentsHeading": "Dokumenty",
+  "verification.fullNameLabel": "Imię i nazwisko",
+  "verification.statusVerified": "Zweryfikowano",
+  "verification.statusPending": "W trakcie weryfikacji",
+  "verification.statusRejected": "Odrzucono",
+  "verification.statusUnverified": "Niezweryfikowane",
+  "verification.rejectionReasonLabel": "Powód odrzucenia",
+  "verification.pendingMessage":
+    "Twoje dokumenty są w trakcie weryfikacji. Powiadomimy Cię, gdy tylko zapadnie decyzja.",
+  "verification.rejectedMessage":
+    "Twoja weryfikacja została odrzucona. Zapoznaj się z poniższym powodem, a następnie popraw i ponownie prześlij swoje dane.",
+  "account.verification": "Weryfikacja",
+
+  // Wallet
+  "wallet.page.title": "Portfel",
+  "wallet.summary.availableBalance": "Dostępne saldo",
+  "wallet.summary.lockedInOrders": "W zleceniach",
+  "wallet.summary.assetsValue": "Wartość aktywów",
+  "wallet.summary.deposit": "Wpłać",
+  "wallet.summary.withdraw": "Wypłać",
+  "wallet.summary.history": "Historia",
+  "wallet.tabs.myAssets": "Moje aktywa",
+  "wallet.tabs.openOrders": "Otwarte zlecenia",
+  "wallet.tabs.history": "Historia",
+  "wallet.assets.headers.asset": "Aktywo",
+  "wallet.assets.headers.amount": "Ilość",
+  "wallet.assets.headers.priceCostBasis": "Cena / Koszt nabycia",
+  "wallet.assets.headers.chart": "Wykres",
+  "wallet.assets.headers.unrealizedPnl": "Niezrealizowany zysk/strata",
+  "wallet.assets.loading": "Ładowanie aktywów…",
+  "wallet.assets.empty": "Nie masz jeszcze żadnych aktywów. Kup na Spot, aby zacząć.",
+  "wallet.assets.costLabel": "Koszt:",
+  "wallet.assets.openOnTradingAria": "Otwórz w sekcji Handel",
+  "wallet.orders.headers.pair": "Para",
+  "wallet.orders.loading": "Ładowanie zleceń…",
+  "wallet.orders.empty": "Brak otwartych zleceń.",
+  "wallet.orders.statusOpen": "Otwarte",
+  "wallet.orders.cancelAria": "Anuluj zlecenie",
+  "wallet.orders.cancelSuccess": "Zlecenie anulowane",
+  "wallet.orders.cancelError": "Nie udało się anulować zlecenia",
+  "wallet.history.headers.cryptoPair": "Kryptowaluta / Para",
+  "wallet.history.headers.total": "Razem",
+  "wallet.history.headers.dateTime": "Data / Godzina",
+  "wallet.history.loading": "Ładowanie historii…",
+  "wallet.history.empty": "Brak historii transakcji.",
+  "wallet.history.statusFilled": "Zrealizowane",
+  "wallet.table.type": "Typ",
+  "wallet.table.side": "Strona",
+  "wallet.table.price": "Cena",
+  "wallet.table.quantity": "Ilość",
+  "wallet.table.status": "Status",
+  "wallet.table.typeMarket": "Rynkowe",
+  "wallet.table.typeLimit": "Z limitem",
+  "wallet.table.sideBuy": "Kup",
+  "wallet.table.sideSell": "Sprzedaj",
+
+  // Trading
+  "trading.page.loadingTerminal": "Ładowanie terminala handlowego…",
+  "trading.watchlist.addFavorite": "Dodaj do ulubionych",
+  "trading.watchlist.removeFavorite": "Usuń z ulubionych",
+  "trading.chart.loading": "Ładowanie wykresu…",
+  "trading.orderPanel.title": "Handel Spot",
+  "trading.orderPanel.buy": "Kup",
+  "trading.orderPanel.sell": "Sprzedaj",
+  "trading.orderPanel.market": "Rynkowe",
+  "trading.orderPanel.limit": "Z limitem",
+  "trading.orderPanel.priceLabel": "Cena",
+  "trading.orderPanel.amountLabel": "Kwota",
+  "trading.orderPanel.quantityLabel": "Ilość",
+  "trading.orderPanel.available": "Dostępne:",
+  "trading.orderPanel.total": "Razem",
+  "trading.orderPanel.sliderBuyAria": "Kwota zakupu jako procent dostępnych środków",
+  "trading.orderPanel.sliderSellAria": "Ilość sprzedaży jako procent dostępnych środków",
+  "trading.orderPanel.errors.invalidAmount": "Wprowadź prawidłową kwotę",
+  "trading.orderPanel.errors.amountExceedsAvailable": "Kwota przekracza dostępne saldo",
+  "trading.orderPanel.errors.insufficientUsdt": "Niewystarczające środki USDT",
+  "trading.orderPanel.errors.priceRequired": "Wprowadź cenę",
+  "trading.orderPanel.errors.orderFailed": "Zlecenie nie powiodło się",
+  "trading.orderPanel.success.bought": "Kupiono",
+  "trading.orderPanel.success.sold": "Sprzedano",
+  "trading.orderPanel.success.limitBuyPlaced": "Zlecenie kupna z limitem złożone",
+  "trading.orderPanel.success.limitSellPlaced": "Zlecenie sprzedaży z limitem złożone",
+  "trading.orders.columnPair": "Para",
+  "trading.orders.columnType": "Typ",
+  "trading.orders.columnSide": "Strona",
+  "trading.orders.columnPrice": "Cena",
+  "trading.orders.columnQuantity": "Ilość",
+  "trading.orders.columnStatus": "Status",
+  "trading.orders.loading": "Ładowanie zleceń…",
+  "trading.orders.emptyOpen": "Brak otwartych zleceń.",
+  "trading.orders.emptyHistory": "Brak historii zleceń.",
+  "trading.orders.statusOpen": "Otwarte",
+  "trading.orders.statusFilled": "Zrealizowane",
+  "trading.orders.statusCancelled": "Anulowane",
+  "trading.orders.filledSuffix": "zrealizowano",
+  "trading.orders.cancelAria": "Anuluj zlecenie",
+  "trading.orders.cancelSuccess": "Zlecenie anulowane",
+  "trading.orders.cancelError": "Nie udało się anulować zlecenia",
+  "trading.orders.cancelConfirmTitle": "Anulować zlecenie?",
+  "trading.orders.cancelConfirmBodyPrefix": "Czy na pewno chcesz anulować zlecenie",
+  "trading.orders.cancelConfirmBodySuffix": "?",
+  "trading.orders.cancelConfirmBack": "Wstecz",
+  "trading.orders.cancelConfirmConfirm": "Anuluj zlecenie",
+  "trading.orders.openTab": "Otwarte zlecenia",
+  "trading.orders.historyTab": "Historia zleceń",
+
+  // Marketing — Home
+  "marketing.home.hero.badge": "+20% od pierwszej wpłaty",
+  "marketing.home.hero.titleLine1": "Twoja pierwsza wpłata —",
+  "marketing.home.hero.titlePrefix": "",
+  "marketing.home.hero.titleHighlight": "o 20% większa",
+  "marketing.home.hero.subtitle":
+    "Zasil swoje konto po raz pierwszy i odbierz bonus. Handluj kryptowalutami i innymi aktywami na niezawodnej, łatwej w obsłudze platformie.",
+  "marketing.home.hero.primaryCta": "Odbierz bonus +20%",
+  "marketing.home.hero.viewMarkets": "Zobacz rynki",
+
+  "marketing.home.phone.balanceLabel": "Twoje saldo",
+  "marketing.home.phone.depositLabel": "Pierwsza wpłata",
+  "marketing.home.phone.bonusLabel": "Bonus +20%",
+  "marketing.home.phone.totalLabel": "Razem",
+
+  "marketing.home.stats.bonus.value": "+20%",
+  "marketing.home.stats.bonus.label": "Bonus od pierwszej wpłaty",
+  "marketing.home.stats.assets.value": "100+",
+  "marketing.home.stats.assets.label": "Dostępnych aktywów",
+  "marketing.home.stats.uptime.value": "24/7",
+  "marketing.home.stats.uptime.label": "Dostęp do platformy przez całą dobę",
+  "marketing.home.stats.referral.value": "do 100 USDT",
+  "marketing.home.stats.referral.label": "Za każdego zaproszonego znajomego",
+  "marketing.home.stats.referral.sublabel": "(program polecający)",
+
+  "marketing.home.referral.titleLine1": "Zapraszaj znajomych —",
+  "marketing.home.referral.titleLine2Prefix": "zyskaj ",
+  "marketing.home.referral.titleHighlight": "do 100 USDT",
+  "marketing.home.referral.description":
+    "Twój znajomy otrzymuje +20% od pierwszej wpłaty, a Ty otrzymujesz 10% kwoty jego wpłaty (do 100 USDT).",
+  "marketing.home.referral.depositLabel": "wpłata",
+  "marketing.home.referral.receiveLabel": "otrzymujesz",
+  "marketing.home.referral.deposit1Value": "250 USDT",
+  "marketing.home.referral.receive1Value": "25 USDT",
+  "marketing.home.referral.deposit2Value": "1000 USDT",
+  "marketing.home.referral.receive2Value": "100 USDT",
+
+  "marketing.home.benefits.security.title": "Bezpieczeństwo środków",
+  "marketing.home.benefits.security.description": "Zimne portfele i ochrona 2FA",
+  "marketing.home.benefits.instant.title": "Natychmiastowe operacje",
+  "marketing.home.benefits.instant.description": "Szybkie wpłaty i wypłaty",
+  "marketing.home.benefits.fees.title": "Niskie opłaty",
+  "marketing.home.benefits.fees.description": "Korzystne warunki dla traderów",
+  "marketing.home.benefits.support.title": "Pomoc 24/7",
+  "marketing.home.benefits.support.description": "Zawsze jesteśmy tu, aby pomóc",
+
+  // Marketing — About
+  "marketing.about.hero.badge": "GTX • Kryptowaluty bez zbędnych komplikacji",
+  "marketing.about.hero.titleLine1": "Tworzymy przestrzeń,",
+  "marketing.about.hero.titleLine2": "w której świat kryptowalut staje się",
+  "marketing.about.hero.titleHighlight": "prostszy.",
+  "marketing.about.hero.subtitle":
+    "GTX to nowoczesna platforma do handlu kryptowalutami stworzona dla osób, które cenią szybkość, przejrzysty interfejs i pełną kontrolę nad swoimi aktywami cyfrowymi.",
+  "marketing.about.hero.primaryCta": "Zacznij handlować",
+
+  "marketing.about.stats.assets.value": "100+",
+  "marketing.about.stats.assets.label": "Aktywów kryptowalutowych",
+  "marketing.about.stats.uptime.value": "24/7",
+  "marketing.about.stats.uptime.label": "Dostęp do platformy",
+  "marketing.about.stats.currency.value": "USDT",
+  "marketing.about.stats.currency.label": "Główna waluta",
+  "marketing.about.stats.fee.value": "0%",
+  "marketing.about.stats.fee.label": "Opłata za wpłaty i wypłaty",
+
+  "marketing.about.mission.label": "NASZA IDEA",
+  "marketing.about.mission.headingLine1": "Handel kryptowalutami",
+  "marketing.about.mission.headingLine2": "nie musi być skomplikowany.",
+  "marketing.about.mission.paragraph1":
+    "GTX budujemy wokół jednej prostej idei: zawsze powinieneś rozumieć, co dzieje się z Twoimi aktywami, widzieć potrzebne informacje i mieć szybki dostęp do najważniejszych narzędzi.",
+  "marketing.about.mission.paragraph2":
+    "Od zasilenia konta po kupno, sprzedaż i zarządzanie kryptowalutami — dążymy do tego, aby każdy krok był jasny i prosty.",
+
+  "marketing.about.why.title": "Dlaczego GTX?",
+  "marketing.about.why.subtitle":
+    "Wszystko, czego potrzebujesz do pracy z aktywami cyfrowymi — w jednym miejscu.",
+  "marketing.about.why.speed.title": "Szybkość",
+  "marketing.about.why.speed.description":
+    "Szybki dostęp do rynków, operacji i kluczowych narzędzi bez zbędnych kroków.",
+  "marketing.about.why.simplicity.title": "Prostota",
+  "marketing.about.why.simplicity.description":
+    "Przejrzysty interfejs, łatwy w obsłudze niezależnie od Twojego doświadczenia.",
+  "marketing.about.why.control.title": "Kontrola",
+  "marketing.about.why.control.description":
+    "Saldo, aktywa, zlecenia i historia operacji są zawsze dostępne na jednym koncie.",
+  "marketing.about.why.available.title": "24/7",
+  "marketing.about.why.available.description":
+    "Rynek kryptowalut nigdy nie śpi — GTX jest dostępny przez całą dobę.",
+
+  "marketing.about.platform.headingLine1": "Wszystko pod kontrolą.",
+  "marketing.about.platform.headingLine2": "W jednym miejscu.",
+  "marketing.about.platform.description":
+    "Śledź swoje saldo, zarządzaj aktywami i przechodź do handlu bez żonglowania dziesiątkami różnych narzędzi.",
+  "marketing.about.platform.availableBalance": "Dostępne saldo",
+  "marketing.about.platform.inOrders": "W zleceniach",
+  "marketing.about.platform.assetsValue": "Wartość aktywów",
+  "marketing.about.platform.pnl": "Zysk / Strata",
+
+  "marketing.about.security.label": "BEZPIECZEŃSTWO",
+  "marketing.about.security.headingLine1": "Twoje aktywa.",
+  "marketing.about.security.headingLine2": "Twoja kontrola.",
+  "marketing.about.security.description":
+    "Przykładamy dużą wagę do ochrony kont użytkowników i ich operacji.",
+  "marketing.about.security.accountProtection.title": "Ochrona konta",
+  "marketing.about.security.accountProtection.description":
+    "Dodatkowe warstwy zabezpieczeń dostępu do Twojego profilu.",
+  "marketing.about.security.twoFactor.title": "2FA",
+  "marketing.about.security.twoFactor.description":
+    "Uwierzytelnianie dwuskładnikowe dla dodatkowego bezpieczeństwa konta.",
+  "marketing.about.security.activityControl.title": "Kontrola aktywności",
+  "marketing.about.security.activityControl.description":
+    "Historia Twoich działań i operacji jest dostępna bezpośrednio na koncie.",
+
+  "marketing.about.values.title": "Co jest dla nas ważne",
+  "marketing.about.values.simplicity.title": "Prostota",
+  "marketing.about.values.simplicity.description":
+    "Złożone narzędzia powinny pozostać zrozumiałe dla użytkownika.",
+  "marketing.about.values.speed.title": "Szybkość",
+  "marketing.about.values.speed.description":
+    "Mniej zbędnych kroków — więcej czasu na to, co naprawdę się liczy.",
+  "marketing.about.values.transparency.title": "Przejrzystość",
+  "marketing.about.values.transparency.description":
+    "Użytkownicy powinni zawsze wyraźnie widzieć swoje aktywa, saldo i operacje.",
+
+  "marketing.about.finalCta.label": "GOTOWY, ABY ZACZĄĆ?",
+  "marketing.about.finalCta.headingLine1": "Twój kolejny krok",
+  "marketing.about.finalCta.headingLine2": "zaczyna się z GTX.",
+  "marketing.about.finalCta.description":
+    "Załóż konto i uzyskaj dostęp do rynku kryptowalut w jednym wygodnym miejscu.",
+  "marketing.about.finalCta.primaryGuest": "Załóż konto",
+
+  // Privacy
+  "privacy.seo.title": "Centrum prywatności | GTX",
+  "privacy.seo.description":
+    "Dowiedz się, jak GTX przetwarza dane osobowe i jakie prawa przysługują Ci w związku z Twoimi informacjami.",
+
+  "privacy.hero.label": "CENTRUM PRYWATNOŚCI",
+  "privacy.hero.headingLine1": "Prywatność",
+  "privacy.hero.headingLine2": "w GTX",
+  "privacy.hero.subtitle":
+    "Stworzyliśmy tę stronę, aby jasno wyjaśnić, jak GTX przetwarza dane użytkowników, jakie zasady stosujemy i jakie masz możliwości w zakresie swoich informacji.",
+  "privacy.hero.tagline": "Twoje dane. Twoja kontrola.",
+  "privacy.hero.lastUpdated": "Ostatnia aktualizacja: 31 sierpnia 2026",
+
+  "privacy.principles.title": "Zasady prywatności GTX",
+  "privacy.principles.transparency.title": "Przejrzystość",
+  "privacy.principles.transparency.description":
+    "Dążymy do jasnego wyjaśnienia, jakie dane mogą być przetwarzane i w jakim celu.",
+  "privacy.principles.minimization.title": "Minimalizacja danych",
+  "privacy.principles.minimization.description":
+    "Dążymy do wykorzystywania wyłącznie danych niezbędnych do działania odpowiednich funkcji platformy.",
+  "privacy.principles.accountability.title": "Odpowiedzialność",
+  "privacy.principles.accountability.description":
+    "Dostęp do informacji jest ograniczony do odpowiednich ról i wykorzystywany wyłącznie w określonych celach.",
+  "privacy.principles.userRights.title": "Prawa użytkownika",
+  "privacy.principles.userRights.description":
+    "Możesz skontaktować się z nami w sprawie dostępu, poprawiania lub innych działań na swoich danych zgodnie z obowiązującym prawem.",
+  "privacy.principles.dataProtection.title": "Ochrona danych",
+  "privacy.principles.dataProtection.description":
+    "Stosujemy środki techniczne i organizacyjne, aby chronić konta i informacje przed nieuprawnionym dostępem.",
+
+  "privacy.usage.title": "Jak GTX wykorzystuje Twoje dane",
+
+  "privacy.usage.personalData.title": "Czym są dane osobowe?",
+  "privacy.usage.personalData.paragraph1":
+    "Dane osobowe to informacje, które można bezpośrednio lub pośrednio powiązać z konkretnym użytkownikiem.",
+  "privacy.usage.personalData.paragraph2":
+    "W GTX mogą to być dane podane podczas zakładania konta, przechodzenia weryfikacji, korzystania z funkcji wpłat i wypłat oraz inne informacje niezbędne do działania odpowiednich funkcji platformy.",
+  "privacy.usage.personalData.examplesIntro": "Może to obejmować na przykład:",
+  "privacy.usage.personalData.example1": "Imię, nazwisko i adres e-mail",
+  "privacy.usage.personalData.example2": "Dane podane podczas weryfikacji tożsamości",
+  "privacy.usage.personalData.example3": "Informacje dotyczące operacji wpłat i wypłat",
+  "privacy.usage.personalData.example4":
+    "Techniczne informacje o sesji i urządzeniu (np. adres IP)",
+
+  "privacy.usage.howWeUse.title": "Jak GTX wykorzystuje dane?",
+  "privacy.usage.howWeUse.intro": "Wykorzystujemy dane użytkowników, aby:",
+  "privacy.usage.howWeUse.item1": "Utworzyć i utrzymywać Twoje konto",
+  "privacy.usage.howWeUse.item2": "Uwierzytelnić Cię",
+  "privacy.usage.howWeUse.item3": "Zweryfikować Twoją tożsamość",
+  "privacy.usage.howWeUse.item4": "Przetwarzać wpłaty",
+  "privacy.usage.howWeUse.item5": "Przetwarzać wypłaty",
+  "privacy.usage.howWeUse.item6": "Realizować funkcje handlowe",
+  "privacy.usage.howWeUse.item7": "Zapewniać pomoc użytkownikom",
+  "privacy.usage.howWeUse.item8": "Chronić platformę",
+  "privacy.usage.howWeUse.item9": "Zapobiegać nadużyciom",
+  "privacy.usage.howWeUse.item10": "Zapewniać techniczne działanie usługi",
+
+  "privacy.usage.retention.title": "Jak długo mogą być przechowywane dane?",
+  "privacy.usage.retention.description":
+    "Informacje mogą być przechowywane tak długo, jak jest to konieczne do działania odpowiedniej funkcji, utrzymania Twojego konta, spełnienia wymogów prawnych, zapewnienia bezpieczeństwa lub rozstrzygania sporów.",
+
+  "privacy.usage.thirdParties.title": "Czy GTX udostępnia dane stronom trzecim?",
+  "privacy.usage.thirdParties.description":
+    "W niektórych przypadkach GTX może korzystać z zewnętrznych usług technicznych do obsługi określonych funkcji platformy, na przykład do wysyłania wiadomości e-mail dotyczących konta i bezpieczeństwa. Dane osobowe są udostępniane wyłącznie wtedy, gdy jest to niezbędne dla danej funkcji lub wymagane przez obowiązujące przepisy.",
+
+  "privacy.usage.cookies.title": "Jak GTX wykorzystuje pliki cookie?",
+  "privacy.usage.cookies.intro":
+    "Technicznie niezbędne pliki cookie mogą być wykorzystywane do:",
+  "privacy.usage.cookies.item1": "Logowania się na konto",
+  "privacy.usage.cookies.item2": "Utrzymywania Twojej sesji",
+  "privacy.usage.cookies.item3": "Bezpiecznego działania funkcji platformy",
+  "privacy.usage.cookies.item4": "Zapamiętywania preferencji językowych",
+
+  "privacy.rights.title": "Twoje prawa dotyczące danych osobowych",
+  "privacy.rights.intro":
+    "W zależności od obowiązującego prawa możesz mieć następujące prawa:",
+  "privacy.rights.access.question": "Prawo dostępu",
+  "privacy.rights.access.answer":
+    "Możesz skontaktować się z nami, aby zapytać, jakie dane osobowe GTX przetwarza na Twój temat.",
+  "privacy.rights.rectification.question": "Prawo do sprostowania",
+  "privacy.rights.rectification.answer":
+    "Możesz poprosić nas o poprawienie niedokładnych lub niekompletnych informacji na Twoim koncie.",
+  "privacy.rights.erasure.question": "Prawo do usunięcia danych",
+  "privacy.rights.erasure.answer":
+    "Możesz poprosić nas o usunięcie Twoich danych osobowych, o ile jest to możliwe zgodnie z obowiązującym prawem i innymi wymogami.",
+  "privacy.rights.restriction.question": "Prawo do ograniczenia przetwarzania",
+  "privacy.rights.restriction.answer":
+    "Możesz poprosić nas o ograniczenie dalszego przetwarzania Twoich danych w określonych przypadkach.",
+  "privacy.rights.objection.question": "Prawo do sprzeciwu",
+  "privacy.rights.objection.answer":
+    "Możesz sprzeciwić się określonym rodzajom przetwarzania Twoich danych osobowych, jeśli przewiduje to obowiązujące prawo.",
+  "privacy.rights.withdrawConsent.question": "Prawo do wycofania zgody",
+  "privacy.rights.withdrawConsent.answer":
+    "Jeśli przetwarzanie odbywa się na podstawie zgody, możesz ją wycofać w dowolnym momencie.",
+  "privacy.rights.portability.question": "Prawo do przenoszenia danych",
+  "privacy.rights.portability.answer":
+    "W określonych przypadkach możesz poprosić nas o przekazanie Twoich danych w ustrukturyzowanym formacie.",
+
+  "privacy.faq.title": "Często zadawane pytania",
+  "privacy.faq.q1.question": "Jak uzyskać informacje o moich danych?",
+  "privacy.faq.q1.answer":
+    "Możesz skontaktować się z pomocą techniczną GTX z prośbą dotyczącą Twoich danych osobowych.",
+  "privacy.faq.q2.question": "Jak poprawić dane na moim koncie?",
+  "privacy.faq.q2.answer":
+    "Większość podstawowych danych można zaktualizować bezpośrednio na koncie. W pozostałych przypadkach skontaktuj się z pomocą techniczną.",
+  "privacy.faq.q3.question": "Jak poprosić o usunięcie moich danych?",
+  "privacy.faq.q3.answer": "Skontaktuj się z pomocą techniczną GTX ze swoją prośbą.",
+  "privacy.faq.q4.question": "Jak zmienić dane podane podczas weryfikacji?",
+  "privacy.faq.q4.answer":
+    "Skontaktuj się z pomocą techniczną GTX, aby zmienić dane weryfikacyjne.",
+  "privacy.faq.q5.question": "Gdzie mogę dowiedzieć się więcej o plikach cookie?",
+  "privacy.faq.q5.answer":
+    'Szczegóły znajdziesz w sekcji "Jak GTX wykorzystuje pliki cookie" na tej stronie.',
+  "privacy.faq.q6.question": "Jak zadać pytanie dotyczące prywatności?",
+  "privacy.faq.q6.answer":
+    "Skontaktuj się z pomocą techniczną GTX z dowolnym pytaniem dotyczącym prywatności.",
+
+  "privacy.support.title": "Potrzebujesz pomocy?",
+  "privacy.support.description":
+    "Jeśli masz pytania dotyczące prywatności lub sposobu wykorzystania Twoich danych, skontaktuj się z pomocą techniczną GTX.",
+  "privacy.support.primaryCta": "Skontaktuj się z pomocą",
+  "privacy.support.secondaryCta": "Przejdź do konta",
+
+  // News (minimal — just the small "Market news" block on /analytics;
+  // no listing page, no article detail, no filters)
+  "news.time.justNow": "Przed chwilą",
+  "news.time.minutesAgo": "min temu",
+  "news.time.hoursAgo": "godz. temu",
+  "news.time.yesterday": "Wczoraj",
+
+  // Analytics
+  "analytics.seo.title": "Analityka rynku kryptowalut | GTX",
+  "analytics.seo.description":
+    "Ceny kryptowalut na żywo, zmiany cen w ciągu 24h, aktywność rynkowa i wiadomości kryptowalutowe na GTX.",
+  "analytics.title": "Analityka",
+  "analytics.subtitle": "Dane i dynamika rynku kryptowalut w czasie rzeczywistym",
+  "analytics.marketOverview.title": "Przegląd rynku",
+  "analytics.marketOverview.gainersCarousel": "Największe wzrosty",
+  "analytics.marketOverview.losersCarousel": "Największe spadki",
+  "analytics.dynamics.title": "Dynamika rynku",
+  "analytics.dynamics.searchPlaceholder": "Szukaj monety...",
+  "analytics.dynamics.period24h": "24h",
+  "analytics.dynamics.error": "Nie udało się załadować danych wykresu",
+  "analytics.activity.title": "Największa aktywność",
+  "analytics.volume24hLabel": "Wolumen 24h",
+  "analytics.table.title": "Rynek",
+  "analytics.table.searchPlaceholder": "Szukaj monety...",
+  "analytics.table.filterAll": "Wszystkie",
+  "analytics.table.filterGainers": "Wzrosty",
+  "analytics.table.filterLosers": "Spadki",
+  "analytics.table.columnCoin": "Moneta",
+  "analytics.table.columnPrice": "Cena",
+  "analytics.table.column24h": "24h",
+  "analytics.table.columnVolume": "Wolumen 24h",
+  "analytics.table.showMore": "Pokaż więcej",
+  "analytics.news.title": "Wiadomości rynkowe",
+
+  // Marketing — Contacts / Support
+  "marketing.contacts.hero.title": "Pomoc",
+  "marketing.contacts.hero.subtitle": "Jesteśmy tu, jeśli potrzebujesz pomocy",
+
+  "marketing.contacts.cards.chat.title": "Czat na żywo",
+  "marketing.contacts.cards.chat.description": "Napisz do nas bezpośrednio na stronie",
+  "marketing.contacts.cards.chat.button": "Otwórz czat",
+
+  "marketing.contacts.cards.telegram.title": "Telegram",
+  "marketing.contacts.cards.telegram.description":
+    "Skontaktuj się z pomocą techniczną na Telegramie",
+  "marketing.contacts.cards.telegram.button": "Napisz na Telegramie",
+  "marketing.contacts.cards.telegram.unavailable": "Jeszcze niedostępne",
+
+  "marketing.contacts.faq.title": "Często zadawane pytania",
+  "marketing.contacts.faq.deposits.q": "Jak działają wpłaty i wypłaty?",
+  "marketing.contacts.faq.deposits.a":
+    "Złóż wniosek o wpłatę lub wypłatę w swoim Portfelu — administrator go zweryfikuje i zatwierdzi, a środki pojawią się na Twoim saldzie zaraz potem.",
+  "marketing.contacts.faq.verification.q": "Dlaczego muszę zweryfikować swoje konto?",
+  "marketing.contacts.faq.verification.a":
+    "Weryfikacja potwierdza Twoją tożsamość, dzięki czemu możemy udostępnić pełną funkcjonalność konta. Prześlij swoje dane i dokumenty na stronie Weryfikacji — większość zgłoszeń rozpatrywana jest szybko.",
+  "marketing.contacts.faq.trading.q": "Jak działa handel na GTX?",
+  "marketing.contacts.faq.trading.a":
+    "Składaj zlecenia rynkowe lub z limitem w ramach handlu Spot po aktualnych cenach. Otwarte zlecenia i historia zleceń są zawsze widoczne na stronie Handel.",
+  "marketing.contacts.faq.bonuses.q": "Jak działają bonusy i program polecający?",
+  "marketing.contacts.faq.bonuses.a":
+    "Twoja pierwsza zatwierdzona wpłata automatycznie otrzymuje bonus. Udostępnij swój kod polecający, a otrzymasz nagrodę, gdy zaproszona osoba dokona swojej pierwszej wpłaty.",
+  "marketing.contacts.faq.security.q": "Jak zabezpieczone jest moje konto?",
+  "marketing.contacts.faq.security.a":
+    "Włącz uwierzytelnianie dwuskładnikowe w Ustawieniach dla dodatkowej ochrony i nigdy nie udostępniaj nikomu swojego hasła ani kodów 2FA.",
+
+  "marketing.contacts.email.note": "Lub napisz do nas na adres",
+
+  // Support chat widget (/contacts)
+  "supportChat.fab.ariaLabel": "Czat pomocy technicznej",
+  "supportChat.header.title": "Pomoc GTX",
+  "supportChat.guest.title": "Zaloguj się, aby rozpocząć czat",
+  "supportChat.guest.body":
+    "Czat pomocy technicznej jest dostępny dla zalogowanych użytkowników.",
+  "supportChat.category.prompt": "Czego dotyczy Twoje pytanie?",
+  "supportChat.category.deposit": "Wpłata",
+  "supportChat.category.withdrawal": "Wypłata",
+  "supportChat.category.trading": "Handel",
+  "supportChat.category.verification": "Weryfikacja",
+  "supportChat.category.bonuses": "Bonusy",
+  "supportChat.category.security": "Bezpieczeństwo",
+  "supportChat.category.other": "Inne",
+  "supportChat.messages.you": "Ty",
+  "supportChat.messages.team": "Pomoc GTX",
+  "supportChat.messages.empty": "Wyślij wiadomość, a wkrótce się odezwiemy.",
+  "supportChat.messages.closedBanner":
+    "Ta rozmowa została zamknięta. Napisz do nas, jeśli nadal potrzebujesz pomocy.",
+  "supportChat.input.placeholder": "Napisz wiadomość…",
+  "supportChat.input.send": "Wyślij",
+  "supportChat.errors.createFailed": "Nie udało się rozpocząć rozmowy. Spróbuj ponownie.",
+  "supportChat.errors.sendFailed": "Wiadomość nie została wysłana. Spróbuj ponownie.",
+  "marketing.footer.platform": "Platforma",
+  "marketing.footer.company": "Firma",
+  "marketing.footer.legal": "Informacje prawne",
+  "marketing.footer.privacyPolicy": "Polityka prywatności",
+  "marketing.footer.termsOfService": "Regulamin",
+  "marketing.footer.description":
+    "GTX to edukacyjna platforma do handlu wirtualnego. Wszystkie salda są wirtualne, a wszystkie transakcje są symulowane — żadne prawdziwe środki nigdy nie są narażone na ryzyko.",
+  "marketing.footer.copyright":
+    "GTX. Symulator handlu wirtualnego wyłącznie w celach edukacyjnych.",
+  "marketing.footer.rightsReserved": "Wszelkie prawa zastrzeżone",
+
+  // Auth
+  "auth.emailLabel": "E-mail",
+  "auth.passwordLabel": "Hasło",
+  "auth.login.title": "Witaj ponownie",
+  "auth.login.noAccountPrompt": "Nie masz konta?",
+  "auth.login.loginFailed": "Logowanie nie powiodło się",
+  "auth.login.welcomeToast": "Witaj ponownie!",
+  "auth.login.twoFactorTitle": "Weryfikacja dwuskładnikowa",
+  "auth.login.twoFactorPrompt": "Wprowadź 6-cyfrowy kod z aplikacji uwierzytelniającej.",
+  "auth.login.codeLabel": "Kod weryfikacyjny",
+  "auth.login.verifyButton": "Zweryfikuj",
+  "auth.login.backToLogin": "Powrót do logowania",
+  "auth.login.invalidCode": "Nieprawidłowy kod weryfikacyjny",
+  "auth.register.title": "Utwórz konto",
+  "auth.register.haveAccountPrompt": "Masz już konto?",
+  "auth.register.firstNameLabel": "Imię",
+  "auth.register.lastNameLabel": "Nazwisko",
+  "auth.register.registrationFailed": "Rejestracja nie powiodła się",
+  "auth.register.successToast": "Konto utworzone — witamy w GTX!",
+  "auth.register.agreeToTermsPrefix": "Akceptuję",
+  "auth.register.privacyPolicy": "Politykę prywatności",
+  "auth.register.submitButton": "Zarejestruj się",
+  "auth.register.referralCodeLabel": "Kod polecający",
+  "auth.register.referralCodePlaceholder": "Wprowadź kod polecający",
+  "auth.register.invalidReferralCode": "Nieprawidłowy kod polecający",
+  "auth.login.forgotPasswordLink": "Nie pamiętasz hasła?",
+  "auth.forgotPassword.title": "Zresetuj hasło",
+  "auth.forgotPassword.description":
+    "Wprowadź swój adres e-mail, a wyślemy Ci link do zresetowania hasła.",
+  "auth.forgotPassword.submitButton": "Wyślij link resetujący",
+  "auth.forgotPassword.successMessage":
+    "Jeśli konto o podanym adresie e-mail istnieje, wysłaliśmy link do zresetowania hasła.",
+  "auth.forgotPassword.backToLogin": "Powrót do logowania",
+  "auth.forgotPassword.failedFallback": "Coś poszło nie tak. Spróbuj ponownie.",
+  "auth.resetPassword.title": "Ustaw nowe hasło",
+  "auth.resetPassword.newPasswordLabel": "Nowe hasło",
+  "auth.resetPassword.confirmPasswordLabel": "Potwierdź hasło",
+  "auth.resetPassword.submitButton": "Zresetuj hasło",
+  "auth.resetPassword.successMessage":
+    "Twoje hasło zostało zresetowane. Możesz teraz zalogować się nowym hasłem.",
+  "auth.resetPassword.goToLogin": "Przejdź do logowania",
+  "auth.resetPassword.invalidTokenMessage":
+    "Ten link resetujący jest nieprawidłowy lub wygasł.",
+  "auth.resetPassword.requestNewLink": "Poproś o nowy link",
+  "auth.resetPassword.failedFallback": "Coś poszło nie tak. Spróbuj ponownie.",
+  "auth.resetPassword.missingTokenMessage": "W tym linku brakuje tokenu resetującego.",
+
+  // Markets
+  "markets.title": "Rynki",
+  "markets.tabs.all": "Wszystkie kryptowaluty",
+  "markets.tabs.favorites": "Ulubione",
+  "markets.tabs.popular": "Popularne",
+  "markets.tabs.gainers": "Największe wzrosty",
+  "markets.tabs.losers": "Największe spadki",
+  "markets.tabs.volume": "Największy wolumen",
+  "markets.tabs.movers": "Największe zmiany",
+  "markets.emptyFavorites": "Nie masz jeszcze żadnych ulubionych kryptowalut",
+  "markets.columns.rank": "№",
+  "markets.columns.name": "Moneta",
+  "markets.columns.price": "Cena",
+  "markets.columns.change24h": "Zmiana 24h",
+  "markets.columns.volume24h": "Wolumen 24h",
+  "markets.columns.chart": "Wykres",
+  "markets.favorites.add": "Dodaj do ulubionych",
+  "markets.favorites.remove": "Usuń z ulubionych",
+  "markets.pagination.pageLabel": "Strona",
+  "markets.pagination.of": "z",
+  "markets.pagination.assets": "aktywów",
+  "markets.pagination.prev": "Poprzednia",
+  "markets.pagination.next": "Następna",
+
+  // Transactional email (lib/email/templates.ts) — server-rendered using
+  // the recipient's saved UserSettings.language, not the request locale.
+  "email.passwordChanged.subject": "Alert bezpieczeństwa: Twoje hasło zostało zmienione",
+  "email.passwordChanged.heading": "Twoje hasło zostało zmienione",
+  "email.passwordChanged.body":
+    "Hasło do Twojego konta GTX zostało zmienione w dniu {date}.",
+  "email.passwordChanged.notYouNotice":
+    "Jeśli to nie Ty dokonałeś tej zmiany, niezwłocznie skontaktuj się z pomocą techniczną.",
+  "email.emailChangeConfirm.subject": "Potwierdź swój nowy adres e-mail GTX",
+  "email.emailChangeConfirm.heading": "Potwierdź swój nowy adres e-mail",
+  "email.emailChangeConfirm.body":
+    "Otrzymaliśmy prośbę o zmianę adresu e-mail na Twoim koncie GTX na ten adres. Kliknij poniższy link, aby go potwierdzić.",
+  "email.emailChangeConfirm.button": "Potwierdź nowy adres e-mail",
+  "email.emailChangeConfirm.expiryNotice":
+    "Ten link wygasa za 1 godzinę. Jeśli to nie Ty poprosiłeś o tę zmianę, możesz bezpiecznie zignorować tę wiadomość.",
+  "email.passwordResetRequest.subject": "Zresetuj swoje hasło GTX",
+  "email.passwordResetRequest.heading": "Zresetuj swoje hasło",
+  "email.passwordResetRequest.body":
+    "Otrzymaliśmy prośbę o zresetowanie hasła na Twoim koncie GTX. Kliknij poniższy przycisk, aby ustawić nowe hasło.",
+  "email.passwordResetRequest.button": "Zresetuj hasło",
+  "email.passwordResetRequest.expiryNotice": "Ten link wygasa za 30 minut.",
+  "email.passwordResetRequest.notYouNotice":
+    "Jeśli to nie Ty złożyłeś tę prośbę, możesz bezpiecznie zignorować tę wiadomość — Twoje hasło nie zostanie zmienione.",
+  "email.emailChanged.subject": "Adres e-mail Twojego konta GTX został zmieniony",
+  "email.emailChanged.heading": "Adres e-mail Twojego konta został zmieniony",
+  "email.emailChanged.body":
+    "Adres e-mail Twojego konta GTX został zmieniony na {newEmail} w dniu {date}.",
+  "email.emailChanged.notYouNotice":
+    "Jeśli to nie Ty dokonałeś tej zmiany, niezwłocznie skontaktuj się z pomocą techniczną.",
+
+  "email.balanceAdjusted.subject": "Twoje saldo GTX zostało zaktualizowane",
+  "email.balanceAdjusted.headingCredit": "Saldo uznane",
+  "email.balanceAdjusted.headingDebit": "Saldo skorygowane",
+  "email.balanceAdjusted.bodyCredit":
+    "Twoje saldo {asset} zostało uznane kwotą {amount} {asset}.",
+  "email.balanceAdjusted.bodyDebit":
+    "Z Twojego salda {asset} obciążono kwotę {amount} {asset}.",
+  "email.balanceAdjusted.footer":
+    "Jeśli masz pytania dotyczące tej zmiany, skontaktuj się z pomocą techniczną.",
+};

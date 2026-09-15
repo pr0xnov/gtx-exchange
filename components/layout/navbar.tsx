@@ -250,6 +250,44 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
 }
 
 /**
+ * Mobile counterpart to the desktop LanguageDropdown — a Radix
+ * DropdownMenu's hover-open handlers and Popper positioning aren't a
+ * great fit inside the already-open, already-scrollable mobile slide-down
+ * panel, so this renders the same LOCALES/localeName data as a plain
+ * wrapping row of tap targets instead of a floating menu. flex-wrap keeps
+ * all 8 languages on screen without ever forcing horizontal scroll, no
+ * matter how much wider "Українська"/"Português" are than "EN".
+ */
+function MobileLanguagePicker() {
+  const { locale, setLocale, t } = useLocale();
+
+  return (
+    <div className="mt-2 border-t border-border pt-4">
+      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
+        {t("nav.language")}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {LOCALES.map((l) => (
+          <button
+            key={l}
+            onClick={() => setLocale(l)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors",
+              l === locale
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border text-muted hover:text-foreground"
+            )}
+          >
+            {localeName(l)}
+            {l === locale && <Check className="h-3.5 w-3.5" />}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
  * The single Navbar used on every page. Right side order (desktop):
  * Language -> Search -> Deposit -> Account (icon-only) for an
  * authenticated user; Language -> Login/Registration for a guest.
@@ -393,6 +431,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
                 </Button>
               </div>
             )}
+            <MobileLanguagePicker />
           </nav>
         </div>
       )}

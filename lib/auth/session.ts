@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import {
   setAuthCookies,
@@ -11,6 +12,7 @@ import {
   signRefreshToken,
   refreshTokenExpiryDate,
 } from "@/lib/auth/jwt";
+import { LOCALE_COOKIE, resolveUserLocale } from "@/lib/i18n/config";
 import type { User } from "@prisma/client";
 
 export class UnauthorizedError extends Error {
@@ -138,8 +140,25 @@ export async function requireSuperAdmin() {
  * (app/api/auth/login) and the 2FA completion step
  * (app/api/auth/login/2fa) so there's exactly one place that does this,
  * not two copies that could drift.
+ *
+ * Also syncs the locale cookie from the account's own saved
+ * UserSettings.language, when one is known — the "saved account
+ * language" priority level from this app's locale-detection spec,
+ * for a returning user logging in on a device/browser whose own locale
+ * cookie was (or would be) auto-detected differently (e.g. a new
+ * browser's Accept-Language doesn't match what they actually chose
+ * last time). Safe to do unconditionally because UserSettings.language
+ * is never just the bare schema default in practice: registration
+ * (app/api/auth/register/route.ts) seeds it from the locale already
+ * active at signup, and any later manual switch (locale-context.tsx's
+ * setLocale) overwrites both the cookie and this column together — so by
+ * the time a user reaches login, this column already reflects either
+ * their real preference or, at worst, the same locale their next
+ * Accept-Language-based auto-detection would have produced anyway.
  */
-export async function establishSession(user: Pick<User, "id" | "email">) {
+export async function establishSession(
+  user: Pick<User, "id" | "email"> & { settings?: { language: string } | null }
+) {
   const accessToken = signAccessToken({ sub: user.id, email: user.email });
   const refreshRecord = await prisma.refreshToken.create({
     data: { token: "", userId: user.id, expiresAt: refreshTokenExpiryDate() },
@@ -151,4 +170,13 @@ export async function establishSession(user: Pick<User, "id" | "email">) {
   });
 
   await setAuthCookies(accessToken, refreshToken);
+
+  if (user.settings?.language) {
+    const store = await cookies();
+    store.set(LOCALE_COOKIE, resolveUserLocale(user.settings.language), {
+      path: "/",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
 }

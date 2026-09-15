@@ -16,6 +16,7 @@ import { getTrustedClientIp, getDeviceHash } from "@/lib/security/client-ip";
 import { generateLoginId } from "@/lib/utils";
 import { SPOT_CURRENCIES } from "@/lib/spot/currencies";
 import { generateReferralCode, normalizeReferralCode } from "@/lib/referral/code";
+import { getLocaleFromRequest } from "@/lib/i18n/get-locale";
 
 const MAX_REFERRAL_CODE_GENERATION_ATTEMPTS = 5;
 
@@ -27,6 +28,7 @@ function createUser(params: {
   referralCode: string;
   lastKnownIp: string | null;
   lastKnownDeviceHash: string | null;
+  language: string;
 }) {
   const {
     input,
@@ -36,6 +38,7 @@ function createUser(params: {
     referralCode,
     lastKnownIp,
     lastKnownDeviceHash,
+    language,
   } = params;
   return prisma.user.create({
     data: {
@@ -50,7 +53,15 @@ function createUser(params: {
       lastKnownIp,
       lastKnownDeviceHash,
       wallet: { create: { balance: 0, credit: 0, currency: "USDT" } },
-      settings: { create: {} },
+      // Seeded from the locale already active for this request (middleware
+      // has already auto-detected/persisted it by the time this route
+      // runs) rather than left at the bare schema default — otherwise
+      // establishSession()'s own login-time "sync cookie from saved
+      // account language" would incorrectly downgrade a correctly
+      // auto-detected non-English cookie back to English on this
+      // account's very first login, since nothing would yet distinguish
+      // "the user chose English" from "nobody has ever set this column".
+      settings: { create: { language } },
       // Spot wallet is a separate ledger from the futures margin wallet
       // above — it can never be spent or margined by futures trades and
       // vice versa. New accounts start at 0 in both.
@@ -106,6 +117,7 @@ export async function POST(req: NextRequest) {
 
     const lastKnownIp = getTrustedClientIp(req.headers);
     const lastKnownDeviceHash = getDeviceHash(req.headers);
+    const language = await getLocaleFromRequest(req);
 
     let user: Awaited<ReturnType<typeof createUser>> | undefined;
     for (let attempt = 0; attempt < MAX_REFERRAL_CODE_GENERATION_ATTEMPTS; attempt++) {
@@ -118,6 +130,7 @@ export async function POST(req: NextRequest) {
           referralCode: generateReferralCode(),
           lastKnownIp,
           lastKnownDeviceHash,
+          language,
         });
         break;
       } catch (err) {

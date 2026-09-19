@@ -24,9 +24,9 @@ export function TerminalTopbar() {
   const { availableBalance, lockedInOrders, assetsValue } = useWalletFinancials();
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border px-4">
+    <header className="hidden h-14 items-center justify-between border-b border-border px-4 sm:flex">
       <div className="flex items-center gap-8">
-        <div className="hidden max-w-xl flex-1 items-center justify-between gap-8 text-xs sm:flex">
+        <div className="flex max-w-xl flex-1 items-center justify-between gap-8 text-xs">
           <div>
             <div className="text-muted">{t("wallet.summary.availableBalance")}</div>
             <div className="font-tabular font-semibold text-foreground">

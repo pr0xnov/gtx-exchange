@@ -5,6 +5,7 @@ import { withdrawSchema } from "@/lib/validation/trading";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { isUserVerified } from "@/lib/verification/status";
 import { ensureSpotWallet } from "@/lib/spot/wallet";
+import { rateLimit } from "@/lib/rate-limit";
 
 const METHOD_LABELS: Record<string, string> = {
   TETHER_USDT: "Tether (USDT)",
@@ -20,6 +21,14 @@ class InsufficientBalanceError extends Error {}
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser();
+
+    // Keyed by user (not IP): a withdrawal always requires an authenticated,
+    // verified account, so the meaningful abuse unit is "one account
+    // submitting many withdrawals," not the network address it's behind.
+    const limit = rateLimit(`withdraw:${user.id}`, 5, 60_000);
+    if (!limit.success) {
+      return apiError("Too many withdrawal requests. Please try again shortly.", 429);
+    }
 
     if (!(await isUserVerified(user.id))) {
       return apiError("Please complete verification before withdrawing funds", 403);

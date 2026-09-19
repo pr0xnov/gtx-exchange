@@ -16,6 +16,7 @@
  */
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import {
   signAccessToken,
@@ -29,6 +30,12 @@ import { resetDatabase, seedUserWithWallet } from "./helpers";
 import type { UserWithWallet } from "./helpers";
 
 vi.mock("next/headers", () => ({ cookies: vi.fn() }));
+
+// POST /api/auth/refresh is now rate-limited by client IP, which reads
+// off the request object rather than an ambient context.
+function refreshRequest() {
+  return new NextRequest("http://test/api/auth/refresh", { method: "POST" });
+}
 
 function setCookies(values: { access?: string; refresh?: string }) {
   vi.mocked(cookies).mockResolvedValue({
@@ -137,7 +144,7 @@ describe("POST /api/auth/refresh", () => {
     const refresh = await issueRefreshToken(user);
     setCookies({ refresh });
 
-    const res = await postRefresh();
+    const res = await postRefresh(refreshRequest());
     expect(res.status).toBe(200);
 
     const before = await prisma.refreshToken.findUnique({ where: { token: refresh } });
@@ -151,7 +158,7 @@ describe("POST /api/auth/refresh", () => {
 
   it("401s with no refresh cookie at all", async () => {
     setCookies({});
-    const res = await postRefresh();
+    const res = await postRefresh(refreshRequest());
     expect(res.status).toBe(401);
   });
 
@@ -164,7 +171,7 @@ describe("POST /api/auth/refresh", () => {
     });
     setCookies({ refresh });
 
-    const res = await postRefresh();
+    const res = await postRefresh(refreshRequest());
     expect(res.status).toBe(401);
   });
 
@@ -175,7 +182,7 @@ describe("POST /api/auth/refresh", () => {
     });
     setCookies({ refresh });
 
-    const res = await postRefresh();
+    const res = await postRefresh(refreshRequest());
     expect(res.status).toBe(401);
   });
 });

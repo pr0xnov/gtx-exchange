@@ -4,10 +4,36 @@ import { requireUser } from "@/lib/auth/session";
 import { verificationSchema } from "@/lib/validation/trading";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { deriveVerificationStatus } from "@/lib/admin/user-summary";
+import { rateLimit } from "@/lib/rate-limit";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB — plenty for a photographed ID/utility bill
-const ALLOWED_MIME = (type: string) =>
-  type === "application/pdf" || type.startsWith("image/");
+
+// Explicit allowlist, not `type.startsWith("image/")` — that wildcard let
+// image/svg+xml through, and an SVG can carry an embedded <script> that
+// runs if the document is ever opened/rendered directly (a stored-XSS risk
+// for whoever views it, e.g. an admin reviewing the submission). No raster
+// format that's actually scriptable belongs here, so the fix is a
+// closed list, not a smarter SVG-specific check.
+const ALLOWED_MIME_TO_EXT: Record<string, string[]> = {
+  "application/pdf": ["pdf"],
+  "image/png": ["png"],
+  "image/jpeg": ["jpg", "jpeg"],
+  "image/webp": ["webp"],
+};
+
+function fileExtension(name: string): string {
+  return name.slice(name.lastIndexOf(".") + 1).toLowerCase();
+}
+
+/** MIME type alone is just what the browser/client declared, not verified
+ *  server-side — also require the filename's extension to be plausible for
+ *  that declared type, so a file can't claim to be a PNG while actually
+ *  named (or crafted as) something else entirely. */
+function isAllowedDocument(file: File): boolean {
+  const allowedExts = ALLOWED_MIME_TO_EXT[file.type];
+  if (!allowedExts) return false;
+  return allowedExts.includes(fileExtension(file.name));
+}
 
 function readFile(form: FormData, field: string): File | null {
   const value = form.get(field);
@@ -29,6 +55,14 @@ export async function POST(req: NextRequest) {
   try {
     const user = await requireUser();
 
+    const limit = rateLimit(`verification-upload:${user.id}`, 5, 60_000);
+    if (!limit.success) {
+      return apiError(
+        "Too many verification submissions. Please try again shortly.",
+        429
+      );
+    }
+
     const form = await req.formData();
     const input = verificationSchema.parse({
       country: form.get("country"),
@@ -45,8 +79,8 @@ export async function POST(req: NextRequest) {
       if (file.size > MAX_FILE_SIZE) {
         return apiError(`${file.name} is too large (max 5MB)`, 422);
       }
-      if (!ALLOWED_MIME(file.type)) {
-        return apiError(`${file.name} must be an image or a PDF`, 422);
+      if (!isAllowedDocument(file)) {
+        return apiError(`${file.name} must be a PNG, JPEG, WEBP image, or a PDF`, 422);
       }
     }
 

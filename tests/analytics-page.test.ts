@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { ThemeProvider } from "@/lib/theme/theme-context";
 import { translate } from "@/lib/i18n/dictionaries";
@@ -124,8 +125,22 @@ function article(overrides: Partial<NewsArticle> = {}): NewsArticle {
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 
 beforeEach(() => {
+  // MarketCarousel (rendered twice per page — gainers + losers) runs a
+  // real setInterval/setTimeout for its slow auto-advance/resume-after-
+  // interaction behavior. Without faking timers here, every mount across
+  // this file's ~20 tests leaves its interval ticking in the background
+  // for the rest of the run (root.unmount() below clears it correctly at
+  // unmount time, but only once React actually gets to flush that
+  // cleanup — in the meantime, and any time that flush is delayed,
+  // outstanding real timers pile up test over test, each one firing
+  // asynchronously and producing "not wrapped in act(...)" warnings, and
+  // together burning enough real CPU across the file to make it take
+  // minutes instead of seconds). Nothing in this file awaits a real
+  // delay, so faking timers changes no test's behavior.
+  vi.useFakeTimers();
   mockFetchResult = { articles: [], sources: [] };
   mockMarkets = { data: [], isLoading: false };
   mockUser = null;
@@ -135,6 +150,7 @@ beforeEach(() => {
     isLoading: false,
     isError: false,
   }));
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
@@ -143,6 +159,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  vi.useRealTimers();
 });
 
 async function renderPage() {
@@ -150,9 +167,13 @@ async function renderPage() {
   act(() => {
     root.render(
       React.createElement(
-        LocaleProvider,
-        { initialLocale: LOCALE },
-        React.createElement(ThemeProvider, { initialTheme: "dark" }, element)
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(
+          LocaleProvider,
+          { initialLocale: LOCALE },
+          React.createElement(ThemeProvider, { initialTheme: "dark" }, element)
+        )
       )
     );
   });

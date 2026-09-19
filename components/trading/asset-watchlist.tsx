@@ -36,10 +36,15 @@ export function AssetWatchlist({
   prices,
   selected,
   onSelect,
+  className,
 }: {
   prices: Record<string, LiveTicker>;
   selected: string;
   onSelect: (symbol: string) => void;
+  /** Overrides the default desktop-sidebar sizing (w-64, h-full, right
+   *  border) — used by MobilePairSelector's drawer to render the exact
+   *  same list full-width with no border. */
+  className?: string;
 }) {
   const { t } = useLocale();
   const [search, setSearch] = useState("");
@@ -85,7 +90,12 @@ export function AssetWatchlist({
   const dividerIndex = symbols.findIndex((s) => !favorites.has(s));
 
   return (
-    <div className="flex h-full w-64 shrink-0 flex-col border-r border-border">
+    <div
+      className={cn(
+        "flex h-full w-64 shrink-0 flex-col border-r border-border",
+        className
+      )}
+    >
       <div className="shrink-0 border-b border-border p-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />

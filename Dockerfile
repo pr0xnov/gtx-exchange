@@ -24,6 +24,17 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 # DATABASE_URL is only needed here for `prisma generate`, not for querying.
 ENV DATABASE_URL="postgresql://placeholder:placeholder@placeholder:5432/placeholder"
+# NEXT_PUBLIC_* values are inlined into the client bundle at this build
+# step, not read at container runtime — docker-compose.yml's `web.environment`
+# NEXT_PUBLIC_WS_URL only ever reached the server process, never the browser
+# bundle, without this ARG/ENV pair (see hooks/use-live-prices.ts's
+# "ws://localhost:8080" fallback, which is what silently shipped instead on
+# every prior build). Must be passed as a --build-arg (docker-compose.yml
+# wires this via `web.build.args`) with the real public wss:// URL once a
+# domain exists; the fallback below only keeps local `docker compose build`
+# usable before that.
+ARG NEXT_PUBLIC_WS_URL="ws://localhost:8080"
+ENV NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
 RUN npx prisma generate
 RUN npm run build
 
@@ -64,22 +75,34 @@ CMD ["node", "server.js"]
 # ---------------------------------------------------------------------------
 # Migrator: one-shot container that runs `prisma migrate deploy` + seed.
 # Uses the full (non-standalone-trimmed) node_modules so the `prisma` CLI
-# and `tsx` (for the TypeScript seed script) are available.
+# and `tsx` (for the TypeScript seed script) are available. Only applies
+# existing migration SQL against the DB over the network and reads (never
+# writes) the seed script, so it needs no elevated filesystem access —
+# `prisma generate` still runs as root, before the user switch, exactly
+# like the runner stage below, so the generated client files exist first.
 # ---------------------------------------------------------------------------
 FROM base AS migrator
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
+USER nextjs
 CMD ["sh", "-c", "npx prisma migrate deploy && npx tsx prisma/seed.ts"]
 
 # ---------------------------------------------------------------------------
 # WebSocket relay: long-running market data + trading engine service.
 # Runs server/ws/index.ts directly via tsx (no Next.js build needed here).
+# Same non-root reasoning as migrator above — a network service with no
+# local filesystem writes.
 # ---------------------------------------------------------------------------
 FROM base AS ws
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
+USER nextjs
 EXPOSE 8080
 CMD ["npx", "tsx", "server/ws/index.ts"]
 

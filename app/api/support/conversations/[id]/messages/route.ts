@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser, ForbiddenError } from "@/lib/auth/session";
 import { sendSupportMessageSchema } from "@/lib/validation/support";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
+import { rateLimit } from "@/lib/rate-limit";
 
 /** Loads a conversation and verifies it belongs to `userId` — the one
  *  ownership check every route in this file goes through, never trusting
@@ -60,6 +61,15 @@ export async function POST(
   try {
     const user = await requireUser();
     const { id } = await params;
+
+    // Generous — the widget is a live chat, not a form — but still caps a
+    // scripted flood of messages into one conversation (or, via ownership
+    // being per-user rather than per-conversation, across all of a single
+    // user's conversations).
+    const limit = rateLimit(`support-message:${user.id}`, 20, 60_000);
+    if (!limit.success) {
+      return apiError("Too many messages sent. Please slow down.", 429);
+    }
 
     const conversation = await loadOwnConversation(id, user.id);
     if (conversation instanceof Response) return conversation;

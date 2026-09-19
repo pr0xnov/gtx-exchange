@@ -18,10 +18,13 @@ import {
   LogOut,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
 import { NavbarSearch } from "@/components/layout/navbar-search";
+import { MobileNavigationDrawer } from "@/components/layout/mobile-nav-drawer";
+import { MobileAccountDrawer } from "@/components/layout/mobile-account-drawer";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { LOCALES, localeLabel, localeName } from "@/lib/i18n/config";
@@ -53,6 +56,14 @@ const ACCOUNT_LINKS = [
   { key: "nav.settings", href: "/settings", icon: Settings },
   { key: "nav.support", href: "/contacts", icon: LifeBuoy },
 ] satisfies { key: DictionaryKey; href: string; icon: typeof UserIcon }[];
+
+// The mobile Account drawer (components/layout/mobile-account-drawer.tsx)
+// deliberately excludes Support — it already lives in the mobile site-
+// navigation drawer as "Поддержка", and the account drawer's own spec
+// lists only Account/Deposit/Withdrawal/History/Verification/Settings.
+// Support is always ACCOUNT_LINKS' last entry, so this is exact, not a
+// second hand-maintained list.
+const MOBILE_ACCOUNT_LINKS = ACCOUNT_LINKS.slice(0, -1);
 
 /**
  * The Language item in the existing Navbar (Globe icon + current locale
@@ -251,44 +262,6 @@ function AccountDropdown({ user, onLogout }: { user: NavbarUser; onLogout: () =>
 }
 
 /**
- * Mobile counterpart to the desktop LanguageDropdown — a Radix
- * DropdownMenu's hover-open handlers and Popper positioning aren't a
- * great fit inside the already-open, already-scrollable mobile slide-down
- * panel, so this renders the same LOCALES/localeName data as a plain
- * wrapping row of tap targets instead of a floating menu. flex-wrap keeps
- * all 8 languages on screen without ever forcing horizontal scroll, no
- * matter how much wider "Українська"/"Português" are than "EN".
- */
-function MobileLanguagePicker() {
-  const { locale, setLocale, t } = useLocale();
-
-  return (
-    <div className="mt-2 border-t border-border pt-4">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
-        {t("nav.language")}
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {LOCALES.map((l) => (
-          <button
-            key={l}
-            onClick={() => setLocale(l)}
-            className={cn(
-              "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors",
-              l === locale
-                ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-border text-muted hover:text-foreground"
-            )}
-          >
-            {localeName(l)}
-            {l === locale && <Check className="h-3.5 w-3.5" />}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/**
  * The single Navbar used on every page. Right side order (desktop):
  * Language -> Search -> Deposit -> Account (icon-only) for an
  * authenticated user; Language -> Login/Registration for a guest.
@@ -296,15 +269,28 @@ function MobileLanguagePicker() {
  */
 export function Navbar({ user }: { user: NavbarUser | null }) {
   const { t } = useLocale();
-  const [open, setOpen] = useState(false);
+  // Two independent mobile drawers (site navigation vs. account) —
+  // opening either one closes the other, see the buttons below.
+  const [navDrawerOpen, setNavDrawerOpen] = useState(false);
+  const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const logoHref = user ? "/account" : "/";
   const navLinks = user ? [WALLET_LINK, ...NAV_LINKS] : NAV_LINKS;
 
   async function handleLogout() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
+      // Every query key in hooks/use-api.ts (["user"], ["portfolio"],
+      // ["spot-wallet"], ["account-summary"], ...) is generic, not scoped
+      // by user id — without clearing the cache here, the NEXT account
+      // that logs in on this same tab would keep seeing the previous
+      // user's already-cached balance/portfolio/history for up to
+      // staleTime (5s) or until each query happens to refetch, since
+      // router.refresh() only re-renders Server Components and never
+      // touches an already-mounted Client Component's query cache.
+      queryClient.clear();
       toast.success(t("nav.logoutSuccess"));
       router.push("/");
       router.refresh();
@@ -314,7 +300,17 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header
+      // z-[65]: above the mobile drawers' z-[60] overlay (portaled to
+      // document.body, so this can't rely on being their DOM ancestor
+      // any more — see mobile-drawer.tsx) so the hamburger/profile
+      // buttons stay visible and clickable *while their own drawer is
+      // open*, letting a second tap on the same icon close it again —
+      // the whole reason it renders Menu/X or the account icon in a
+      // fixed spot rather than only inside the drawer itself.
+      className="sticky top-0 z-[65] border-b border-border/60 bg-background/80 backdrop-blur-xl"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-10">
           <Link href={logoHref} className="shrink-0">
@@ -361,80 +357,46 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           )}
         </div>
 
-        <button
-          className="p-2 text-foreground lg:hidden"
-          onClick={() => setOpen((o) => !o)}
-          aria-label={t("nav.toggleMenu")}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-1 lg:hidden">
+          {user && (
+            <button
+              className="flex h-11 w-11 items-center justify-center text-foreground"
+              onClick={() => {
+                setAccountDrawerOpen((o) => !o);
+                setNavDrawerOpen(false);
+              }}
+              aria-label={t("nav.accountMenu")}
+            >
+              <UserIcon className="h-5 w-5" />
+            </button>
+          )}
+          <button
+            className="flex h-11 w-11 items-center justify-center text-foreground"
+            onClick={() => {
+              setNavDrawerOpen((o) => !o);
+              setAccountDrawerOpen(false);
+            }}
+            aria-label={t("nav.toggleMenu")}
+          >
+            {navDrawerOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
-      {open && (
-        <div className="border-t border-border bg-background px-6 py-4 lg:hidden">
-          <nav className="flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm text-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                {t(link.key)}
-              </Link>
-            ))}
-            {user ? (
-              <>
-                <div className="mt-2 border-t border-border pt-4">
-                  <div className="text-sm font-medium text-foreground">
-                    {user.firstName} {user.lastName}
-                  </div>
-                  <div className="text-xs text-muted">{user.email}</div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  {ACCOUNT_LINKS.map((link) => {
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="flex items-center gap-2.5 text-sm text-muted hover:text-foreground"
-                        onClick={() => setOpen(false)}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {t(link.key)}
-                      </Link>
-                    );
-                  })}
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      handleLogout();
-                    }}
-                    className="flex items-center gap-2.5 text-sm text-danger"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {t("common.logout")}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="mt-2 flex gap-3">
-                <Button variant="outline" size="sm" className="flex-1" asChild>
-                  <Link href="/login" onClick={() => setOpen(false)}>
-                    {t("common.login")}
-                  </Link>
-                </Button>
-                <Button variant="primary" size="sm" className="flex-1" asChild>
-                  <Link href="/register" onClick={() => setOpen(false)}>
-                    {t("common.register")}
-                  </Link>
-                </Button>
-              </div>
-            )}
-            <MobileLanguagePicker />
-          </nav>
-        </div>
+      <MobileNavigationDrawer
+        open={navDrawerOpen}
+        onClose={() => setNavDrawerOpen(false)}
+        links={navLinks}
+        isGuest={!user}
+      />
+      {user && (
+        <MobileAccountDrawer
+          open={accountDrawerOpen}
+          onClose={() => setAccountDrawerOpen(false)}
+          user={user}
+          links={MOBILE_ACCOUNT_LINKS}
+          onLogout={handleLogout}
+        />
       )}
     </header>
   );

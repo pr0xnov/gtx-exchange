@@ -14,11 +14,26 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/api/:path*",
+        // Previously /api/:path* only — page routes got zero security
+        // headers at all. A bare CSP is deliberately NOT included here:
+        // getting it right (inline hydration scripts, the WS connection,
+        // coincap/coinmarketcap image hosts, fonts) needs its own
+        // dedicated pass with real page-by-page verification, not a
+        // guess bundled into an unrelated audit — a wrong CSP fails
+        // silent-and-broken, which is worse than the current gap. HSTS
+        // is also deliberately absent — this deployment has no real
+        // HTTPS/reverse-proxy in front yet (see lib/security/geo.ts and
+        // client-ip.ts's own TRUST_PROXY_HEADERS gate for the same
+        // reasoning) and enabling it prematurely on plain HTTP is unsafe.
+        source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
         ],
       },
     ];

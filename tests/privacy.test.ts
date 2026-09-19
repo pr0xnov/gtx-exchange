@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { translate } from "@/lib/i18n/dictionaries";
 import PrivacyPage, { generateMetadata } from "@/app/(marketing)/privacy/page";
@@ -50,9 +51,11 @@ function t(key: Parameters<typeof translate>[1]) {
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 
 beforeEach(() => {
   mockUser = null;
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
@@ -66,7 +69,13 @@ afterEach(() => {
 async function renderPrivacy() {
   const element = await PrivacyPage();
   act(() => {
-    root.render(React.createElement(LocaleProvider, { initialLocale: LOCALE }, element));
+    root.render(
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(LocaleProvider, { initialLocale: LOCALE }, element)
+      )
+    );
   });
 }
 

@@ -11,9 +11,17 @@ import {
   clearAuthCookies,
 } from "@/lib/auth/cookies";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { NextRequest } from "next/server";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req.headers);
+    const limit = rateLimit(`refresh:${ip}`, 30, 60_000);
+    if (!limit.success) {
+      return apiError("Too many refresh attempts. Please try again shortly.", 429);
+    }
+
     const token = await getRefreshTokenFromCookies();
     if (!token) return apiError("No refresh token provided", 401);
 

@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
 import { TerminalTopbar } from "@/components/trading/terminal-topbar";
 import { AssetWatchlist, DISPLAY_NAMES } from "@/components/trading/asset-watchlist";
+import { MobilePairSelector } from "@/components/trading/mobile-pair-selector";
 import { ChartHeader } from "@/components/trading/chart-header";
 import {
   CandlestickChart,
@@ -88,15 +89,31 @@ export function TradingTerminal() {
     // last Order History row would end up permanently hidden behind it
     // once scrolled all the way down, with no way to scroll further to
     // reveal it.
-    <div className="flex flex-col bg-background pb-8">
-      {/* Top trading workspace (sidebar/chart/Spot panel) — fixed at
-          exactly the height it had before Open Orders/History moved out
-          from inside it (100vh-4rem minus the 13rem/h-52 that panel used
-          to occupy in this column), so the chart's own flex-1 resolves
-          to the exact same pixel height as before. shrink-0 keeps that
-          height fixed regardless of anything below it. */}
-      <div className="flex h-[calc(100vh-4rem-13rem)] shrink-0 overflow-hidden">
-        <AssetWatchlist prices={prices} selected={symbol} onSelect={setSymbol} />
+    <div className="flex flex-col bg-background pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
+      {/* Top trading workspace (pair selector/sidebar/chart/Spot panel).
+          Desktop (lg+): unchanged fixed-height row (100vh-4rem minus the
+          13rem/h-52 that panel used to occupy in this column), so the
+          chart's own flex-1 resolves to the exact same pixel height as
+          before. Mobile (<lg): a plain vertical stack at natural height —
+          AssetWatchlist's 256px sidebar has no room to exist here at all,
+          so it's replaced by MobilePairSelector's compact bar + drawer
+          (same pair-selection data/logic, just not permanently on
+          screen), and the chart gets an explicit height since it has no
+          fixed-height row left to fill via flex-1. */}
+      <div className="flex flex-col lg:h-[calc(100vh-4rem-13rem)] lg:shrink-0 lg:flex-row lg:overflow-hidden">
+        <MobilePairSelector
+          symbol={symbol}
+          displayName={displayName}
+          ticker={ticker}
+          prices={prices}
+          onSelect={setSymbol}
+        />
+        <AssetWatchlist
+          prices={prices}
+          selected={symbol}
+          onSelect={setSymbol}
+          className="hidden lg:flex"
+        />
 
         <div className="flex flex-1 flex-col overflow-y-auto">
           <TerminalTopbar />
@@ -109,7 +126,7 @@ export function TradingTerminal() {
                 timeframe={timeframe}
                 onTimeframeChange={handleTimeframeChange}
               />
-              <div className="min-h-0 flex-1">
+              <div className="h-[300px] shrink-0 sm:h-[340px] lg:h-auto lg:min-h-0 lg:flex-1">
                 <CandlestickChart
                   symbol={symbol}
                   timeframe={timeframe}
@@ -131,7 +148,7 @@ export function TradingTerminal() {
                   label is the only way to avoid a visibly incorrect
                   flash while that's being resolved. */}
               <div className="flex items-center justify-between border-b border-border px-4 py-3" />
-              <div className="min-h-0 flex-1">
+              <div className="h-[300px] shrink-0 sm:h-[340px] lg:h-auto lg:min-h-0 lg:flex-1">
                 <div className="relative h-full w-full">
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/60 text-sm text-muted">
                     {t("trading.chart.loading")}
@@ -142,7 +159,7 @@ export function TradingTerminal() {
           )}
         </div>
 
-        <div className="flex h-full w-80 shrink-0 flex-col border-l border-border">
+        <div className="flex w-full shrink-0 flex-col border-t border-border lg:h-full lg:w-80 lg:border-l lg:border-t-0">
           <SpotOrderPanel
             symbol={symbol}
             displayName={displayName}
@@ -161,8 +178,10 @@ export function TradingTerminal() {
           scrolls once this plus the top workspace exceed one viewport. */}
       <SpotOrdersPanel />
 
-      {/* MarketTicker — after the complete OrdersWorkspace, in normal
-          document flow (not sticky/fixed). Same `prices` map already
+      {/* MarketTicker — fixed to the viewport bottom (see its own file);
+          rendered last here only so its z-40 strip paints over the rest
+          of this page's content, not because position in this tree
+          affects its (already fixed) placement. Same `prices` map already
           subscribed to above via useLivePrices(), not a second
           connection. */}
       <MarketTicker prices={prices} onSelect={setSymbol} />

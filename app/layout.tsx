@@ -1,14 +1,26 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getServerLocale } from "@/lib/i18n/get-locale";
 import { getServerTheme } from "@/lib/theme/get-theme";
 
 export const metadata: Metadata = {
-  title: "GTX — Earn on the Best Financial Assets",
+  title: "GTX — Crypto Trading Exchange",
   description:
-    "GTX is a training trading platform. Practice trading crypto, forex, stocks, and commodities with real market prices and zero risk using virtual funds.",
-  keywords: ["paper trading", "crypto simulator", "demo trading", "GTX"],
+    "GTX is a modern crypto spot trading platform. Buy, sell, and manage digital assets with real-time market prices, fast deposits and withdrawals, and a clean, easy-to-use interface.",
+  keywords: ["crypto exchange", "spot trading", "buy crypto", "sell crypto", "GTX"],
+};
+
+// `viewportFit: "cover"` is what actually lets `env(safe-area-inset-*)`
+// resolve to a real value instead of 0 on notch/Dynamic-Island/home-
+// indicator phones (Safari ignores the env() vars entirely without it) —
+// used by the fixed Navbar/MarketTicker/mobile drawers. Zoom is
+// deliberately left enabled (no maximumScale/userScalable: false): this is
+// a financial app where users may need to zoom in on amounts/addresses.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({

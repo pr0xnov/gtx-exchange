@@ -62,8 +62,13 @@ export async function POST(req: NextRequest) {
       });
       const locale = resolveUserLocale(settings?.language);
       const resetUrl = `${env.APP_URL}/reset-password?token=${rawToken}`;
+      // Never log the URL itself — it carries the raw reset token, which
+      // is exactly what's needed to take over the account until it
+      // expires. Anyone who can read logs (ops tooling, a misconfigured
+      // aggregator, a compromised log pipeline) would otherwise be able to
+      // hijack any pending reset without ever touching the user's inbox.
       // eslint-disable-next-line no-console
-      console.log(`[forgot-password] Reset URL generated: ${resetUrl}`);
+      console.log("[forgot-password] Reset URL generated");
 
       // eslint-disable-next-line no-console
       console.log("[forgot-password] Email sending started");

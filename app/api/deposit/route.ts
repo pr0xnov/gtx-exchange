@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/session";
 import { depositSchema } from "@/lib/validation/trading";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
+import { rateLimit } from "@/lib/rate-limit";
 
 const METHOD_LABELS: Record<string, string> = {
   TETHER_USDT: "Tether (USDT)",
@@ -31,6 +32,11 @@ const ALLOWED_PROOF_MIME = new Set([
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser();
+
+    const limit = rateLimit(`deposit:${user.id}`, 10, 60_000);
+    if (!limit.success) {
+      return apiError("Too many deposit submissions. Please try again shortly.", 429);
+    }
 
     const form = await req.formData();
     const input = depositSchema.parse({

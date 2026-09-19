@@ -21,6 +21,115 @@ import { useLocale } from "@/lib/i18n/locale-context";
  * tab's scroll position is ever reset or clamped by the other's row
  * count.
  */
+/** Mobile replacement for OrdersTable's <table> (7 columns don't fit a
+ *  320-480px screen) — same rows/actions, just one order per card instead
+ *  of one row per table line. Desktop table below is untouched. */
+function OrdersCards({
+  rows,
+  isLoading,
+  emptyMessage,
+  cancelPending,
+  onRequestCancel,
+}: {
+  rows: SpotOrderDto[];
+  isLoading: boolean;
+  emptyMessage: string;
+  cancelPending: boolean;
+  onRequestCancel: (id: string, symbol: string) => void;
+}) {
+  const { t } = useLocale();
+
+  if (isLoading) {
+    return (
+      <p className="px-4 py-6 text-center text-xs text-muted sm:hidden">
+        {t("trading.orders.loading")}
+      </p>
+    );
+  }
+  if (rows.length === 0) {
+    return (
+      <p className="px-4 py-6 text-center text-xs text-muted sm:hidden">{emptyMessage}</p>
+    );
+  }
+
+  return (
+    <div className="divide-y divide-border/50 sm:hidden">
+      {rows.map((o) => (
+        <div key={o.id} className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-medium text-foreground">
+              <PairCell symbol={o.symbol} />
+              <Badge variant={o.side === "BUY" ? "success" : "danger"}>
+                {o.side === "BUY"
+                  ? t("trading.orderPanel.buy")
+                  : t("trading.orderPanel.sell")}
+              </Badge>
+            </div>
+            {o.status === "OPEN" && (
+              <button
+                onClick={() => onRequestCancel(o.id, o.symbol)}
+                disabled={cancelPending}
+                className="flex h-9 w-9 items-center justify-center rounded-md text-muted hover:bg-danger/10 hover:text-danger"
+                aria-label={t("trading.orders.cancelAria")}
+              >
+                {cancelPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <X className="h-3.5 w-3.5" />
+                )}
+              </button>
+            )}
+          </div>
+          <div className="mt-2 text-xs text-muted">
+            {o.type === "MARKET"
+              ? t("trading.orderPanel.market")
+              : t("trading.orderPanel.limit")}
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <div className="text-muted">{t("trading.orders.columnPrice")}</div>
+              <div className="font-tabular text-foreground">
+                {formatPrice(parseFloat(o.price))}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted">{t("trading.orders.columnQuantity")}</div>
+              <div className="font-tabular text-foreground">
+                {o.quantity}
+                {parseFloat(o.filledQuantity) > 0 &&
+                  parseFloat(o.filledQuantity) !== parseFloat(o.quantity) && (
+                    <span className="text-muted">
+                      {" "}
+                      ({o.filledQuantity} {t("trading.orders.filledSuffix")})
+                    </span>
+                  )}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted">{t("trading.orders.columnStatus")}</div>
+              <Badge
+                variant={
+                  o.status === "FILLED"
+                    ? "success"
+                    : o.status === "CANCELLED"
+                      ? "muted"
+                      : "pending"
+                }
+              >
+                {o.status === "OPEN"
+                  ? t("trading.orders.statusOpen")
+                  : o.status === "FILLED"
+                    ? t("trading.orders.statusFilled")
+                    : t("trading.orders.statusCancelled")}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function OrdersTable({
   rows,
   isLoading,
@@ -36,7 +145,7 @@ function OrdersTable({
 }) {
   const { t } = useLocale();
   return (
-    <table className="w-full text-xs">
+    <table className="hidden w-full text-xs sm:table">
       <thead className="sticky top-0 bg-background">
         <tr className="border-b border-border text-left text-muted">
           <th className="px-4 py-2 font-medium">{t("trading.orders.columnPair")}</th>
@@ -205,6 +314,13 @@ export function SpotOrdersPanel() {
           above it) exceeds one viewport, rather than a cramped internal
           mini-scrollbar. */}
       <div className={cn(tab !== "open" && "hidden")}>
+        <OrdersCards
+          rows={openOrders}
+          isLoading={isLoading}
+          emptyMessage={t("trading.orders.emptyOpen")}
+          cancelPending={cancelOrder.isPending}
+          onRequestCancel={(id, symbol) => setPendingCancel({ id, symbol })}
+        />
         <OrdersTable
           rows={openOrders}
           isLoading={isLoading}
@@ -214,6 +330,13 @@ export function SpotOrdersPanel() {
         />
       </div>
       <div className={cn(tab !== "history" && "hidden")}>
+        <OrdersCards
+          rows={historyOrders}
+          isLoading={isLoading}
+          emptyMessage={t("trading.orders.emptyHistory")}
+          cancelPending={cancelOrder.isPending}
+          onRequestCancel={(id, symbol) => setPendingCancel({ id, symbol })}
+        />
         <OrdersTable
           rows={historyOrders}
           isLoading={isLoading}

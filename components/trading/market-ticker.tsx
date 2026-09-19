@@ -93,9 +93,17 @@ export function MarketTicker({
   // overflow-y-auto/scroll here), so hovering it never traps page
   // scrolling. TradingTerminal reserves matching bottom padding (pb-8)
   // on its own root so this never covers the last Order History row.
+  // h-8 is the ticker's own content height; safe-area padding-bottom
+  // (home indicator on notched phones) is added on top of that, not
+  // instead of it, so the row itself never gets visually squashed.
+  const safeAreaStyle = { paddingBottom: "env(safe-area-inset-bottom, 0px)" };
+
   if (reducedMotion) {
     return (
-      <div className="fixed inset-x-0 bottom-0 z-40 flex h-8 items-center overflow-x-auto border-t border-border bg-background">
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 flex h-8 items-center overflow-x-auto border-t border-border bg-background"
+        style={safeAreaStyle}
+      >
         {renderSequence("static", false)}
       </div>
     );
@@ -104,6 +112,7 @@ export function MarketTicker({
   return (
     <div
       className="fixed inset-x-0 bottom-0 z-40 h-8 overflow-hidden border-t border-border bg-background"
+      style={safeAreaStyle}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

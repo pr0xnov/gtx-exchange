@@ -328,9 +328,13 @@ describe("TradingTerminal — MarketTicker: actually mounted, after OrdersWorksp
   it("reserves bottom padding matching the ticker's own height, so the fixed ticker never permanently covers the last Order History row", () => {
     renderTerminal();
     // MarketTicker is `fixed` (removed from flow) — the page root must
-    // carry its own compensating padding-bottom, since nothing else
-    // pushes content up out from under it.
+    // carry its own compensating padding-bottom (2rem, matching the
+    // ticker's own h-8), since nothing else pushes content up out from
+    // under it. Also adds env(safe-area-inset-bottom) on top of that 2rem
+    // for the home-indicator area on notched phones (see MarketTicker's
+    // own matching safe-area padding) — same invariant, just no longer a
+    // bare Tailwind pb-8 literal.
     const pageRoot = container.firstElementChild as HTMLElement;
-    expect(pageRoot.className).toContain("pb-8");
+    expect(pageRoot.className).toContain("pb-[calc(2rem+env(safe-area-inset-bottom");
   });
 });

@@ -10,18 +10,38 @@ function blankToUndefined(value: string | undefined): string | undefined {
   return value === "" ? undefined : value;
 }
 
+// `next build` bundles route handler modules without executing their
+// top-level code, but this defends against the case where it does (or a
+// future refactor makes it so): during the actual `next build` phase only,
+// a missing secret falls back to a placeholder so the build itself can't
+// fail over a secret that a real deployment will supply at runtime. At
+// every other time — dev, test, and a running server (`next start` /
+// standalone) — a missing secret must fail fast, never sign real tokens
+// with a value anyone can read in this file.
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+// Same reasoning applies to APP_URL: a silently-defaulted localhost link
+// mailed to a real user in production is a broken password-reset/
+// email-change email, not just a cosmetic bug — so a production runtime
+// with no APP_URL configured must fail loudly instead. Dev/test/build
+// keep the localhost default so nothing extra is required to run locally.
+const isProductionRuntime = process.env.NODE_ENV === "production" && !isBuildPhase;
+
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
 
-  JWT_ACCESS_SECRET: z
-    .string()
-    .min(32, "JWT_ACCESS_SECRET must be at least 32 chars")
-    .default("build_placeholder_access_secret_12345678901234567890"),
+  JWT_ACCESS_SECRET: isBuildPhase
+    ? z
+        .string()
+        .min(32, "JWT_ACCESS_SECRET must be at least 32 chars")
+        .default("build_placeholder_access_secret_12345678901234567890")
+    : z.string().min(32, "JWT_ACCESS_SECRET is required and must be at least 32 chars"),
 
-  JWT_REFRESH_SECRET: z
-    .string()
-    .min(32, "JWT_REFRESH_SECRET must be at least 32 chars")
-    .default("build_placeholder_refresh_secret_12345678901234567890"),
+  JWT_REFRESH_SECRET: isBuildPhase
+    ? z
+        .string()
+        .min(32, "JWT_REFRESH_SECRET must be at least 32 chars")
+        .default("build_placeholder_refresh_secret_12345678901234567890")
+    : z.string().min(32, "JWT_REFRESH_SECRET is required and must be at least 32 chars"),
 
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 
@@ -35,7 +55,15 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().optional(),
-  APP_URL: z.string().default("http://localhost:3000"),
+  APP_URL: isProductionRuntime
+    ? z
+        .string()
+        .min(1, "APP_URL is required in production — set it to the real public URL")
+        .refine(
+          (v) => !v.includes("localhost") && !v.includes("127.0.0.1"),
+          "APP_URL must be the real public production URL, not localhost"
+        )
+    : z.string().default("http://localhost:3000"),
 
   // Admin Panel: key for the reversible current-password encryption used
   // only by SUPER_ADMIN's "Show password" feature (see

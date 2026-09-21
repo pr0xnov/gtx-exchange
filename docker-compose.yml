@@ -34,6 +34,12 @@ services:
     restart: "no"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # Was missing entirely — prisma/seed.ts now gates its demo-user seed
+      # (demo@gtx.com / a well-known password) on this being exactly
+      # "production", so it must actually reach the container. Without it,
+      # that check would silently never see "production" and the demo
+      # account would keep seeding on every real deploy.
+      NODE_ENV: production
     depends_on:
       postgres:
         condition: service_healthy

@@ -69,6 +69,15 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+# Liveness check against app/api/health (a plain 200, no DB query — see
+# that route's own comment for why). Uses Node's own built-in fetch, not
+# curl/wget — neither is installed in this alpine image, and adding one
+# just for this would be a needless extra package. start-period gives the
+# standalone server room to finish booting before a slow first check
+# would otherwise count as a failure.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["node", "server.js"]
 
@@ -104,5 +113,17 @@ COPY . .
 RUN npx prisma generate
 USER nextjs
 EXPOSE 8080
+
+# Liveness check — a plain TCP connect to the relay's own listen port,
+# not a full WebSocket handshake (that would be a heavier check than a
+# periodic healthcheck needs, and would show up as extra "client
+# connected/disconnected" log noise every interval). Confirms the process
+# is up and accepting connections, same bar the web healthcheck above
+# uses; the `ws` npm package itself already only tracks real browser
+# clients (see server/ws/index.ts), so this raw connect+close never
+# reaches application code at all.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "const net=require('net');const s=net.connect(process.env.WS_PORT||8080,'127.0.0.1');const done=(code)=>{try{s.destroy()}catch(e){}process.exit(code)};s.on('connect',()=>done(0));s.on('error',()=>done(1));setTimeout(()=>done(1),3000)"
+
 CMD ["npx", "tsx", "server/ws/index.ts"]
 

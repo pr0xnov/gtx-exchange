@@ -1,0 +1,33 @@
+# GTX Exchange — PostgreSQL backup, one-shot unit triggered by
+# gtx-backup.timer (do not enable/start this unit directly on a schedule —
+# that's the timer's job).
+#
+# NOT installed anywhere by this repo. To install on a real VPS:
+#
+#   sudo cp scripts/systemd/gtx-backup.service /etc/systemd/system/
+#   sudo cp scripts/systemd/gtx-backup.timer /etc/systemd/system/
+#   # Edit the two paths below (WorkingDirectory, ExecStart) to match
+#   # where this project actually lives on that machine, and edit
+#   # Environment=GTX_BACKUP_DIR= if not using the default /var/backups/gtx.
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now gtx-backup.timer
+#
+# Runs as root deliberately (matches docs/backup.md's Permissions
+# section: the backup directory and dump files are readable only by root
+# and whichever user runs this job) — change User=/Group= here only if
+# you also update the ownership/chmod expectations in backup-postgres.sh
+# and docs/backup.md accordingly.
+
+[Unit]
+Description=GTX Exchange PostgreSQL backup
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/gtx-exchange
+ExecStart=/opt/gtx-exchange/scripts/backup-postgres.sh
+Environment=GTX_BACKUP_DIR=/var/backups/gtx
+# Keep the backup job from ever being able to affect the app itself —
+# it only runs `docker compose exec postgres pg_dump`, never anything
+# that touches web/ws/migrator.

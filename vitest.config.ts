@@ -36,6 +36,19 @@ export default defineConfig({
       NODE_ENV: "test",
       JWT_ACCESS_SECRET: "test_access_secret_at_least_32_characters_long",
       JWT_REFRESH_SECRET: "test_refresh_secret_at_least_32_characters_long",
+      // Several existing test files (e.g. tests/referral-system.test.ts's
+      // registerRequest()) deliberately send a distinct X-Forwarded-For
+      // per simulated user specifically to get independent rate-limit
+      // buckets, the same way a real deployment behind a correctly
+      // configured reverse proxy would. This is the test-runner process's
+      // own env only — production defaults to "false" until a real proxy
+      // is confirmed (see lib/security/client-ip.ts and docs/
+      // deployment-checklist.md). Tests that specifically need the
+      // *untrusted* (production-default) path override this locally via
+      // vi.resetModules() + a fresh dynamic import — see tests/
+      // client-ip.test.ts and tests/rate-limit-ip-spoofing.test.ts —
+      // which works regardless of this global default.
+      TRUST_PROXY_HEADERS: "true",
     },
   },
 });

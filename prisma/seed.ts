@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { seedAssets } from "../lib/markets/seed-assets";
 import { SPOT_CURRENCIES } from "../lib/spot/currencies";
 import { generateReferralCode } from "../lib/referral/code";
+import { shouldSeedDemoUser } from "../lib/seed/should-seed-demo-user";
 
 const prisma = new PrismaClient();
 
@@ -57,9 +58,23 @@ async function seedDemoUser() {
 
 async function main() {
   console.log("[seed] starting…");
+  // Required system data (tradeable assets) — runs in every environment,
+  // production included. Never gated on NODE_ENV.
   const count = await seedAssets(prisma);
   console.log(`[seed] upserted ${count} assets`);
-  await seedDemoUser();
+
+  // The demo user (demo@gtx.com / a password fixed in this file, in
+  // plain sight in source control) is a dev/test convenience only — a
+  // real production deployment must never auto-create a publicly-known
+  // login with a funded wallet on every migrator run. Everything else in
+  // this file (including seedAssets above) still runs in production;
+  // only this one call is skipped.
+  if (shouldSeedDemoUser(process.env.NODE_ENV)) {
+    await seedDemoUser();
+  } else {
+    console.log("[seed] NODE_ENV=production — skipping demo user seed.");
+  }
+
   console.log("[seed] complete");
 }
 

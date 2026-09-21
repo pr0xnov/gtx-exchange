@@ -45,6 +45,17 @@ function getTransporter(): Transporter | null {
   return transporter;
 }
 
+/** Masks the value of any `?token=...`/`&token=...` query parameter — the
+ *  shape every sensitive link this app emails uses (password-reset,
+ *  email-change confirmation; see forgot-password/route.ts and settings/
+ *  email/request/route.ts). Keeps the rest of the message (subject,
+ *  greeting, surrounding text) intact for local debugging, so the dev-only
+ *  console fallback below stays useful without ever printing the actual
+ *  secret that link grants. */
+function redactTokens(text: string): string {
+  return text.replace(/([?&]token=)[^\s&"'<]+/gi, "$1[REDACTED]");
+}
+
 /** True SMTP-error codes nodemailer/Node's net & tls modules actually set
  *  (EAUTH, ECONNECTION, ETIMEDOUT, ESOCKET, ...) — logging this alongside
  *  the message turns "something failed" into "auth failed" / "connection
@@ -107,12 +118,25 @@ export async function sendMail(message: MailMessage): Promise<boolean> {
   const t = getTransporter();
 
   if (!t) {
-    // No SMTP provider configured — this is expected in local dev per this
-    // project's setup. Log the content so the flow is still verifiable
-    // end-to-end without a real inbox, instead of silently doing nothing.
+    if (env.NODE_ENV === "production") {
+      // Fail securely — a production deployment with SMTP left
+      // unconfigured must never print a password-reset/email-change link
+      // (or any other message body) to the container's logs, which are
+      // far more widely readable than a real inbox would be. No message
+      // content, no recipient-specific detail — just enough to make the
+      // misconfiguration itself loud and obvious in `docker logs`.
+      // eslint-disable-next-line no-console
+      console.error("[email:not-configured] Email transport is not configured.");
+      return false;
+    }
+    // Dev/test convenience: log the content so the flow is still
+    // verifiable end-to-end without a real inbox — but with any
+    // `?token=...` value masked (see redactTokens above), so a
+    // password-reset/email-change link's actual secret is never printed
+    // even here.
     // eslint-disable-next-line no-console
     console.log(
-      `[email:not-configured] to=${message.to} subject="${message.subject}"\n${message.text}`
+      `[email:not-configured] to=${message.to} subject="${message.subject}"\n${redactTokens(message.text)}`
     );
     return false;
   }

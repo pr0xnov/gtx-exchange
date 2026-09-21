@@ -1,0 +1,18 @@
+# GTX Exchange — schedule for gtx-backup.service. See that file's own
+# header for installation steps; NOT installed anywhere by this repo.
+#
+# Fires every 6 hours (docs/backup.md's suggested cadence) plus once
+# shortly after boot, in case the VPS was down across a scheduled run.
+# Persistent=true means a missed run (VPS was off) fires as soon as the
+# system is back up, instead of silently waiting for the next slot.
+
+[Unit]
+Description=Run GTX Exchange PostgreSQL backup every 6 hours
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=6h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

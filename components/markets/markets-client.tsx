@@ -10,6 +10,7 @@ import { POPULAR_SYMBOLS, TRACKED_SYMBOLS } from "@/lib/binance/client";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/lib/i18n/locale-context";
+import type { DictionaryKey } from "@/lib/i18n/dictionaries";
 import { AllMarketsTable } from "@/components/markets/all-markets-table";
 import { MiniMarketTable } from "@/components/markets/mini-market-table";
 import {
@@ -41,6 +42,24 @@ export const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 const SEARCHABLE_TABS: TabId[] = ["all"];
+
+// Mobile's compact chip tab bar shows only these 4 (see MOBILE_TAB_LABEL
+// below for the short label each uses) — Избранные/Объём/Движение stay
+// reachable on desktop only, matching the agreed mobile design. This is a
+// pure presentation subset: no new ids, no separate data/state, every one
+// of these already exists in TABS and drives the exact same activeTab/
+// setActiveTab as the desktop tabs.
+const MOBILE_TAB_IDS: TabId[] = ["all", "popular", "gainers", "losers"];
+const MOBILE_TABS = TABS.filter((tab) => MOBILE_TAB_IDS.includes(tab.id));
+
+// Short label per mobile tab id — the desktop labels above ("Top Gainers",
+// "All Cryptocurrencies") are too long for a 320-440px chip strip.
+const MOBILE_TAB_LABEL: Partial<Record<TabId, DictionaryKey>> = {
+  all: "markets.tabs.allShort",
+  popular: "markets.tabs.popularShort",
+  gainers: "markets.tabs.gainersShort",
+  losers: "markets.tabs.losersShort",
+};
 
 /** Избранные is an authenticated-account feature — hidden from the tab
  *  list entirely for a guest, not just inert. Exported as its own pure
@@ -123,9 +142,10 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
   const effectiveSearch = showSearch ? debouncedSearch : "";
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-4 p-4 sm:space-y-6 sm:p-6">
       <div>
-        <nav className="flex gap-1 overflow-x-auto border-b border-border">
+        {/* Desktop: unchanged underline tab bar, full label set */}
+        <nav className="hidden gap-1 overflow-x-auto border-b border-border sm:flex">
           {visibleTabs.map((tab) => (
             <button
               key={tab.id}
@@ -142,8 +162,31 @@ export function MarketsClient({ isAuthenticated }: { isAuthenticated: boolean })
           ))}
         </nav>
 
+        {/* Mobile: compact pill/chip tab bar, short label subset (see
+            MOBILE_TABS/MOBILE_TAB_LABEL above) — same activeTab state and
+            setActiveTab handler as the desktop nav, only the visible set
+            and visual style differ. Swipeable when it doesn't fit; the
+            page itself never scrolls horizontally because only this one
+            strip is a scroll container. */}
+        <nav className="scrollbar-hide flex gap-2 overflow-x-auto sm:hidden">
+          {MOBILE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                activeTab === tab.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-card text-muted"
+              )}
+            >
+              {t(MOBILE_TAB_LABEL[tab.id] ?? tab.label)}
+            </button>
+          ))}
+        </nav>
+
         {showSearch && (
-          <div className="relative mt-4 max-w-md">
+          <div className="relative mt-3 max-w-md sm:mt-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <Input
               placeholder={t("nav.searchPlaceholder")}

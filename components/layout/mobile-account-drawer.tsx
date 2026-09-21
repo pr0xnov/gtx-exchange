@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 import { MobileDrawer } from "@/components/layout/mobile-drawer";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { DictionaryKey } from "@/lib/i18n/dictionaries";
@@ -29,16 +29,37 @@ export function MobileAccountDrawer({
   const { t } = useLocale();
 
   return (
-    <MobileDrawer open={open} onClose={onClose} title={t("nav.accountMenu")} side="right">
-      <div className="flex h-full flex-col">
-        <div className="border-b border-border pb-4">
-          <div className="truncate text-sm font-medium text-foreground">
-            {user.firstName} {user.lastName}
+    <MobileDrawer
+      open={open}
+      onClose={onClose}
+      title={t("nav.accountMenu")}
+      side="right"
+      header={
+        // Real user data only — same firstName/lastName/email the desktop
+        // AccountDropdown already shows (see navbar.tsx's AccountDropdown),
+        // not a separate nickname field (the User model has none). Replaces
+        // the old generic "Меню аккаунта ×" bar: this drawer's one and only
+        // close button now sits beside the name it actually belongs to.
+        <div className="flex shrink-0 items-start justify-between border-b border-border px-4 py-3">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-foreground">
+              {user.firstName} {user.lastName}
+            </div>
+            <div className="truncate text-xs text-muted">{user.email}</div>
           </div>
-          <div className="truncate text-xs text-muted">{user.email}</div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("common.close")}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted hover:text-foreground"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-
-        <nav className="flex flex-1 flex-col gap-1 pt-4">
+      }
+    >
+      <div className="flex h-full flex-col">
+        <nav className="flex flex-1 flex-col gap-1">
           {links.map((link) => {
             const Icon = link.icon;
             return (

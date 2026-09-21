@@ -145,12 +145,91 @@ export function MiniMarketTable({
 
   return (
     <div className="rounded-2xl border border-border bg-card">
-      <div className="border-b border-border px-4 py-3">
+      {/* Hidden on mobile — the active chip tab (see MarketsClient) already
+          says which list this is; repeating the same label as a heading
+          right above it added vertical space the agreed mobile layout
+          doesn't have room for. Desktop keeps it exactly as before. */}
+      <div className="hidden border-b border-border px-4 py-3 sm:block">
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full table-fixed text-sm">
-          {/* table-fixed + this colgroup is what keeps every tab's columns
+
+      {/* Mobile: vertical card list — same `rows`/`favorites`/isLoading
+          props as the desktop table below, just a different presentation.
+          No separate fetch, filter or sort: AllMarketsTable/MarketsClient
+          already computed `rows` once for both. */}
+      <div className="sm:hidden">
+        {isLoading &&
+          Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex min-h-[68px] items-center gap-3 border-b border-border/50 px-4 py-3 last:border-0"
+            >
+              <Skeleton className="h-6 w-6 shrink-0 rounded-full" />
+              <Skeleton className="h-5 w-full" />
+            </div>
+          ))}
+
+        {!isLoading && rows.length === 0 && (
+          <div className="px-4 py-8 text-center text-sm text-muted">
+            {resolvedEmptyMessage}
+          </div>
+        )}
+
+        {!isLoading &&
+          rows.map((row) => {
+            const up = row.change24h >= 0;
+            return (
+              <div
+                key={row.id}
+                onClick={() => goToTrading(row.symbol)}
+                className="flex min-h-[68px] cursor-pointer items-center justify-between gap-3 border-b border-border/50 px-4 py-3 last:border-0 active:bg-white/[0.02]"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <CoinIcon symbol={row.base} />
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-foreground">
+                      {row.name}
+                    </div>
+                    <div className="truncate text-xs text-muted">{row.displaySymbol}</div>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="font-tabular text-sm font-semibold text-foreground">
+                    {formatPrice(row.price, row.price < 10 ? 4 : 2)}
+                  </div>
+                  <div
+                    className={cn(
+                      "font-tabular text-xs",
+                      up ? "text-primary" : "text-danger"
+                    )}
+                  >
+                    {formatPercent(row.change24h)}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+      </div>
+
+      {/* Desktop: unchanged full table (columns, sort, sparkline, star) */}
+      <div className="hidden overflow-x-auto sm:block">
+        <table className="w-full min-w-[1200px] table-fixed text-sm lg:min-w-0">
+          {/* This table only ever renders at sm (640px)+ now — below that,
+              the card list above takes over instead. min-w-[1200px]
+              (cancelled again at lg, where the container is already wider
+              than that) still matters for the 640-1023px tablet range:
+              the percentage columns below are too narrow for real content
+              (price/volume/name all ellipsis-truncated to 1-2 characters)
+              once table-fixed has to divide a ~700-950px-wide table by
+              these same percentages. Forcing a wider table here means the
+              *same* percentages produce readable column widths again, and
+              the existing overflow-x-auto above turns the excess into a
+              horizontal scroll contained to the table only — the page
+              itself never gets wider than the viewport. Desktop (lg+) is
+              untouched: its container is already wider than 1200px there,
+              so this min-width is a no-op and lg:min-w-0 makes that
+              explicit rather than relying on it accidentally being moot.
+              table-fixed + this colgroup is what keeps every tab's columns
               at identical widths — with the default table-layout: auto,
               each render of this table sized its own columns from that
               tab's own row content (huge numbers in "Максимальный объём"

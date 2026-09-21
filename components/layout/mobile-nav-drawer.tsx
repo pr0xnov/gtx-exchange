@@ -27,7 +27,19 @@ export function MobileNavigationDrawer({
   const { t } = useLocale();
 
   return (
-    <MobileDrawer open={open} onClose={onClose} title={t("nav.siteMenu")} side="right">
+    <MobileDrawer
+      open={open}
+      onClose={onClose}
+      title={t("nav.siteMenu")}
+      side="right"
+      header={null}
+    >
+      {/* No title bar here on purpose — the real page header, still
+          visible above this panel, already shows the GTX logo and its
+          hamburger button doubles as this drawer's close control (see
+          navbar.tsx: it swaps to an × while this is open). A second
+          "Меню ×" row here duplicated that closer and confused users into
+          seeing two ×'s. */}
       <nav className="flex flex-col gap-1">
         {links.map((link) => (
           <Link

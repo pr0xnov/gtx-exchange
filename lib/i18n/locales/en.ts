@@ -255,6 +255,23 @@ export const en = {
     "We process your data in accordance with our Privacy Policy.",
   "verification.identityDocumentLabel": "Identity document",
   "verification.proofOfAddressLabel": "Proof of address",
+  // components/shared/document-list.tsx — shared by the user's own
+  // /verification page and the Admin Panel's review screen; previously
+  // hardcoded in English with no t() calls at all.
+  "verification.documentList.empty": "No documents on file.",
+  "verification.documentList.open": "Open",
+  "verification.documentList.delete": "Delete",
+  "verification.documentList.deleteTitle": "Delete document",
+  "verification.documentList.deleteConfirm":
+    "Are you sure you want to delete this document?",
+  "verification.documentList.deleting": "Deleting…",
+  // components/shared/document-viewer-modal.tsx — same sharing/hardcoded
+  // situation as document-list.tsx above.
+  "verification.documentViewer.zoomOut": "Zoom out",
+  "verification.documentViewer.zoomIn": "Zoom in",
+  "verification.documentViewer.resetZoom": "Reset zoom",
+  "verification.documentViewer.cannotPreview": "can't be previewed here.",
+  "verification.documentViewer.openInNewTab": "Open in a new tab",
   "verification.missingDocsError": "Please upload both required documents",
   "verification.submitSuccess": "Documents submitted for review",
   "verification.submitFailedFallback": "Submission failed",
@@ -863,6 +880,13 @@ export const en = {
   "markets.tabs.popular": "Popular",
   "markets.tabs.gainers": "Top Gainers",
   "markets.tabs.losers": "Top Losers",
+  // Short labels for the mobile pill/chip tab bar (see MarketsClient) —
+  // the long desktop labels above ("Top Gainers", "All Cryptocurrencies")
+  // don't fit as compact chips on a 320-440px screen.
+  "markets.tabs.allShort": "All",
+  "markets.tabs.popularShort": "Popular",
+  "markets.tabs.gainersShort": "Gainers",
+  "markets.tabs.losersShort": "Losers",
   "markets.tabs.volume": "Top Volume",
   "markets.tabs.movers": "Biggest Movers",
   "markets.emptyFavorites": "You don't have any favorite cryptocurrencies yet",

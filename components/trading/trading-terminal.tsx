@@ -37,12 +37,12 @@ export function TradingTerminal() {
   const initialSymbol = searchParams.get("symbol") ?? "BTCUSDT";
 
   const [symbol, setSymbol] = useState(initialSymbol);
-  const [timeframe, setTimeframeState] = useState<Timeframe>("1h");
+  const [timeframe, setTimeframeState] = useState<Timeframe>("1m");
   // CandlestickChart doesn't mount at all until this flips to true — see
-  // the layout effect below. A plain useState("1h") plus reading
+  // the layout effect below. A plain useState("1m") plus reading
   // localStorage in an effect isn't enough on its own: CandlestickChart
-  // would still mount on the very first commit with timeframe="1h" and
-  // its OWN effect would immediately fire a real "1h" klines fetch, which
+  // would still mount on the very first commit with timeframe="1m" and
+  // its OWN effect would immediately fire a real "1m" klines fetch, which
   // resolves and paints onto the canvas moments later — a real visible
   // flash of the wrong interval, not just a wrong label, even though a
   // *synchronous* (useLayoutEffect) state update happens before the
@@ -126,7 +126,17 @@ export function TradingTerminal() {
                 timeframe={timeframe}
                 onTimeframeChange={handleTimeframeChange}
               />
-              <div className="h-[300px] shrink-0 sm:h-[340px] lg:h-auto lg:min-h-0 lg:flex-1">
+              {/* Phone heights step up in 3 explicit bands (380/415/450px,
+                  at the <375/375-399/400px+ widths this was measured
+                  against) rather than one flat height or a vh-based
+                  clamp() — a vh clamp tracks viewport *height*, not width,
+                  so it wouldn't actually respond to "wider phone = more
+                  room" the way these bands are specifically tuned to.
+                  440px (iPhone 16 Pro Max) lands in the top band at
+                  450px, inside the ~440-470px this was asked for. sm:
+                  (640px+, tablet) and lg: (desktop, flex-1 within the
+                  fixed-height row above) are unchanged from before. */}
+              <div className="h-[380px] shrink-0 min-[375px]:h-[415px] min-[400px]:h-[450px] sm:h-[340px] lg:h-auto lg:min-h-0 lg:flex-1">
                 <CandlestickChart
                   symbol={symbol}
                   timeframe={timeframe}
@@ -141,14 +151,14 @@ export function TradingTerminal() {
                   up the exact same height — swapping it for the real
                   ChartHeader a moment later causes no layout shift. This
                   (plus not mounting CandlestickChart below) is what keeps
-                  the restored timeframe from ever flashing "1h" first: the
+                  the restored timeframe from ever flashing "1m" first: the
                   server can't know localStorage's value, so the raw
                   pre-hydration HTML must render *something* — showing a
                   neutral placeholder instead of a wrong, real timeframe
                   label is the only way to avoid a visibly incorrect
                   flash while that's being resolved. */}
               <div className="flex items-center justify-between border-b border-border px-4 py-3" />
-              <div className="h-[300px] shrink-0 sm:h-[340px] lg:h-auto lg:min-h-0 lg:flex-1">
+              <div className="h-[380px] shrink-0 min-[375px]:h-[415px] min-[400px]:h-[450px] sm:h-[340px] lg:h-auto lg:min-h-0 lg:flex-1">
                 <div className="relative h-full w-full">
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/60 text-sm text-muted">
                     {t("trading.chart.loading")}

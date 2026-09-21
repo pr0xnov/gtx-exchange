@@ -2,9 +2,10 @@
 /**
  * Component tests for the /trading chart's timeframe selector
  * (components/trading/chart-header.tsx): the button opens a real Radix
- * dropdown menu on click, offers exactly the 8 required timeframes, shows
- * the currently-selected one on the trigger, and picking one both closes
- * the menu and calls back with the new value. Confirmed in isolation
+ * dropdown menu on click, offers exactly the 7 required timeframes ("5s"
+ * removed — see that task's own notes), shows the currently-selected one
+ * on the trigger, and picking one both closes the menu and calls back
+ * with the new value. Confirmed in isolation
  * (this file) that the click-to-open mechanism itself works correctly —
  * if it still doesn't open in a real browser, the cause lives outside
  * this component (see the site-wide Navbar dropdown scroll/pointer lock
@@ -81,14 +82,14 @@ describe("ChartHeader timeframe selector — the button opens the dropdown", () 
   });
 });
 
-describe("ChartHeader timeframe selector — offers exactly the 8 required timeframes", () => {
-  it("lists 5s, 30s, 1m, 15m, 1h, 4h, 1D, 1W — no more, no less", () => {
+describe("ChartHeader timeframe selector — offers exactly the 7 required timeframes", () => {
+  it("lists 30s, 1m, 15m, 1h, 4h, 1D, 1W — no more, no less", () => {
     render("1h", vi.fn());
     clickTrigger(container.querySelector("button")!);
     const items = Array.from(menu()!.querySelectorAll('[role="menuitem"]')).map(
       (el) => el.textContent
     );
-    expect(items).toEqual(["5s", "30s", "1m", "15m", "1h", "4h", "1D", "1W"]);
+    expect(items).toEqual(["30s", "1m", "15m", "1h", "4h", "1D", "1W"]);
   });
 });
 

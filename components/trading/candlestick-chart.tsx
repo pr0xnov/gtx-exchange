@@ -11,10 +11,9 @@ import {
 import { useLocale } from "@/lib/i18n/locale-context";
 import { useTheme } from "@/lib/theme/theme-context";
 
-export type Timeframe = "5s" | "30s" | "1m" | "15m" | "1h" | "4h" | "1d" | "1w";
+export type Timeframe = "30s" | "1m" | "15m" | "1h" | "4h" | "1d" | "1w";
 
 export const TIMEFRAMES: { label: string; value: Timeframe }[] = [
-  { label: "5s", value: "5s" },
   { label: "30s", value: "30s" },
   { label: "1m", value: "1m" },
   { label: "15m", value: "15m" },
@@ -25,7 +24,6 @@ export const TIMEFRAMES: { label: string; value: Timeframe }[] = [
 ];
 
 const TIMEFRAME_SECONDS: Record<Timeframe, number> = {
-  "5s": 5,
   "30s": 30,
   "1m": 60,
   "15m": 900,
@@ -39,14 +37,13 @@ const TIMEFRAME_SECONDS: Record<Timeframe, number> = {
 // (fitContent() over exactly this many bars) covers a sensible real-world
 // window instead of one flat count for every interval. A flat 500, as this
 // used to be, means 500 hourly candles (~21 days) got squeezed into the
-// same on-screen width as 500 five-second candles (~42 minutes) — at that
+// same on-screen width as 500 thirty-second candles (~4 hours) — at that
 // zoom level lightweight-charts auto-coarsens its axis labels to
 // day-granularity ticks, so "1h" visually read as a multi-week daily
 // chart even though the underlying candles really were hourly. The chart
 // still pages further back on demand as the user scrolls — see
 // loadOlderPage below — using this same per-timeframe page size.
 const TIMEFRAME_DEFAULT_BARS: Record<Timeframe, number> = {
-  "5s": 180, // ~15 minutes
   "30s": 100, // ~50 minutes
   "1m": 180, // ~3 hours
   "15m": 192, // ~2 days

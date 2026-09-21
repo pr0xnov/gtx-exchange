@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 interface DocumentViewerModalProps {
   url: string;
@@ -26,6 +27,7 @@ export function DocumentViewerModal({
   mimeType,
   onClose,
 }: DocumentViewerModalProps) {
+  const { t } = useLocale();
   const isImage = mimeType?.startsWith("image/") ?? false;
   const [zoom, setZoom] = useState(1);
 
@@ -46,7 +48,7 @@ export function DocumentViewerModal({
                 onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
                 disabled={zoom <= MIN_ZOOM}
                 className="rounded-lg p-1.5 text-white/80 hover:bg-white/10 hover:text-white disabled:opacity-40"
-                title="Zoom out"
+                title={t("verification.documentViewer.zoomOut")}
               >
                 <ZoomOut className="h-5 w-5" />
               </button>
@@ -55,7 +57,7 @@ export function DocumentViewerModal({
                 onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
                 disabled={zoom >= MAX_ZOOM}
                 className="rounded-lg p-1.5 text-white/80 hover:bg-white/10 hover:text-white disabled:opacity-40"
-                title="Zoom in"
+                title={t("verification.documentViewer.zoomIn")}
               >
                 <ZoomIn className="h-5 w-5" />
               </button>
@@ -64,7 +66,7 @@ export function DocumentViewerModal({
                   type="button"
                   onClick={() => setZoom(1)}
                   className="rounded-lg p-1.5 text-white/80 hover:bg-white/10 hover:text-white"
-                  title="Reset zoom"
+                  title={t("verification.documentViewer.resetZoom")}
                 >
                   <RotateCcw className="h-5 w-5" />
                 </button>
@@ -75,7 +77,7 @@ export function DocumentViewerModal({
             type="button"
             onClick={onClose}
             className="rounded-lg p-1.5 text-white/80 hover:bg-white/10 hover:text-white"
-            title="Close"
+            title={t("common.close")}
           >
             <X className="h-5 w-5" />
           </button>
@@ -92,14 +94,14 @@ export function DocumentViewerModal({
           </div>
         ) : (
           <div className="rounded-2xl bg-card p-8 text-center text-sm text-muted">
-            {fileName} can&apos;t be previewed here.{" "}
+            {fileName} {t("verification.documentViewer.cannotPreview")}{" "}
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              Open in a new tab
+              {t("verification.documentViewer.openInNewTab")}
             </a>
             .
           </div>

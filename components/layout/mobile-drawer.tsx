@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,12 +45,26 @@ export function MobileDrawer({
   title,
   children,
   side = "right",
+  header,
 }: {
   open: boolean;
   onClose: () => void;
+  /** Accessible name for the dialog (aria-label) — always required, even
+   *  when `header` replaces the visible title row below, since screen
+   *  readers still need a name for the dialog itself. */
   title: string;
   children: React.ReactNode;
   side?: "left" | "right";
+  /** Replaces the default title-bar row (generic title text + one close
+   *  button) with custom content when provided — e.g. the Account
+   *  drawer's own name/email + close button. Pass `null` to render no
+   *  header row at all (the Navigation drawer: the real page header,
+   *  still visible above this panel, already shows the GTX logo and the
+   *  hamburger button doubling as this drawer's close control, so a
+   *  second title bar here was a redundant, confusing second "×").
+   *  Whatever is passed is responsible for its own close button, wired to
+   *  the same `onClose`. Omit entirely to keep the default title+X row. */
+  header?: ReactNode;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -116,17 +130,21 @@ export function MobileDrawer({
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
-          <span className="text-sm font-semibold text-foreground">{title}</span>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:text-foreground"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        {header !== undefined ? (
+          header
+        ) : (
+          <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
+            <span className="text-sm font-semibold text-foreground">{title}</span>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
           {children}
         </div>

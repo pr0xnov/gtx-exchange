@@ -338,3 +338,41 @@ describe("TradingTerminal — MarketTicker: actually mounted, after OrdersWorksp
     expect(pageRoot.className).toContain("pb-[calc(2rem+env(safe-area-inset-bottom");
   });
 });
+
+describe("TradingTerminal — timeframe default is 1m, and a stale 5s never survives", () => {
+  const STORAGE_KEY = "gtx-trading-timeframe";
+
+  afterEach(() => {
+    window.localStorage.removeItem(STORAGE_KEY);
+  });
+
+  function timeframeTriggerLabel() {
+    // ChartHeader's timeframe dropdown trigger is the only button whose
+    // text matches one of the real Timeframe values.
+    const known = ["30s", "1m", "15m", "1h", "4h", "1D", "1W"];
+    const btn = Array.from(container.querySelectorAll("button")).find((b) =>
+      known.includes(b.textContent?.trim() ?? "")
+    );
+    return btn?.textContent?.trim();
+  }
+
+  it("defaults to 1m with nothing in localStorage", () => {
+    renderTerminal();
+    expect(timeframeTriggerLabel()).toBe("1m");
+  });
+
+  it("a stale 5s value from before this change falls back to 1m, not an error or blank chart", () => {
+    window.localStorage.setItem(STORAGE_KEY, "5s");
+    renderTerminal();
+    expect(timeframeTriggerLabel()).toBe("1m");
+    // The chart itself still mounted (loading placeholder or the real
+    // header) — no blank/crashed tree.
+    expect(container.textContent).toContain("BTC/USDT");
+  });
+
+  it("a valid stored timeframe (e.g. 4h) still restores correctly", () => {
+    window.localStorage.setItem(STORAGE_KEY, "4h");
+    renderTerminal();
+    expect(timeframeTriggerLabel()).toBe("4h");
+  });
+});

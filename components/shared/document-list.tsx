@@ -5,6 +5,7 @@ import { FileText, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 export interface DocumentListRow {
   id: string;
@@ -34,6 +35,7 @@ export function DocumentList({
   typeLabel: (type: string) => string;
   onDelete?: (documentId: string) => Promise<void>;
 }) {
+  const { t } = useLocale();
   const [preview, setPreview] = useState<DocumentListRow | null>(null);
   const [confirming, setConfirming] = useState<DocumentListRow | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -59,7 +61,7 @@ export function DocumentList({
   }
 
   if (documents.length === 0) {
-    return <p className="text-sm text-muted">No documents on file.</p>;
+    return <p className="text-sm text-muted">{t("verification.documentList.empty")}</p>;
   }
 
   return (
@@ -87,7 +89,7 @@ export function DocumentList({
                 onClick={() => open(d)}
                 className="text-sm font-medium text-primary hover:underline"
               >
-                Open
+                {t("verification.documentList.open")}
               </button>
               {onDelete && (
                 <button
@@ -95,7 +97,7 @@ export function DocumentList({
                   onClick={() => setConfirming(d)}
                   className="text-sm font-medium text-danger hover:underline"
                 >
-                  Delete
+                  {t("verification.documentList.delete")}
                 </button>
               )}
             </div>
@@ -123,10 +125,12 @@ export function DocumentList({
           >
             <div className="flex items-center gap-2 text-danger">
               <Trash2 className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Delete document</h2>
+              <h2 className="text-lg font-semibold">
+                {t("verification.documentList.deleteTitle")}
+              </h2>
             </div>
             <p className="mt-2 text-sm text-muted">
-              Are you sure you want to delete this document?
+              {t("verification.documentList.deleteConfirm")}
             </p>
             <p className="mt-1 text-xs text-muted">
               {typeLabel(confirming.type)} · {confirming.fileName}
@@ -138,7 +142,7 @@ export function DocumentList({
                 onClick={() => setConfirming(null)}
                 disabled={deleting}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="danger"
@@ -146,7 +150,9 @@ export function DocumentList({
                 onClick={handleConfirmDelete}
                 disabled={deleting}
               >
-                {deleting ? "Deleting…" : "Delete"}
+                {deleting
+                  ? t("verification.documentList.deleting")
+                  : t("verification.documentList.delete")}
               </Button>
             </div>
           </div>

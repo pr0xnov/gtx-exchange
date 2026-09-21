@@ -57,14 +57,6 @@ const ACCOUNT_LINKS = [
   { key: "nav.support", href: "/contacts", icon: LifeBuoy },
 ] satisfies { key: DictionaryKey; href: string; icon: typeof UserIcon }[];
 
-// The mobile Account drawer (components/layout/mobile-account-drawer.tsx)
-// deliberately excludes Support — it already lives in the mobile site-
-// navigation drawer as "Поддержка", and the account drawer's own spec
-// lists only Account/Deposit/Withdrawal/History/Verification/Settings.
-// Support is always ACCOUNT_LINKS' last entry, so this is exact, not a
-// second hand-maintained list.
-const MOBILE_ACCOUNT_LINKS = ACCOUNT_LINKS.slice(0, -1);
-
 /**
  * The Language item in the existing Navbar (Globe icon + current locale
  * label) — was a static, non-functional "EN" button; this is the only
@@ -394,7 +386,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           open={accountDrawerOpen}
           onClose={() => setAccountDrawerOpen(false)}
           user={user}
-          links={MOBILE_ACCOUNT_LINKS}
+          links={ACCOUNT_LINKS}
           onLogout={handleLogout}
         />
       )}

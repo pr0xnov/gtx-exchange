@@ -202,27 +202,17 @@ export interface Candle {
   volume: number;
 }
 
-// Native Binance kline intervals, plus "5s"/"30s" which Binance doesn't
-// offer directly — we synthesize both below by aggregating Binance's
-// native "1s" candles, 5 or 30 at a time respectively.
-export const KLINE_INTERVALS = [
-  "5s",
-  "30s",
-  "1m",
-  "15m",
-  "1h",
-  "4h",
-  "1d",
-  "1w",
-] as const;
+// Native Binance kline intervals, plus "30s" which Binance doesn't offer
+// directly — we synthesize it below by aggregating Binance's native "1s"
+// candles, 30 at a time.
+export const KLINE_INTERVALS = ["30s", "1m", "15m", "1h", "4h", "1d", "1w"] as const;
 export type KlineInterval = (typeof KLINE_INTERVALS)[number];
 
-const SYNTHETIC_INTERVAL_SECONDS: Record<"5s" | "30s", number> = {
-  "5s": 5,
+const SYNTHETIC_INTERVAL_SECONDS: Record<"30s", number> = {
   "30s": 30,
 };
 
-const BINANCE_NATIVE_INTERVAL: Record<Exclude<KlineInterval, "5s" | "30s">, string> = {
+const BINANCE_NATIVE_INTERVAL: Record<Exclude<KlineInterval, "30s">, string> = {
   "1m": "1m",
   "15m": "15m",
   "1h": "1h",
@@ -244,12 +234,12 @@ export async function fetchKlines(
   limit = 500,
   endTime?: number
 ): Promise<Candle[]> {
-  if (interval === "5s" || interval === "30s") {
-    // No native 5s/30s interval on Binance — aggregate from 1s candles,
-    // 5 or 30 of which make up one bucket. Binance caps a single request
-    // at 1000 candles, so this can return well under `limit` candles per
-    // page for these specific intervals — the chart pages further back
-    // to compensate (see components/trading/candlestick-chart.tsx).
+  if (interval === "30s") {
+    // No native 30s interval on Binance — aggregate from 1s candles, 30
+    // of which make up one bucket. Binance caps a single request at 1000
+    // candles, so this can return well under `limit` candles per page for
+    // this specific interval — the chart pages further back to compensate
+    // (see components/trading/candlestick-chart.tsx).
     const bucketSeconds = SYNTHETIC_INTERVAL_SECONDS[interval];
     const raw = await fetchRawKlines(
       symbol,

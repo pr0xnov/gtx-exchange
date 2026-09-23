@@ -19,8 +19,7 @@
     "create-admin": "tsx scripts/create-admin.ts",
     "set-user-password": "tsx scripts/set-user-password.ts",
     "backfill-referral-codes": "tsx scripts/backfill-referral-codes.ts",
-    "postinstall": "prisma generate",
-    "prepare": "husky"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "6.3.1",

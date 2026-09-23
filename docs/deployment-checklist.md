@@ -139,9 +139,41 @@ machine expects `localhost:5432` to work.
       you can log in with it, then treat the old dev/test password as
       permanently invalid.
 
+      **Note:** unlike the Settings > Security > Change Password flow
+      (see "Session revocation on password change" below), this script
+      does **not** revoke existing sessions — it writes the new hash
+      directly via Prisma, bypassing the API route's revocation logic.
+      If a dev-era session for this account might still be alive
+      somewhere, don't rely on this rotation alone to kill it.
+
 - [ ] Admin email is already a neutral operational address
       (`admin@gtx.exchange`), not a personal one — keep it that way for
       any additional admin accounts created later.
+
+### Session revocation on password change
+
+`POST /api/settings/password` (Settings > Security > Change Password)
+revokes **every** refresh token belonging to that user — any device,
+tab, or previously-issued session — atomically alongside the password
+hash update, in the same DB transaction. This applies to every account,
+not just admins.
+
+This is specific to that one API route. `scripts/set-user-password.ts`
+(used above for the initial admin rotation) writes the new hash directly
+via Prisma and does **not** go through this logic, so it does not revoke
+anything — see the note on that step.
+
+- The still-live access token (15 minutes) keeps working until its own
+  natural expiry, since it carries no password-derived claim (see
+  `lib/auth/jwt.ts`) — this is deliberate, not a gap: revoking it early
+  would need either a token-denylist or shorter TTLs, neither justified
+  by this change.
+- Once that access token expires, the existing revoked-token check
+  already in `POST /api/auth/refresh` rejects it — no separate
+  invalidation path was added.
+- A stolen or forgotten-about refresh token (another device, an old
+  session) stops being usable for a fresh session the moment the
+  password changes, without needing that device to be reachable.
 
 ## 6. Healthchecks
 
@@ -175,3 +207,10 @@ machine expects `localhost:5432` to work.
 - [ ] Delete the smoke-test account (or leave a note that it's test data,
       the same way this project's own test accounts are always
       `@example.test` — never reuse a real-looking email for this).
+- [ ] Confirm session revocation on password change: log in as the
+      smoke-test account in two separate browsers (or one normal + one
+      private/incognito window), change the password in one, then confirm
+      `POST /api/auth/refresh` from the other fails once its access token
+      expires (or immediately, if you clear its access-token cookie to
+      force a refresh) — see "Session revocation on password change"
+      under §5 above.

@@ -33,10 +33,30 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = await hashPassword(input.newPassword);
     const encryptedPassword = maybeEncryptPassword(input.newPassword);
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash, encryptedPassword },
-    });
+
+    // Revoke every refresh token this user currently has (any device,
+    // any tab) in the same transaction as the hash update — atomic, so a
+    // failure on either side leaves neither applied: never a changed
+    // password with old sessions still trusted, never revoked sessions
+    // with the old password still active. The still-live access token
+    // (15m) keeps working until its own natural expiry either way (it
+    // carries no password-derived claim — see lib/auth/jwt.ts), but once
+    // it expires, POST /api/auth/refresh's existing `stored.revoked`
+    // check (app/api/auth/refresh/route.ts) already rejects every one of
+    // these tokens — no change needed there. Deliberately "revoke all",
+    // including the very session making this request, rather than
+    // carving out an exception for it: simpler and safer for a
+    // security-sensitive change like this one.
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash, encryptedPassword },
+      }),
+      prisma.refreshToken.updateMany({
+        where: { userId: user.id, revoked: false },
+        data: { revoked: true },
+      }),
+    ]);
 
     // A failed send must never undo (or even fail the response for) an
     // already-committed password change — the hash above is already
